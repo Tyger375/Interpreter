@@ -143,6 +143,7 @@
     <ClCompile Include="Function.cpp" />
     <ClCompile Include="Interprete.cpp" />
     <ClCompile Include="Origine.cpp" />
+    <ClCompile Include="Strings.cpp" />
     <ClCompile Include="Utilities.cpp" />
     <ClCompile Include="Variable.cpp" />
   </ItemGroup>

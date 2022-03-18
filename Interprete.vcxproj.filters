@@ -33,6 +33,9 @@
     <ClCompile Include="DebugInterprete.cpp">
       <Filter>File di risorse</Filter>
     </ClCompile>
+    <ClCompile Include="Strings.cpp">
+      <Filter>File di risorse</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="test.lmao">

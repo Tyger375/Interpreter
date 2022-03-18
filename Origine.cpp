@@ -27,6 +27,7 @@ int main() {
             interprete.Linea(tp);
         }
         interprete.debugVariables();
+        interprete.debugFunctions();
         newfile.close();   //close the file object.
     }
     else

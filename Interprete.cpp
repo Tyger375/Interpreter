@@ -131,7 +131,13 @@ void Interprete::Linea(string linea)
 							{
 								//cout << stringacheck << endl;
 								if (stringacheck != "," && stringacheck != "(")
-									parametri.push_back(stringacheck);
+									if (stringacheck == "=" && splitted[this->i + 1] == "=")
+									{
+										parametri.push_back("==");
+										this->i++;
+									}
+									else
+										parametri.push_back(stringacheck);
 								stringacheck = splitted[++this->i];
 							} while (stringacheck != ")" || this->i >= splitted.size());
 
@@ -139,15 +145,72 @@ void Interprete::Linea(string linea)
 							{
 								this->print(parametri);
 							}
+							else if (nomefunzione == "if")
+							{
+								cout << "if statement" << endl;
+								const string if1 = parametri[0];
+								const string paragone = parametri[1];
+								const string if2 = parametri[2];
+
+								bool isStr1 = (if1[0] == '"');
+								bool isStr2 = (if2[0] == '"');
+
+								string Val1;
+								string Val2;
+
+								string Type1;
+								string Type2;
+
+								if (isStr1)
+								{
+									Val1 = if1;
+									Type1 = "string";
+								}
+								else if (!isNan(if1))
+								{
+									Val1 = stoi(if1);
+									Type1 = "int";
+								}
+								else
+								{
+									this->find_variable(if1);
+								}
+
+								if (paragone == "==")
+								{
+									if (if1 == if2)
+									{
+										cout << "true" << endl;
+									}
+									else
+									{
+										cout << "false" << endl;
+									}
+								}
+							}
 							else
 							{
 								Function func = this->find_function(nomefunzione);
 								if (func.get_name() == "")
 								{
-									cout << "Aggiungo funzione" << endl;
-									Function func;
-									func.setup(nomefunzione);
-
+									try
+									{
+										if (splitted[i-3] == "func")
+										{
+											cout << "Aggiungo funzione" << endl;
+											Function func;
+											func.setup(nomefunzione);
+											this->funzioni.push_back(func);
+										}
+										else
+										{
+											cout << "Error: invalid function" << endl;
+										}
+									}
+									catch (const exception&)
+									{
+										cout << "Error: invalid function" << endl;
+									}
 								}
 								else
 								{
