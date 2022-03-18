@@ -1,0 +1,8 @@
+int test = 2+2+4
+print(test)
+test = test+2
+print(test)
+string ciao = "ciao ok" + " due"
+print(ciao)
+ciao = "due"
+print(ciao)
