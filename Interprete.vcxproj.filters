@@ -27,6 +27,12 @@
     <ClCompile Include="Interprete.cpp">
       <Filter>File di risorse</Filter>
     </ClCompile>
+    <ClCompile Include="Function.cpp">
+      <Filter>File di risorse</Filter>
+    </ClCompile>
+    <ClCompile Include="DebugInterprete.cpp">
+      <Filter>File di risorse</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="test.lmao">
@@ -41,6 +47,9 @@
       <Filter>File di risorse</Filter>
     </ClInclude>
     <ClInclude Include="Interprete.h">
+      <Filter>File di risorse</Filter>
+    </ClInclude>
+    <ClInclude Include="Function.h">
       <Filter>File di risorse</Filter>
     </ClInclude>
   </ItemGroup>

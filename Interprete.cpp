@@ -34,20 +34,9 @@ void Interprete::Linea(string linea)
 			//vector<char> Operatori = searchOperatori(stringa);
 			//vector<string> Parole = OperatoriParole(stringa);
 			bool FoundInVector = findInVector(tipiVariabili, lastStringa);
-			if (findInVector(tipiVariabili, stringa))
+			if (!findInVector(tipiVariabili, stringa))
 			{
-				//cout << stringa << " e' un tipo variabile" << endl;
-				//const string type = stringa;
-				//const string nome = splitted[(++i)];
-				//const string nome = splitted[(++i)];
-			}
-			else
-			{
-				if (FoundInVector)
-				{
-					//cout << stringa << " e' il nome di una variabile" << endl;
-				}
-				else
+				if (!FoundInVector)
 				{
 					if (stringa == "=" && !FoundInVector)
 					{
@@ -137,43 +126,32 @@ void Interprete::Linea(string linea)
 							const string nomefunzione = lastStringa;
 							//cout << "nome funzione = " << nomefunzione << endl;
 							vector<string> parametri;
-							string stringacheck = splitted[i];
+							string stringacheck = splitted[this->i];
 							do
 							{
+								//cout << stringacheck << endl;
 								if (stringacheck != "," && stringacheck != "(")
 									parametri.push_back(stringacheck);
 								stringacheck = splitted[++this->i];
 							} while (stringacheck != ")" || this->i >= splitted.size());
+
 							if (nomefunzione == "print")
 							{
-								if (parametri.size() == 0)
-									cout << "Error: no param given" << endl;
+								this->print(parametri);
+							}
+							else
+							{
+								Function func = this->find_function(nomefunzione);
+								if (func.get_name() == "")
+								{
+									cout << "Aggiungo funzione" << endl;
+									Function func;
+									func.setup(nomefunzione);
+
+								}
 								else
 								{
-									const string primoparametro = parametri[0];
-									if (primoparametro[0] == '"')
-									{
-										//cout << primoparametro << " e' una stringa" << endl;
-										cout << "Output: ";
-										this->printString(primoparametro);
-									}
-									else
-									{
-										//cout << primoparametro << " e' una variabile" << endl;
-										Variable var = this->find_variable(primoparametro);
-										const string type = var.get_type();
-										if (type == "string")
-										{
-											cout << "Output: ";
-											this->printString(var.get_str_value());
-											cout << endl;
-											//cout << "Output: " << var.get_str_value() << endl;
-										}
-										else if (type == "int")
-										{
-											cout << "Output: " << var.get_int_value() << endl;
-										}
-									}
+									cout << "Funzione esistente" << endl;
 								}
 							}
 						}
@@ -194,24 +172,6 @@ void Interprete::Linea(string linea)
 		cout << errore.what() << endl;
 	}
 	//cout << endl;
-}
-
-void Interprete::debugVariables()
-{
-	for (int i = 0; i < this->variabili.size(); i++)
-	{
-		Variable var = variabili[i];
-		const string type = var.get_type();
-		cout << var.get_name();
-		if (type == "string")
-		{
-			cout << " " << var.get_str_value() << endl;
-		}
-		else if (type == "int")
-		{
-			cout << " " << var.get_int_value() << endl;
-		}
-	}
 }
 
 Variable Interprete::find_variable(string name)

@@ -139,6 +139,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="DebugInterprete.cpp" />
+    <ClCompile Include="Function.cpp" />
     <ClCompile Include="Interprete.cpp" />
     <ClCompile Include="Origine.cpp" />
     <ClCompile Include="Utilities.cpp" />
@@ -148,6 +150,7 @@
     <None Include="test.lmao" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Function.h" />
     <ClInclude Include="Interprete.h" />
     <ClInclude Include="Utilities.h" />
     <ClInclude Include="Variable.h" />
