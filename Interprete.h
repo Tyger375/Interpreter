@@ -13,8 +13,11 @@ private:
 	std::vector<std::string> tipiVariabili;
 	std::vector<Variable> variabili;
 	std::vector<Function> funzioni;
+	std::vector<bool> Ifs;
+	bool FindindGraffa;
 public:
 	Interprete();
+	void start(std::string);
 	void Linea(std::string linea);
 	void debugVariables();
 	void debugFunctions();
@@ -27,4 +30,6 @@ public:
 	void AddInteri(std::vector<std::string>, std::string*, std::string*);
 	void AddStringhe(std::vector<std::string>, std::string*, std::string*);
 	void print(std::vector<std::string>);
+	void If(const std::string, const std::string, const std::string);
+	void FindGraffa(std::vector<std::string>);
 };

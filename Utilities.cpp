@@ -15,7 +15,9 @@ vector<string> Utilities::split(string stringa, char splitter)
 		"=",
 		"(",
 		")",
-		","
+		",",
+		"{",
+		"}"
 	};
 	string word = "";
 	vector<string> words;

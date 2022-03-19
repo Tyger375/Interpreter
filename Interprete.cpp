@@ -12,6 +12,28 @@ Interprete::Interprete()
 		"int",
 		"string"
 	};
+	this->FindindGraffa = false;
+}
+
+void Interprete::start(std::string nomefile)
+{
+	fstream newfile;
+	newfile.open(nomefile, ios::in);
+	if (newfile.is_open())
+	{
+		string tp;
+		while (getline(newfile, tp))
+		{
+			this->Linea(tp);
+		}
+		this->debugVariables();
+		this->debugFunctions();
+		newfile.close();
+	}
+	else
+	{
+		cout << "F" << endl;
+	}
 }
 
 void Interprete::Linea(string linea)
@@ -29,16 +51,20 @@ void Interprete::Linea(string linea)
 
 		for (this->i = 0; this->i < splitted.size(); this->i++)
 		{
+			if (this->FindindGraffa)
+				this->FindGraffa(splitted);
+
 			const string stringa = splitted[i];
 			//cout << stringa << endl;
 			//vector<char> Operatori = searchOperatori(stringa);
 			//vector<string> Parole = OperatoriParole(stringa);
 			bool FoundInVector = findInVector(tipiVariabili, lastStringa);
+
 			if (!findInVector(tipiVariabili, stringa))
 			{
 				if (!FoundInVector)
 				{
-					if (stringa == "=" && !FoundInVector)
+					if (stringa == "=")
 					{
 						//const
 						string name = lastStringa;
@@ -68,7 +94,7 @@ void Interprete::Linea(string linea)
 							this->loadStringVariable(splitted, name);
 						}
 					}
-					else if (stringa == "+" && !FoundInVector)
+					else if (stringa == "+")
 					{
 						//cout << lastStringa << " e' l'addendo 1" << endl;
 						string addendo1 = lastStringa;
@@ -119,7 +145,7 @@ void Interprete::Linea(string linea)
 						}
 						//cout << splitted[(++i)] << " e' l'addendo 2" << endl;
 					}
-					else if (stringa == "(" && !FoundInVector)
+					else if (stringa == "(")
 					{
 						if (lastStringa != "")
 						{
@@ -152,41 +178,8 @@ void Interprete::Linea(string linea)
 								const string paragone = parametri[1];
 								const string if2 = parametri[2];
 
-								bool isStr1 = (if1[0] == '"');
-								bool isStr2 = (if2[0] == '"');
 
-								string Val1;
-								string Val2;
-
-								string Type1;
-								string Type2;
-
-								if (isStr1)
-								{
-									Val1 = if1;
-									Type1 = "string";
-								}
-								else if (!isNan(if1))
-								{
-									Val1 = stoi(if1);
-									Type1 = "int";
-								}
-								else
-								{
-									this->find_variable(if1);
-								}
-
-								if (paragone == "==")
-								{
-									if (if1 == if2)
-									{
-										cout << "true" << endl;
-									}
-									else
-									{
-										cout << "false" << endl;
-									}
-								}
+								this->If(if1, paragone, if2);
 							}
 							else
 							{
@@ -223,11 +216,37 @@ void Interprete::Linea(string linea)
 							cout << "non e' una funzione" << endl;
 						}
 					}
+					else if (stringa == "{")
+					{
+						if (this->Ifs.size() > 0)
+						{
+							cout << "Inizio If" << endl;
+							const int ultimoelem = Ifs.size() - 1;
+							if (!this->Ifs[ultimoelem])
+							{
+								cout << "If falso" << endl;
+								this->FindGraffa(splitted);
+							}
+							else
+							{
+								cout << "If vero" << endl;
+							}
+						}
+						else
+						{
+							cout << "Apertura procedure" << endl;
+						}
+					}
 				}
 			}
 			//cout << endl;
 			lastStringa = splitted[i];
 		}
+		/*if (this->Ifs.size() > 0 && !this->FindindGraffa)
+		{
+			cout << "Error: expected { after if statement" << endl;
+			return;
+		}*/
 		//cout << lastStringa << endl;
 	}
 	catch (const exception& errore)
@@ -462,4 +481,128 @@ void Interprete::AddStringhe(std::vector<std::string> splitted, string* valore, 
 			//cout << isNan1 << " " << isNan2 << endl;
 		}
 	} while (true);
+}
+
+void Interprete::If(const string if1, const string paragone, const string if2)
+{
+	bool isStr1 = (if1[0] == '"');
+	bool isStr2 = (if2[0] == '"');
+
+	string Val1;
+	string Val2;
+
+	string Type1;
+	string Type2;
+
+	if (isStr1)
+	{
+		Val1 = if1;
+		Type1 = "string";
+	}
+	else if (!isNan(if1))
+	{
+		Val1 = if1;
+		Type1 = "int";
+	}
+	else
+	{
+		Variable var1 = this->find_variable(if1);
+
+		if (var1.get_type() == "")
+		{
+			cout << "Error: variable not found" << endl;
+			return;
+		}
+		else
+		{
+			Type1 = var1.get_type();
+
+			if (Type1 == "int")
+			{
+				Val1 = to_string(var1.get_int_value());
+			}
+			else if (Type1 == "string")
+			{
+				Val1 = var1.get_str_value();
+			}
+		}
+	}
+
+	if (isStr2)
+	{
+		Val2 = if2;
+		Type2 = "string";
+	}
+	else if (!isNan(if2))
+	{
+		Val2 = if2;
+		Type2 = "int";
+	}
+	else
+	{
+		Variable var2 = this->find_variable(if2);
+		if (var2.get_type() == "")
+		{
+			cout << "Error: variable not found" << endl;
+			return;
+		}
+		Type2 = var2.get_type();
+		if (Type2 == "int")
+		{
+			Val2 = to_string(var2.get_int_value());
+		}
+		else if (Type2 == "string")
+		{
+			Val2 = var2.get_str_value();
+		}
+	}
+
+	if (paragone == "==")
+	{
+
+		if (Val1 == Val2)
+		{
+			//cout << "true" << endl;
+			this->Ifs.push_back(true);
+		}
+		else
+		{
+			//cout << "false" << endl;
+			this->Ifs.push_back(false);
+		}
+	}
+}
+
+void Interprete::FindGraffa(vector<string> splitted)
+{
+	bool trovata = false;
+	int numgraffeaperte = 0;
+	do
+	{
+		if (this->i >= splitted.size()-1)
+		{
+			break;
+		}
+		this->i++;
+		//cout << splitted[this->i] << " " << " " << numgraffeaperte << endl;
+		if (splitted[this->i] == "{")
+			numgraffeaperte++;
+		if (splitted[this->i] == "}")
+			numgraffeaperte--;
+	} while (splitted[this->i] != "}" && numgraffeaperte > 0);
+	if (splitted[this->i] == "}" && numgraffeaperte == 0)
+		trovata = true;
+	cout << "trovata = " << trovata << endl;
+
+	this->FindindGraffa = !trovata;
+
+	if (trovata)
+	{
+		this->Ifs.erase(this->Ifs.end() - 1);
+		//this->FindindGraffa = false;
+	}
+	for (int i = 0; i < this->Ifs.size(); i++)
+	{
+		cout << "Ifs " << i << " " << Ifs[i] << endl;
+	}
 }

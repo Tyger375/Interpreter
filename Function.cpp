@@ -54,6 +54,10 @@ void Interprete::print(vector<string> parametri)
 			cout << "Output: ";
 			this->printString(primoparametro);
 		}
+		else if (!isNan(primoparametro))
+		{
+			cout << "Output: " << stoi(primoparametro) << "\n";
+		}
 		else
 		{
 			//cout << primoparametro << " e' una variabile" << endl;
