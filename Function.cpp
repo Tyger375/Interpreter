@@ -74,6 +74,10 @@ void Interprete::print(vector<string> parametri)
 			{
 				cout << "Output: " << var.get_int_value() << endl;
 			}
+			else
+			{
+				cout << "Error: invalid variable" << endl;
+			}
 		}
 	}
 }

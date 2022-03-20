@@ -3,5 +3,10 @@ int ciao = 2
 if (2 == ciao)
 {
 print(4)
+int due = 2
+int tre = 3
 }
-print(2)
+print(due)
+
+{
+}

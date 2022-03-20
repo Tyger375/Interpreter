@@ -14,6 +14,7 @@ private:
 	std::vector<Variable> variabili;
 	std::vector<Function> funzioni;
 	std::vector<bool> Ifs;
+	std::vector<std::vector<Variable>> VariablesInIfs;
 	bool FindindGraffa;
 public:
 	Interprete();

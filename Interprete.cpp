@@ -28,6 +28,13 @@ void Interprete::start(std::string nomefile)
 		}
 		this->debugVariables();
 		this->debugFunctions();
+		for (int i = 0; i < this->VariablesInIfs.size(); i++)
+		{
+			for (int i2 = 0; i2 < VariablesInIfs[i].size(); i2++)
+			{
+				cout << "Variable in if " << i << " = " << VariablesInIfs[i][i2].get_type() << endl;
+			}
+		}
 		newfile.close();
 	}
 	else
@@ -227,14 +234,22 @@ void Interprete::Linea(string linea)
 								cout << "If falso" << endl;
 								this->FindGraffa(splitted);
 							}
-							else
-							{
-								cout << "If vero" << endl;
-							}
 						}
 						else
 						{
 							cout << "Apertura procedure" << endl;
+						}
+					}
+					else if (stringa == "}")
+					{
+						if (this->Ifs.size() > 0)
+						{
+							cout << "Chiusura if" << endl;
+							//this->Ifs.erase(Ifs.size() - 1)
+						}
+						else
+						{
+							cout << "Chiusura funzione" << endl;
 						}
 					}
 				}
@@ -242,7 +257,7 @@ void Interprete::Linea(string linea)
 			//cout << endl;
 			lastStringa = splitted[i];
 		}
-		/*if (this->Ifs.size() > 0 && !this->FindindGraffa)
+		/*if (this->Ifs.size() == 0 && this->FindindGraffa)
 		{
 			cout << "Error: expected { after if statement" << endl;
 			return;
@@ -318,7 +333,18 @@ void Interprete::loadIntVariable(vector<string> splitted, string name)
 		{
 			Variable var;
 			var.setup(name, stoi(valore));
-			this->variabili.push_back(var);
+			if (this->Ifs.size() > 0)
+			{
+				int size = VariablesInIfs.size();
+				if (VariablesInIfs.size() <= size)
+				{
+					vector<Variable> vettore;
+					VariablesInIfs.push_back(vettore);
+				}
+				this->VariablesInIfs[size].push_back(var);
+			}
+			else
+				this->variabili.push_back(var);
 		}
 	}
 
@@ -592,7 +618,7 @@ void Interprete::FindGraffa(vector<string> splitted)
 	} while (splitted[this->i] != "}" && numgraffeaperte > 0);
 	if (splitted[this->i] == "}" && numgraffeaperte == 0)
 		trovata = true;
-	cout << "trovata = " << trovata << endl;
+	//cout << "trovata = " << trovata << endl;
 
 	this->FindindGraffa = !trovata;
 
@@ -601,8 +627,8 @@ void Interprete::FindGraffa(vector<string> splitted)
 		this->Ifs.erase(this->Ifs.end() - 1);
 		//this->FindindGraffa = false;
 	}
-	for (int i = 0; i < this->Ifs.size(); i++)
+	/*for (int i = 0; i < this->Ifs.size(); i++)
 	{
 		cout << "Ifs " << i << " " << Ifs[i] << endl;
-	}
+	}*/
 }
