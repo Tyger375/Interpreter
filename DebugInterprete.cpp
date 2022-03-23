@@ -1,4 +1,4 @@
-#include "Interprete.h"
+#include "Interpreter.h"
 #include "Utilities.h"
 #include "Variable.h"
 #include <iostream>
@@ -6,11 +6,11 @@
 using namespace std;
 using namespace Utilities;
 
-void Interprete::debugVariables()
+void Interpreter::debugVariables()
 {
-	for (int i = 0; i < this->variabili.size(); i++)
+	for (int i = 0; i < this->variables.size(); i++)
 	{
-		Variable var = variabili[i];
+		Variable var = variables[i];
 		const string type = var.get_type();
 		cout << var.get_name();
 		if (type == "string")
@@ -24,11 +24,11 @@ void Interprete::debugVariables()
 	}
 }
 
-void Interprete::debugFunctions()
+void Interpreter::debugFunctions()
 {
-	for (int i = 0; i < this->funzioni.size(); i++)
+	for (int i = 0; i < this->functions.size(); i++)
 	{
-		Function func = this->funzioni[i];
+		Function func = this->functions[i];
 		cout << func.get_name() << endl;
 	}
 }

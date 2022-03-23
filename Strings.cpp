@@ -6,16 +6,16 @@
 
 using namespace std;
 
-string getValueFromString(string stringa)
+string getValueFromString(string String)
 {
-	string newStringa;
-	for (int i = 0; i < stringa.length(); i++)
+	string newString;
+	for (int i = 0; i < String.length(); i++)
 	{
-		char carattere = stringa[i];
+		char carattere = String[i];
 		if (carattere != '"')
 		{
-			newStringa += carattere;
+			newString += carattere;
 		}
 	}
-	return newStringa;
+	return newString;
 }
