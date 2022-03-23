@@ -359,7 +359,7 @@ void Interpreter::loadIntVariable(vector<string> splitted, string name)
 					vector<Variable> vettore;
 					VariablesInfos.push_back(vettore);
 				}
-				this->VariablesInfos[size].push_back(var);
+				this->VariablesInfos[size-1].push_back(var);
 			}
 			else
 				this->variables.push_back(var);
