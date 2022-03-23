@@ -354,12 +354,15 @@ void Interpreter::loadIntVariable(vector<string> splitted, string name)
 			if (this->Ifs.size() > 0)
 			{
 				int size = VariablesInfos.size();
+				//cout << size << " " << Ifs.size() << endl;
 				if (Ifs.size() > size)
 				{
+					//cout << "ok" << endl;
 					vector<Variable> vettore;
 					VariablesInfos.push_back(vettore);
 				}
-				this->VariablesInfos[size-1].push_back(var);
+				//cout << this->VariablesInfos.size() << " " << Ifs.size() << endl;
+				this->VariablesInfos[(this->VariablesInfos.size() - 1)].push_back(var);
 			}
 			else
 				this->variables.push_back(var);
