@@ -1,9 +1,15 @@
 int ciao = 2
 
+func lmao()
+{
+ciao pog
+}
+
 if (2 == ciao)
 {
 	print(4)
 	int due = 2
 	int tre = 3
+	print("ciao lol lmao\n")
 }
 print(due)

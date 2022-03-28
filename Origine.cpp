@@ -9,7 +9,8 @@
 using namespace Utilities;
 using namespace std;
 
-int main() {
+int main()
+{
     Interpreter interprete;
     interprete.start("test.lmao");
 }

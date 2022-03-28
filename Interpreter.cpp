@@ -35,6 +35,24 @@ void Interpreter::start(std::string nomefile)
 				cout << "Variable in if " << i << " = " << VariablesInfos[i][i2].get_type() << endl;
 			}
 		}
+		//cout << functions.size() << " " << functions[0].get_lines().size() << " " << functions[0].get_lines()[0][0] << endl;
+		cout << functions.size() << endl;
+		for (int i = 0; i < this->functions.size(); i++)
+		{
+			cout << "i = " << i << endl;
+			for (int i2 = 0; i2 < this->functions[i].get_lines().size(); i2++)
+			{
+				cout << "i2 = " << i2 << endl;
+				vector<string> line = functions[i].get_lines()[i2];
+				for (int i3 = 0; i < line.size(); i++)
+				{
+					cout << "i3 = " << i3 << endl;
+					cout << line[i3];
+				}
+				cout << endl;
+				//cout << "Variable in if " << i << " = " << VariablesInfos[i][i2].get_type() << endl;
+			}
+		}
 		newfile.close();
 	}
 	else
@@ -54,14 +72,31 @@ void Interpreter::Line(string line)
 		}
 		//cout << splitted[0] << endl;
 		//cout << splitted.size() << endl;
+		//string line;
 		string lastString;
 
 		for (this->i = 0; this->i < splitted.size(); this->i++)
 		{
+			const string String = splitted[i];
+
+			if (this->Ifs.size() == 0 && this->functions.size() > 0)
+			{
+				if (String != "{" && String != "}")
+				{
+					//cout << "linea di funzione" << endl;
+					//cout << i << " " << splitted.size() << endl;
+					if (i == (splitted.size()-1))
+					{
+						cout << "adding line" << endl;
+						functions[functions.size() - 1].add_line(splitted);
+						cout << functions[0].get_lines().size() << endl;
+						return;
+					}
+				}
+			}
+
 			if (this->FindindStaple)
 				this->FindGraffa(splitted);
-
-			const string String = splitted[i];
 			//cout << stringa << endl;
 			//vector<char> Operatori = searchOperatori(stringa);
 			//vector<string> Parole = OperatoriParole(stringa);
@@ -227,40 +262,58 @@ void Interpreter::Line(string line)
 					{
 						if (this->Ifs.size() > 0)
 						{
-							cout << "Inizio If" << endl;
+							//cout << "Inizio If" << endl;
 							const int lastelem = Ifs.size() - 1;
 							if (!this->Ifs[lastelem])
 							{
-								cout << "If falso" << endl;
+								//cout << "If falso" << endl;
 								this->FindGraffa(splitted);
 							}
 						}
 						else
 						{
-							cout << "Apertura procedure" << endl;
+							if (this->functions.size() > 0)
+							{
+								cout << "Apertura funzione" << endl;
+							}
+							else
+							{
+								cout << "Apertura procedure" << endl;
+							}
 						}
 					}
 					else if (String == "}")
 					{
 						if (this->Ifs.size() > 0)
 						{
-							cout << "Chiusura if" << endl;
+							//cout << "Chiusura if" << endl;
 							
 							Ifs.erase(Ifs.end() - 1);
-							cout << VariablesInfos.size() << endl;
+							//cout << VariablesInfos.size() << endl;
 							this->VariablesInfos.erase(VariablesInfos.end() - 1);
-							cout << VariablesInfos.size() << endl;
+							//cout << VariablesInfos.size() << endl;
 							//this->Ifs.erase(Ifs.size() - 1)
 						}
 						else
 						{
-							cout << "Chiusura funzione" << endl;
+							if (this->functions.size() > 0)
+							{
+								functions.erase(functions.end() - 1);
+								//cout << VariablesInfos.size() << endl;
+								//this->VariablesInfos.erase(VariablesInfos.end() - 1);
+								cout << "Chiusura funzione" << endl;
+							}
+							else
+							{
+								cout << "Chiusura procedure" << endl;
+							}
 						}
 					}
 				}
 			}
 			//cout << endl;
 			lastString = splitted[i];
+			//line = String;
 		}
 		/*if (this->Ifs.size() == 0 && this->FindindGraffa)
 		{
