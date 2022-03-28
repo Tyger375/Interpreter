@@ -1,0 +1,2 @@
+out.a: Origine.cpp Variable.cpp Variable.h Interprete.cpp Interprete.h Utilities.cpp Utilities.h Function.cpp Function.h DebugInterprete.cpp
+	g++ Origine.cpp Variable.cpp Interprete.cpp Utilities.cpp Function.cpp DebugInterprete.cpp

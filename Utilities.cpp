@@ -167,11 +167,14 @@ vector<string> Utilities::OperatoriParole(string stringa)
 
 bool Utilities::findInVector(vector<string> lista, string key)
 {
-	if (count(lista.begin(), lista.end(), key)) {
-		return true;
-	}
-	else {
-		return false;
+	bool trovato = false;
+	for (int i = 0; i < lista.size(); i++)
+	{
+		if (lista[i] == key)
+		{
+			trovato = true;
+			break;
+		}
 	}
 }
 
