@@ -24,7 +24,7 @@
     <ClCompile Include="Variable.cpp">
       <Filter>File di risorse</Filter>
     </ClCompile>
-    <ClCompile Include="Interprete.cpp">
+    <ClCompile Include="Interpreter.cpp">
       <Filter>File di risorse</Filter>
     </ClCompile>
     <ClCompile Include="Function.cpp">
@@ -49,7 +49,7 @@
     <ClInclude Include="Variable.h">
       <Filter>File di risorse</Filter>
     </ClInclude>
-    <ClInclude Include="Interprete.h">
+    <ClInclude Include="Interpreter.h">
       <Filter>File di risorse</Filter>
     </ClInclude>
     <ClInclude Include="Function.h">

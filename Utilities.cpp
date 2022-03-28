@@ -5,7 +5,7 @@
 
 using namespace std;
 
-vector<string> Utilities::split(string stringa, char splitter)
+vector<string> Utilities::split(string String, char splitter)
 {
 	vector<string> operatori = {
 		"+",
@@ -24,19 +24,19 @@ vector<string> Utilities::split(string stringa, char splitter)
 	bool isStringa = false;
 	try
 	{
-		for (int i = 0; i < (stringa.length()); i++)
+		for (int i = 0; i < (String.length()); i++)
 		{
-			char pog = stringa[i];
+			char pog = String[i];
 			//cout << pog << endl;
 			//cout << i << stringa.length() << endl;
-			if (((pog == splitter && !isStringa) || i == stringa.length() - 1))
+			if (((pog == splitter && !isStringa) || i == String.length() - 1))
 			{
 				//cout << word << endl;
 				if (pog == splitter && word != "" && !isStringa) {
 					words.push_back(word);
 					word = "";
 				}
-				else if (i == stringa.length() - 1)
+				else if (i == String.length() - 1)
 				{
 					if (findInVector(operatori, string(1, pog)))
 					{
@@ -72,7 +72,8 @@ vector<string> Utilities::split(string stringa, char splitter)
 				else
 				{
 					//cout << pog << endl;
-					word += pog;
+					if (pog != '\t')
+						word += pog;
 				}
 			}
 			//cout << word << endl;
@@ -89,7 +90,7 @@ vector<string> Utilities::split(string stringa, char splitter)
 	return words;
 }
 
-vector<char> Utilities::searchOperatori(string stringa)
+vector<char> Utilities::searchOperatori(string String)
 {
 	vector<string> operatori = {
 		"+",
@@ -101,15 +102,15 @@ vector<char> Utilities::searchOperatori(string stringa)
 	string Parola = "";
 	vector<string> Parole;
 	vector<char> Operatori;
-	for (int i = 0; i < stringa.length(); i++)
+	for (int i = 0; i < String.length(); i++)
 	{
-		const char carattere = stringa[i];
+		const char carattere = String[i];
 		const string charToString = string(1, carattere);
 		//cout << charToString << endl;
 		bool FoundInVector = findInVector(operatori, charToString);
-		if (FoundInVector || i == stringa.length() - 1)
+		if (FoundInVector || i == String.length() - 1)
 		{
-			if (i == stringa.length() - 1)
+			if (i == String.length() - 1)
 			{
 				Parola += charToString;
 			}
@@ -129,7 +130,7 @@ vector<char> Utilities::searchOperatori(string stringa)
 	return Operatori;
 }
 
-vector<string> Utilities::OperatoriParole(string stringa)
+vector<string> Utilities::OperatoriParole(string String)
 {
 	vector<string> operatori = {
 		"+",
@@ -141,15 +142,15 @@ vector<string> Utilities::OperatoriParole(string stringa)
 	string Parola = "";
 	vector<string> Parole;
 	vector<char> Operatori;
-	for (int i = 0; i < stringa.length(); i++)
+	for (int i = 0; i < String.length(); i++)
 	{
-		const char carattere = stringa[i];
+		const char carattere = String[i];
 		const string charToString = string(1, carattere);
 		//cout << charToString << endl;
 		bool FoundInVector = findInVector(operatori, charToString);
-		if (FoundInVector || i == stringa.length() - 1)
+		if (FoundInVector || i == String.length() - 1)
 		{
-			if (i == stringa.length() - 1 && !FoundInVector && charToString != "")
+			if (i == String.length() - 1 && !FoundInVector && charToString != "")
 			{
 				Parola += charToString;
 			}
@@ -165,24 +166,25 @@ vector<string> Utilities::OperatoriParole(string stringa)
 	return Parole;
 }
 
-bool Utilities::findInVector(vector<string> lista, string key)
+bool Utilities::findInVector(vector<string> list, string key)
 {
 	bool trovato = false;
-	for (int i = 0; i < lista.size(); i++)
+	for (int i = 0; i < list.size(); i++)
 	{
-		if (lista[i] == key)
+		if (list[i] == key)
 		{
 			trovato = true;
 			break;
 		}
 	}
+	return trovato;
 }
 
-bool Utilities::isNan(string stringa)
+bool Utilities::isNan(string String)
 {
 	try
 	{
-		int intero = stoi(stringa);
+		int intero = stoi(String);
 		return false;
 	}
 	catch (const exception&)
