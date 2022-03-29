@@ -1,18 +1,34 @@
 #include "Interpreter.h"
-#include "Utilities.h"
-#include "Variable.h"
+#include "../Other/Utilities/Utilities.h"
+#include "../Variable/Variable.h"
 #include <iostream>
 
 using namespace std;
 using namespace Utilities;
 
-Interpreter::Interpreter()
+void Interpreter::Setup()
 {
 	this->typeVariables = {
 		"int",
 		"string"
 	};
 	this->FindindStaple = false;
+	this->writingFunc = false;
+}
+
+Interpreter::Interpreter()
+{
+	this->Setup();
+}
+
+Interpreter::Interpreter(vector<Variable> oldVariables)
+{
+	this->Setup();
+	for (int i = 0; i < oldVariables.size(); i++)
+	{
+		this->variables.push_back(oldVariables[i]);
+	}
+	
 }
 
 void Interpreter::start(std::string nomefile)
@@ -26,38 +42,39 @@ void Interpreter::start(std::string nomefile)
 		{
 			this->Line(tp);
 		}
-		this->debugVariables();
-		this->debugFunctions();
-		for (int i = 0; i < this->VariablesInfos.size(); i++)
+		//this->debugVariables();
+		//this->debugFunctions();
+		/*for (int i = 0; i < this->VariablesInfos.size(); i++)
 		{
 			for (int i2 = 0; i2 < VariablesInfos[i].size(); i2++)
 			{
 				cout << "Variable in if " << i << " = " << VariablesInfos[i][i2].get_type() << endl;
 			}
-		}
+		}*/
 		//cout << functions.size() << " " << functions[0].get_lines().size() << " " << functions[0].get_lines()[0][0] << endl;
-		cout << functions.size() << endl;
-		for (int i = 0; i < this->functions.size(); i++)
+		//cout << this->functions.size() << endl;
+		/*for (int i = 0; i < this->functions.size(); i++)
 		{
-			cout << "i = " << i << endl;
+			//cout << "i = " << i << endl;
+			cout << "function name: " << functions[i].get_name() << endl;
 			for (int i2 = 0; i2 < this->functions[i].get_lines().size(); i2++)
 			{
-				cout << "i2 = " << i2 << endl;
+				//cout << "i2 = " << i2 << endl;
 				vector<string> line = functions[i].get_lines()[i2];
-				for (int i3 = 0; i < line.size(); i++)
+				for (int i3 = 0; i3 < line.size(); i3++)
 				{
-					cout << "i3 = " << i3 << endl;
-					cout << line[i3];
+					//cout << "i3 = " << i3 << endl;
+					cout << line[i3] << " ";
 				}
 				cout << endl;
 				//cout << "Variable in if " << i << " = " << VariablesInfos[i][i2].get_type() << endl;
 			}
-		}
+		}*/
 		newfile.close();
 	}
 	else
 	{
-		cout << "F" << endl;
+		cout << "Error: file not found" << endl;
 	}
 }
 
@@ -74,24 +91,22 @@ void Interpreter::Line(string line)
 		//cout << splitted.size() << endl;
 		//string line;
 		string lastString;
-
+		//bool writingFunc = false;
 		for (this->i = 0; this->i < splitted.size(); this->i++)
 		{
 			const string String = splitted[i];
+			//cout << String << endl;
 
-			if (this->Ifs.size() == 0 && this->functions.size() > 0)
+			//cout << "writingFunc = " << writingFunc << endl;
+			if (this->Ifs.size() == 0 && this->functions.size() > 0 && writingFunc)
 			{
-				if (String != "{" && String != "}")
+				//cout << "wtf " << String << endl;
+				if (i == (splitted.size()-1))
 				{
-					//cout << "linea di funzione" << endl;
-					//cout << i << " " << splitted.size() << endl;
-					if (i == (splitted.size()-1))
-					{
-						cout << "adding line" << endl;
-						functions[functions.size() - 1].add_line(splitted);
-						cout << functions[0].get_lines().size() << endl;
-						return;
-					}
+					//cout << "adding line" << endl;
+					this->functions[functions.size() - 1].add_line(splitted);
+					//return;
+					//cout << this->functions[0].get_lines().size() << endl;
 				}
 			}
 
@@ -106,7 +121,7 @@ void Interpreter::Line(string line)
 			{
 				if (!FoundInVector)
 				{
-					if (String == "=")
+					if (String == "=" && !writingFunc)
 					{
 						//const
 						string name = lastString;
@@ -136,7 +151,7 @@ void Interpreter::Line(string line)
 							this->loadStringVariable(splitted, name);
 						}
 					}
-					else if (String == "+")
+					else if (String == "+" && !writingFunc)
 					{
 						//cout << lastStringa << " e' l'addendo 1" << endl;
 						string add1 = lastString;
@@ -195,35 +210,62 @@ void Interpreter::Line(string line)
 							//cout << "nome funzione = " << nomefunzione << endl;
 							vector<string> parameters;
 							string stringcheck = splitted[this->i];
-							do
+							if (writingFunc)
 							{
-								//cout << stringacheck << endl;
-								if (stringcheck != "," && stringcheck != "(")
-									if (stringcheck == "=" && splitted[this->i + 1] == "=")
-									{
-										parameters.push_back("==");
-										this->i++;
-									}
-									else
-										parameters.push_back(stringcheck);
-								stringcheck = splitted[++this->i];
-							} while (stringcheck != ")" || this->i >= splitted.size());
+								int Integer = this->i;
+								do
+								{
+									//cout << stringacheck << endl;
+									if (stringcheck != "," && stringcheck != "(")
+										if (stringcheck == "=" && splitted[Integer + 1] == "=")
+										{
+											parameters.push_back("==");
+											Integer++;
+										}
+										else
+											parameters.push_back(stringcheck);
+										stringcheck = splitted[++Integer];
+								} while (stringcheck != ")" || Integer >= splitted.size());
+							}
+							else
+							{
+								do
+								{
+									//cout << stringacheck << endl;
+									if (stringcheck != "," && stringcheck != "(")
+										if (stringcheck == "=" && splitted[this->i + 1] == "=")
+										{
+											parameters.push_back("==");
+											this->i++;
+										}
+										else
+											parameters.push_back(stringcheck);
+										stringcheck = splitted[++this->i];
+								} while (stringcheck != ")" || this->i >= splitted.size());
+							}
 
-							if (namefunction == "print")
+							if (namefunction == "print" && !writingFunc)
 							{
 								this->print(parameters);
 							}
 							else if (namefunction == "if")
 							{
-								cout << "if statement" << endl;
-								const string if1 = parameters[0];
-								const string comparison = parameters[1];
-								const string if2 = parameters[2];
+								if (!writingFunc)
+								{
+									//cout << "if statement" << endl;
+									const string if1 = parameters[0];
+									const string comparison = parameters[1];
+									const string if2 = parameters[2];
 
 
-								this->If(if1, comparison, if2);
+									this->If(if1, comparison, if2);
+								}
+								else
+								{
+									this->Ifs.push_back(true);
+								}
 							}
-							else
+							else if (!writingFunc)
 							{
 								Function func = this->find_function(namefunction);
 								if (func.get_name() == "")
@@ -232,10 +274,12 @@ void Interpreter::Line(string line)
 									{
 										if (splitted[i-3] == "func")
 										{
-											cout << "Aggiungo funzione" << endl;
+											//cout << "Aggiungo funzione" << endl;
 											Function func;
 											func.setup(namefunction);
+											//writingFunc = true;
 											this->functions.push_back(func);
+											//cout << functions.size() << endl;
 										}
 										else
 										{
@@ -249,7 +293,21 @@ void Interpreter::Line(string line)
 								}
 								else
 								{
-									cout << "Funzione esistente" << endl;
+									vector<vector<string>> lines = func.get_lines();
+									Interpreter interpreter(this->variables);
+									for (int i = 0; i < lines.size(); i++)
+									{
+										vector<string> line = lines[i];
+										string Strline = "";
+										for (int i2 = 0; i2 < line.size(); i2++)
+										{
+											Strline += (line[i2] + " ");
+										}
+										//cout << Strline << endl;
+										interpreter.Line(Strline);
+									}
+									
+									//cout << "Funzione esistente" << endl;
 								}
 							}
 						}
@@ -258,7 +316,7 @@ void Interpreter::Line(string line)
 							cout << "non e' una funzione" << endl;
 						}
 					}
-					else if (String == "{")
+					else if (String == "{" && !writingFunc)
 					{
 						if (this->Ifs.size() > 0)
 						{
@@ -274,11 +332,12 @@ void Interpreter::Line(string line)
 						{
 							if (this->functions.size() > 0)
 							{
-								cout << "Apertura funzione" << endl;
+								writingFunc = true;
+								//cout << "Apertura funzione" << endl;
 							}
 							else
 							{
-								cout << "Apertura procedure" << endl;
+								//cout << "Apertura procedure" << endl;
 							}
 						}
 					}
@@ -287,10 +346,13 @@ void Interpreter::Line(string line)
 						if (this->Ifs.size() > 0)
 						{
 							//cout << "Chiusura if" << endl;
-							
 							Ifs.erase(Ifs.end() - 1);
 							//cout << VariablesInfos.size() << endl;
-							this->VariablesInfos.erase(VariablesInfos.end() - 1);
+							if (VariablesInfos.size() > 0)
+								this->VariablesInfos.erase(VariablesInfos.end() - 1);
+
+							if (writingFunc && i == (splitted.size()-1))
+								this->functions[functions.size() - 1].add_line(splitted);
 							//cout << VariablesInfos.size() << endl;
 							//this->Ifs.erase(Ifs.size() - 1)
 						}
@@ -298,14 +360,15 @@ void Interpreter::Line(string line)
 						{
 							if (this->functions.size() > 0)
 							{
-								functions.erase(functions.end() - 1);
+								//functions.erase(functions.end() - 1);
 								//cout << VariablesInfos.size() << endl;
 								//this->VariablesInfos.erase(VariablesInfos.end() - 1);
-								cout << "Chiusura funzione" << endl;
+								writingFunc = false;
+								//cout << "Chiusura funzione" << endl;
 							}
 							else
 							{
-								cout << "Chiusura procedure" << endl;
+								//cout << "Chiusura procedure" << endl;
 							}
 						}
 					}
@@ -314,6 +377,20 @@ void Interpreter::Line(string line)
 			//cout << endl;
 			lastString = splitted[i];
 			//line = String;
+			if (i == (splitted.size()-1) && writingFunc)
+			{
+				//cout << String << endl;
+				//cout << (String == "{" || String == "}" || String == ")") << " " << (this->Ifs.size() != 0) << endl;
+				if((String == "{" || String == "}" || String == ")") && (this->Ifs.size() != 0))
+				{
+					//cout << "adding " << String << endl;
+					//this->functions[functions.size() - 1].add_line();
+					this->functions[functions.size() - 1].add_line(splitted);
+				}
+				//cout << "adding line" << endl;
+				//cout << this->functions[0].get_lines().size() << endl;
+			}
+			/**/
 		}
 		/*if (this->Ifs.size() == 0 && this->FindindGraffa)
 		{
@@ -331,15 +408,18 @@ void Interpreter::Line(string line)
 
 Variable Interpreter::find_variable(string name)
 {
-	bool found = false;
+	//bool found = false;
+	Variable VAR;
 	for (int i = 0; i < this->variables.size(); i++)
 	{
 		Variable* var = &this->variables[i];
 		if (var->get_name() == name)
 		{
-			found = true;
+			//found = true;
 			//cout << "Trovata! " << var->get_name() << " = " << var->get_int_value() << endl;
-			return *var;
+			VAR = *var;
+			break;
+			//return *var;
 		}
 	}
 	for (int i = 0; i < this->VariablesInfos.size(); i++)
@@ -349,18 +429,15 @@ Variable Interpreter::find_variable(string name)
 			Variable* var = &this->VariablesInfos[i][i2];
 			if (var->get_name() == name)
 			{
-				found = true;
+				//found = true;
 				//cout << "Trovata! " << var->get_name() << " = " << var->get_int_value() << endl;
-				return *var;
+				VAR = *var;
+				break;
+				//return *var;
 			}
 		}
 	}
-	if (!found)
-	{
-		Variable var;
-		//cout << var.get_str_value() << endl;
-		return var;
-	}
+	return VAR;
 }
 
 void Interpreter::loadIntVariable(vector<string> splitted, string name)
@@ -622,6 +699,7 @@ void Interpreter::If(const string if1, const string comparison, const string if2
 		if (var1.get_type() == "")
 		{
 			cout << "Error: variable not found" << endl;
+			this->Ifs.push_back(false);
 			return;
 		}
 		else
@@ -655,6 +733,7 @@ void Interpreter::If(const string if1, const string comparison, const string if2
 		if (var2.get_type() == "")
 		{
 			cout << "Error: variable not found" << endl;
+			this->Ifs.push_back(false);
 			return;
 		}
 		Type2 = var2.get_type();

@@ -2,15 +2,20 @@
 #include <fstream>
 #include <string>
 #include <vector>
-#include "Utilities.h"
-#include "Variable.h"
-#include "Interpreter.h"
+#include "./Interpreter/Interpreter.h"
 
-using namespace Utilities;
 using namespace std;
 
-int main()
+int main(int argc, char** argv)
 {
-    Interpreter interprete;
-    interprete.start("test.lmao");
+    if (argc == 2)
+    {
+        Interpreter interprete;
+        interprete.start(argv[1]);
+    }
+    else
+    {
+        cout << "Real-time interpreter is not available. It'll be added soon" << endl;
+    }
+    return 0;
 }

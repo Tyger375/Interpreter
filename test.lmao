@@ -1,8 +1,15 @@
 int ciao = 2
 
-func lmao()
+func test()
 {
-ciao pog
+	int test = 2
+	print("test\n")
+	if (2 == test)
+	{
+		print(3)
+		print("test1\n")
+	}
+	print("test2\n")
 }
 
 if (2 == ciao)
@@ -12,4 +19,4 @@ if (2 == ciao)
 	int tre = 3
 	print("ciao lol lmao\n")
 }
-print(due)
+test()

@@ -1,10 +1,10 @@
 #pragma once
 //#include "Utilities.h"
-#include "Variable.h"
+#include "../Variable/Variable.h"
 #include <iostream>
 #include <vector>
 #include <string>
-#include "Function.h"
+#include "../Function/Function.h"
 
 class Interpreter
 {
@@ -16,8 +16,12 @@ private:
 	std::vector<bool> Ifs;
 	std::vector<std::vector<Variable>> VariablesInfos;
 	bool FindindStaple;
+	bool writingFunc;
+
+	void Setup();
 public:
 	Interpreter();
+	Interpreter(vector<Variable>);
 	void start(std::string);
 	void Line(std::string line);
 	void debugVariables();

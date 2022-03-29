@@ -1,6 +1,6 @@
-#include "Interpreter.h"
-#include "Utilities.h"
-#include "Variable.h"
+#include "../Interpreter/Interpreter.h"
+#include "./Utilities/Utilities.h"
+#include "../Variable/Variable.h"
 #include <iostream>
 
 using namespace std;

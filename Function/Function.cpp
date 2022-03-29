@@ -1,10 +1,10 @@
-#include "Utilities.h"
+#include "../Other/Utilities/Utilities.h"
 #include "Function.h"
-#include "Interpreter.h"
+#include "../Interpreter/Interpreter.h"
 #include <iostream>
 #include <vector>
 #include <string>
-#include "Variable.h"
+#include "../Variable/Variable.h"
 
 using namespace std;
 using namespace Utilities;
@@ -22,23 +22,20 @@ void Function::add_line(vector<string> line)
 
 Function Interpreter::find_function(string name)
 {
-	bool found = false;
+	//bool found = false;
+	Function FUNC;
 	for (int i = 0; i < this->functions.size(); i++)
 	{
 		Function* func = &this->functions[i];
 		if (func->get_name() == name)
 		{
-			found = true;
 			//cout << "Trovata! " << var->get_name() << " = " << var->get_int_value() << endl;
-			return *func;
+			FUNC = *func;
+			break;
+			//return *func;
 		}
 	}
-	if (!found)
-	{
-		Function func;
-		//cout << var.get_str_value() << endl;
-		return func;
-	}
+	return FUNC;
 }
 
 void Interpreter::print(vector<string> parameters)

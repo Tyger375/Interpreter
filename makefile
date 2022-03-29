@@ -1,2 +1,2 @@
-out.a: Origine.cpp Variable.cpp Variable.h Interpreter.cpp Interpreter.h Utilities.cpp Utilities.h Function.cpp Function.h DebugInterprete.cpp
-	g++ Origine.cpp Variable.cpp Interpreter.cpp Utilities.cpp Function.cpp DebugInterprete.cpp
+out.a: Origine.cpp ./Variable/Variable.cpp ./Variable/Variable.h ./Interpreter/Interpreter.cpp ./Interpreter/Interpreter.h ./Other/Utilities/Utilities.cpp ./Other/Utilities/Utilities.h ./Function/Function.cpp ./Function/Function.h ./Other/DebugInterprete.cpp
+	g++ Origine.cpp ./Variable/Variable.cpp ./Interpreter/Interpreter.cpp ./Other/Utilities/Utilities.cpp ./Function/Function.cpp ./Other/DebugInterprete.cpp
