@@ -36,5 +36,7 @@ public:
 	void AddStrings(std::vector<std::string>, std::string*, std::string*);
 	void print(std::vector<std::string>);
 	void If(const std::string, const std::string, const std::string);
+	//for (i=0;i>0;i++)
+	void ForLoop(const std::vector<std::string>, const std::vector<std::string>, const std::vector<std::string>);
 	void FindGraffa(std::vector<std::string>);
 };

@@ -51,6 +51,7 @@ void Interpreter::print(vector<string> parameters)
 			//cout << primoparametro << " e' una stringa" << endl;
 			cout << "Output: ";
 			this->printString(firstparameter);
+			cout << endl;
 		}
 		else if (!isNan(firstparameter))
 		{

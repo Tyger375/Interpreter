@@ -8,14 +8,24 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
+    Interpreter interpreter;
     if (argc == 2)
     {
-        Interpreter interprete;
-        interprete.start(argv[1]);
+        interpreter.start(argv[1]);
     }
     else
     {
-        cout << "Real-time interpreter is not available. It'll be added soon" << endl;
+        string line;
+        do
+        {
+            cout << ">>> ";
+            getline(cin, line);
+            interpreter.Line(line);
+            //interpreter.debugVariables();
+        }
+        while (line != "exit");
+        interpreter.debugVariables();
+        //cout << "Real-time interpreter is not available. It'll be added soon" << endl;
     }
     return 0;
 }

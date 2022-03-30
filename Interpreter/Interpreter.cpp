@@ -83,6 +83,7 @@ void Interpreter::Line(string line)
 	try
 	{
 		vector<string> splitted = split(line, ' ');
+		//cout << "printing splitted members" << endl;
 		for (int i = 0; i < splitted.size(); i++)
 		{
 			//cout << splitted[i] << endl;
@@ -129,26 +130,34 @@ void Interpreter::Line(string line)
 						Variable var = this->find_variable(name);
 						if (var.get_type() == "")
 						{
-							if (!(i - 1 < 0))
+							int num = 0;
+							while ((i - num) >= 0)
 							{
-								if (findInVector(typeVariables, splitted[this->i - 2]))
+								if (findInVector(typeVariables, splitted[this->i - num]))
 								{
-									type = splitted[this->i - 2];
+									type = splitted[this->i - num];
 								}
+								num++;
 							}
 						}
 						else
 						{
 							type = var.get_type();
 						}
-						//cout << stringa << " e' l'operatore di assegnazione" << endl;
+						//cout << "adding a variable" << endl;
 						if (type == "int")
 						{
+							//cout << "adding int var" << endl;
 							this->loadIntVariable(splitted, name);
 						}
 						else if (type == "string")
 						{
+							//cout << "adding string var" << endl;
 							this->loadStringVariable(splitted, name);
+						}
+						else
+						{
+							cout << "Error: invalid variable type" << endl;
 						}
 					}
 					else if (String == "+" && !writingFunc)
@@ -264,6 +273,40 @@ void Interpreter::Line(string line)
 								{
 									this->Ifs.push_back(true);
 								}
+							}
+							else if (namefunction == "for")
+							{
+								cout << "for loop" << endl;
+								int num = 0;
+								vector<string> assign;
+								vector<string> check;
+								vector<string> advancing;
+								for (int index = 0; index < parameters.size(); index++)
+								{
+									if (parameters[index] != ";")
+									{
+										if (num == 0)
+										{
+											assign.push_back(parameters[index]);
+										}
+										else if (num == 1)
+										{
+											check.push_back(parameters[index]);
+										}
+										else if (num == 2)
+										{
+											advancing.push_back(parameters[index]);
+										}
+										else
+											break;
+									}
+									else
+									{
+										num++;
+									}
+								}
+								
+								this->ForLoop(assign, check, advancing);
 							}
 							else if (!writingFunc)
 							{
@@ -759,6 +802,100 @@ void Interpreter::If(const string if1, const string comparison, const string if2
 		{
 			//cout << "false" << endl;
 			this->Ifs.push_back(false);
+		}
+	}
+}
+
+void Interpreter::ForLoop(const vector<string> assign, const vector<string> check, const vector<string> advancing)
+{
+	string type = "";
+	string variableName;
+	string assignment;
+	string value;
+	for (int i = 0; i < assign.size(); i++)
+	{
+		string String = assign[i];
+		if (findInVector(this->typeVariables, String))
+		{
+			type = String;
+		}
+		else if (String == "=")
+		{
+			assignment = String;
+			variableName = assign[i-1];
+		}
+		if (type != "" && variableName != "" && assignment != "" && String != "=")
+		{
+			value += (String + " ");
+		}
+	}
+	cout << type << " " << variableName << " " << assignment << " " << value << endl;
+
+	//Check
+	string VariableNameCheck;
+	string Comparation;
+	string ComparationValue;
+
+	vector<string> Comparations = {
+		"=",
+		">",
+		"<"
+	};
+
+	for (int index = 0; index < check.size(); index++)
+	{
+		string String = check[index];
+		if (findInVector(Comparations, String))
+		{
+			//cout << "Simbolo" << endl;
+			Comparation += String;
+			int num = 1;
+			if (!findInVector(Comparations, check[index-1]))
+				VariableNameCheck = check[index-1];
+			if (!findInVector(Comparations, check[index+1]))
+				ComparationValue = check[++index];
+		}
+	}
+
+	cout << VariableNameCheck << " " << Comparation << " " << ComparationValue << endl;
+
+	string VarName;
+	string Operator;
+
+	vector<string> Operators = {
+		"+",
+		"-"
+	};
+
+	for (int index = 0; index < advancing.size(); index++)
+	{
+		string String = advancing[index];
+		if (findInVector(Operators, String))
+		{
+			//cout << "Simbolo" << endl;
+			Operator += String;
+			int num = 1;
+			if (!findInVector(Operators, advancing[index-1]))
+				VarName = advancing[index-1];
+		}
+	}
+
+	cout << VarName << " " << Operator << endl;
+
+	Variable varDeclared = this->find_variable(variableName);
+	Variable varCondition1 = this->find_variable(VariableNameCheck);
+	
+	if (Comparation == "<")
+	{
+		string typeVarDeclared = varDeclared.get_type();
+		string typeVarCondition1 = varCondition1.get_type();
+		if (typeVarDeclared == "int")
+		{
+
+			for (int i = 0; i < 10; i++)
+			{
+				cout << "lmao" << endl;
+			}
 		}
 	}
 }

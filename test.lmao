@@ -3,13 +3,13 @@ int ciao = 2
 func test()
 {
 	int test = 2
-	print("test\n")
+	print("test")
 	if (2 == test)
 	{
 		print(3)
-		print("test1\n")
+		print("test1")
 	}
-	print("test2\n")
+	print("test2")
 }
 
 if (2 == ciao)
@@ -17,6 +17,12 @@ if (2 == ciao)
 	print(4)
 	int due = 2
 	int tre = 3
-	print("ciao lol lmao\n")
+	print("ciao lol lmao")
 }
+
+for (int due = 0; due <= 0; due++)
+{
+
+}
+
 test()
