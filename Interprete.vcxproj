@@ -139,22 +139,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="DebugInterprete.cpp" />
-    <ClCompile Include="Function.cpp" />
-    <ClCompile Include="Interpreter.cpp" />
+    <ClCompile Include="Other\DebugInterprete.cpp" />
+    <ClCompile Include="Function\Function.cpp" />
+    <ClCompile Include="Interpreter\Interpreter.cpp" />
     <ClCompile Include="Origine.cpp" />
-    <ClCompile Include="Strings.cpp" />
-    <ClCompile Include="Utilities.cpp" />
-    <ClCompile Include="Variable.cpp" />
+    <ClCompile Include="Other\Strings.cpp" />
+    <ClCompile Include="Other\Utilities\Utilities.cpp" />
+    <ClCompile Include="Variable\Variable.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="test.lmao" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Function.h" />
-    <ClInclude Include="Interpreter.h" />
-    <ClInclude Include="Utilities.h" />
-    <ClInclude Include="Variable.h" />
+    <ClInclude Include="Function\Function.h" />
+    <ClInclude Include="Interpreter\Interpreter.h" />
+    <ClInclude Include="Other\Utilities\Utilities.h" />
+    <ClInclude Include="Variable\Variable.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="ignore.txt" />

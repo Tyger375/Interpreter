@@ -20,7 +20,8 @@ vector<string> Utilities::split(string String, char splitter)
 		"}",
 		";",
 		"<",
-		">"
+		">",
+		"/"
 	};
 	string word = "";
 	vector<string> words;

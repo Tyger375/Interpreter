@@ -18,22 +18,22 @@
     <ClCompile Include="Origine.cpp">
       <Filter>File di risorse</Filter>
     </ClCompile>
-    <ClCompile Include="Utilities.cpp">
+    <ClCompile Include="Other\Utilities\Utilities.cpp">
       <Filter>File di risorse</Filter>
     </ClCompile>
-    <ClCompile Include="Variable.cpp">
+    <ClCompile Include="Variable\Variable.cpp">
       <Filter>File di risorse</Filter>
     </ClCompile>
-    <ClCompile Include="Interpreter.cpp">
+    <ClCompile Include="Interpreter\Interpreter.cpp">
       <Filter>File di risorse</Filter>
     </ClCompile>
-    <ClCompile Include="Function.cpp">
+    <ClCompile Include="Function\Function.cpp">
       <Filter>File di risorse</Filter>
     </ClCompile>
-    <ClCompile Include="DebugInterprete.cpp">
+    <ClCompile Include="Other\DebugInterprete.cpp">
       <Filter>File di risorse</Filter>
     </ClCompile>
-    <ClCompile Include="Strings.cpp">
+    <ClCompile Include="Other\Strings.cpp">
       <Filter>File di risorse</Filter>
     </ClCompile>
   </ItemGroup>
@@ -43,16 +43,16 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="Utilities.h">
+    <ClInclude Include="Other\Utilities\Utilities.h">
       <Filter>File di risorse</Filter>
     </ClInclude>
-    <ClInclude Include="Variable.h">
+    <ClInclude Include="Variable\Variable.h">
       <Filter>File di risorse</Filter>
     </ClInclude>
-    <ClInclude Include="Interpreter.h">
+    <ClInclude Include="Interpreter\Interpreter.h">
       <Filter>File di risorse</Filter>
     </ClInclude>
-    <ClInclude Include="Function.h">
+    <ClInclude Include="Function\Function.h">
       <Filter>File di risorse</Filter>
     </ClInclude>
   </ItemGroup>

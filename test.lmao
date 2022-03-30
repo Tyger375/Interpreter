@@ -20,9 +20,14 @@ if (2 == ciao)
 	print("ciao lol lmao")
 }
 
-for (int due = 0; due <= 0; due++)
+while (ciao == 2)
 {
 
 }
+
+//for (int due = 0; due <= 0; due++)
+//{
+
+//}
 
 test()

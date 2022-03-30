@@ -98,6 +98,15 @@ void Interpreter::Line(string line)
 			const string String = splitted[i];
 			//cout << String << endl;
 
+			if (String == "/")
+			{
+				if (splitted[i + 1] == "/")
+				{
+					i++;
+					return;
+				}
+			}
+
 			//cout << "writingFunc = " << writingFunc << endl;
 			if (this->Ifs.size() == 0 && this->functions.size() > 0 && writingFunc)
 			{
@@ -308,6 +317,10 @@ void Interpreter::Line(string line)
 								
 								this->ForLoop(assign, check, advancing);
 							}
+							else if (namefunction == "while")
+							{
+								this->WhileLoop(parameters);
+							}
 							else if (!writingFunc)
 							{
 								Function func = this->find_function(namefunction);
@@ -475,6 +488,41 @@ Variable Interpreter::find_variable(string name)
 				//found = true;
 				//cout << "Trovata! " << var->get_name() << " = " << var->get_int_value() << endl;
 				VAR = *var;
+				break;
+				//return *var;
+			}
+		}
+	}
+	return VAR;
+}
+
+Variable* Interpreter::find_variable_pointer(string name)
+{
+	//bool found = false;
+	Variable var;
+	Variable* VAR = &var;
+	for (int i = 0; i < this->variables.size(); i++)
+	{
+		Variable* var = &this->variables[i];
+		if (var->get_name() == name)
+		{
+			//found = true;
+			//cout << "Trovata! " << var->get_name() << " = " << var->get_int_value() << endl;
+			VAR = var;
+			break;
+			//return *var;
+		}
+	}
+	for (int i = 0; i < this->VariablesInfos.size(); i++)
+	{
+		for (int i2 = 0; i2 < this->VariablesInfos[i].size(); i2++)
+		{
+			Variable* var = &this->VariablesInfos[i][i2];
+			if (var->get_name() == name)
+			{
+				//found = true;
+				//cout << "Trovata! " << var->get_name() << " = " << var->get_int_value() << endl;
+				static Variable* VAR = var;
 				break;
 				//return *var;
 			}
@@ -895,6 +943,51 @@ void Interpreter::ForLoop(const vector<string> assign, const vector<string> chec
 			for (int i = 0; i < 10; i++)
 			{
 				cout << "lmao" << endl;
+			}
+		}
+	}
+}
+
+void Interpreter::WhileLoop(const vector<string> condition)
+{
+	//Check
+	string VariableNameCheck;
+	string Comparation;
+	string ComparationValue;
+
+	vector<string> Comparations = {
+		"==",
+		">",
+		"<"
+	};
+
+	for (int index = 0; index < condition.size(); index++)
+	{
+		string String = condition[index];
+		cout << String << endl;
+		if (findInVector(Comparations, String))
+		{
+			//cout << "Simbolo" << endl;
+			Comparation += String;
+			int num = 1;
+			if (!findInVector(Comparations, condition[index - 1]))
+				VariableNameCheck = condition[index - 1];
+			if (!findInVector(Comparations, condition[index + 1]))
+				ComparationValue = condition[++index];
+		}
+	}
+
+	cout << VariableNameCheck << " " << Comparation << " " << ComparationValue << endl;
+	Variable* var1 = this->find_variable_pointer(VariableNameCheck);
+	Variable* var2 = this->find_variable_pointer(ComparationValue);
+	string Type1 = var1->get_type();
+	if (Comparation == "==")
+	{
+		if (Type1 == "int")
+		{
+			while (string(1, var1->get_int_value()) == ComparationValue)
+			{
+				cout << "While" << endl;
 			}
 		}
 	}
