@@ -17,6 +17,7 @@ void Function::setup(string name)
 void Function::add_line(vector<string> line)
 {
 	//cout << line.size() << endl;
+	// Ao er contributore
 	this->lines.push_back(line);
 }
 
