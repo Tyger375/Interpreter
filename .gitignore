@@ -12,6 +12,9 @@
 *.sln.docstates
 
 # User-specific files (MonoDevelop/Xamarin Studio)
+cmake-build-debug
+cmake-build-debug-visual-studio
+CMakeLists.txt
 *.userprefs
 
 # Mono auto generated files
