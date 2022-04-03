@@ -1,6 +1,6 @@
 # Interpreter
 
-- Creator of [Lmao bot](https://lmaobot.gq/) <br>
+An interpreter made in C++ just for fun.
 
 ## Compiler
 
