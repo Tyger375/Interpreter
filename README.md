@@ -35,6 +35,9 @@ They will be added soon too.
 print("hello world!")
 ```
 
+Print function allows you to print something in the output <br>
+
+
 ## Links and socials
 
 - Discord: tyger 375#4141<br>

@@ -1,3 +1,8 @@
+int int_var = 5
+string str_var = "Hello world"
+print("value =")
+print(str_var)
+
 int ciao = 2
 
 func test()
@@ -12,7 +17,9 @@ func test()
 	print("test2")
 }
 
-if (2 == ciao)
+print("ok")
+
+if (3 == ciao)
 {
 	print(4)
 	int due = 2
@@ -20,14 +27,16 @@ if (2 == ciao)
 	print("ciao lol lmao")
 }
 
-while (ciao == 2)
-{
+print("ok2")
 
-}
+//while (ciao == 2)
+//{
+
+//}
 
 //for (int due = 0; due <= 0; due++)
 //{
 
 //}
 
-test()
+//test()

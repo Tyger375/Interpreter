@@ -120,8 +120,24 @@ void Interpreter::Line(string line)
 				}
 			}
 
+            if (this->Ifs.size() != 0)
+            {
+                if (!this->Ifs[Ifs.size()-1])
+                {
+                    if (String == "}")
+                    {
+                        this->Ifs.erase(this->Ifs.end() - 1);
+                    }
+                    else
+                    {
+                        return;
+                    }
+                }
+            }
+            /*
 			if (this->FindindStaple)
 				this->FindGraffa(splitted);
+            */
 			//cout << stringa << endl;
 			//vector<char> Operatori = searchOperatori(stringa);
 			//vector<string> Parole = OperatoriParole(stringa);
@@ -380,8 +396,8 @@ void Interpreter::Line(string line)
 							const int lastelem = Ifs.size() - 1;
 							if (!this->Ifs[lastelem])
 							{
-								//cout << "If falso" << endl;
-								this->FindGraffa(splitted);
+								cout << "If falso" << endl;
+								//this->FindGraffa(splitted);
 							}
 						}
 						else
@@ -999,16 +1015,19 @@ void Interpreter::FindGraffa(vector<string> splitted)
 	int numopenedstaples = 0;
 	do
 	{
+        cout << this->i << " " << splitted.size() << endl;
 		if (this->i >= splitted.size()-1)
 		{
 			break;
 		}
-		this->i++;
-		//cout << splitted[this->i] << " " << " " << numgraffeaperte << endl;
+        cout << "cock " << splitted[this->i] << endl;
+		cout << splitted[this->i] << " " << " " << numopenedstaples << endl;
 		if (splitted[this->i] == "{")
 			numopenedstaples++;
 		if (splitted[this->i] == "}")
 			numopenedstaples--;
+        this->i++;
+        cout << endl;
 	} while (splitted[this->i] != "}" && numopenedstaples > 0);
 	if (splitted[this->i] == "}" && numopenedstaples == 0)
 		found = true;
