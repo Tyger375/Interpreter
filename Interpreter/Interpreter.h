@@ -5,6 +5,7 @@
 #include <vector>
 #include <string>
 #include "../Function/Function.h"
+#include "../While/While.h"
 
 class Interpreter
 {
@@ -13,19 +14,26 @@ private:
 	std::vector<std::string> typeVariables;
 	std::vector<Variable> variables;
 	std::vector<Function> functions;
+    std::vector<While> whiles;
 	std::vector<bool> Ifs;
 	std::vector<std::vector<Variable>> VariablesInfos;
 	bool FindindStaple;
 	bool writingFunc;
+    bool writingWhile;
+
+    bool isExecutingFunc;
 
 	void Setup();
 public:
 	Interpreter();
-	Interpreter(vector<Variable>);
+	Interpreter(vector<Variable>, bool);
 	void start(std::string);
 	void Line(std::string line);
 	void debugVariables();
 	void debugFunctions();
+
+    inline vector<Variable> getVariables() { return this->variables; };
+
 	Variable find_variable(std::string);
 	Variable* find_variable_pointer(std::string);
 	Function find_function(std::string);

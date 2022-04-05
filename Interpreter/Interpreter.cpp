@@ -1,6 +1,7 @@
 #include "Interpreter.h"
 #include "../Other/Utilities/Utilities.h"
 #include "../Variable/Variable.h"
+#include "../While/While.h"
 #include <iostream>
 
 using namespace std;
@@ -14,6 +15,8 @@ void Interpreter::Setup()
 	};
 	this->FindindStaple = false;
 	this->writingFunc = false;
+    this->writingWhile = false;
+    this->isExecutingFunc = false;
 }
 
 Interpreter::Interpreter()
@@ -21,9 +24,10 @@ Interpreter::Interpreter()
 	this->Setup();
 }
 
-Interpreter::Interpreter(vector<Variable> oldVariables)
+Interpreter::Interpreter(vector<Variable> oldVariables, bool executingFunction)
 {
 	this->Setup();
+    this->isExecutingFunc = executingFunction;
 	for (int i = 0; i < oldVariables.size(); i++)
 	{
 		this->variables.push_back(oldVariables[i]);
@@ -108,16 +112,20 @@ void Interpreter::Line(string line)
 			}
 
 			//cout << "writingFunc = " << writingFunc << endl;
-			if (this->Ifs.size() == 0 && this->functions.size() > 0 && writingFunc)
+			if (this->Ifs.size() == 0)
 			{
 				//cout << "wtf " << String << endl;
-				if (i == (splitted.size()-1))
-				{
-					//cout << "adding line" << endl;
-					this->functions[functions.size() - 1].add_line(splitted);
-					//return;
-					//cout << this->functions[0].get_lines().size() << endl;
-				}
+                if (i == (splitted.size()-1))
+                {
+                    if (this->functions.size() > 0 && writingFunc)
+                    {
+                        this->functions[functions.size() - 1].add_line(splitted);
+                    }
+                    else if (this->whiles.size() > 0 && writingWhile)
+                    {
+                        this->whiles[whiles.size() - 1].add_line(splitted);
+                    }
+                }
 			}
 
             if (this->Ifs.size() != 0)
@@ -142,12 +150,13 @@ void Interpreter::Line(string line)
 			//vector<char> Operatori = searchOperatori(stringa);
 			//vector<string> Parole = OperatoriParole(stringa);
 			bool FoundInVector = findInVector(typeVariables, lastString);
+            bool CheckWriting = writingFunc || writingWhile;
 
 			if (!findInVector(typeVariables, String))
 			{
 				if (!FoundInVector)
 				{
-					if (String == "=" && !writingFunc)
+					if (String == "=" && !CheckWriting)
 					{
 						//const
 						string name = lastString;
@@ -185,7 +194,7 @@ void Interpreter::Line(string line)
 							cout << "Error: invalid variable type" << endl;
 						}
 					}
-					else if (String == "+" && !writingFunc)
+					else if (String == "+" && !CheckWriting)
 					{
 						//cout << lastStringa << " e' l'addendo 1" << endl;
 						string add1 = lastString;
@@ -251,7 +260,7 @@ void Interpreter::Line(string line)
 							vector<string> parameters;
 							//cout << parameters.size() << endl;
 							string stringcheck = splitted[this->i];
-							if (writingFunc)
+							if (CheckWriting)
 							{
 								int Integer = this->i;
 								do
@@ -285,13 +294,13 @@ void Interpreter::Line(string line)
 								} while (stringcheck != ")" || this->i >= splitted.size());
 							}
 
-							if (namefunction == "print" && !writingFunc)
+							if (namefunction == "print" && !CheckWriting)
 							{
 								this->print(parameters);
 							}
 							else if (namefunction == "if")
 							{
-								if (!writingFunc)
+								if (!CheckWriting)
 								{
 									//cout << "if statement" << endl;
 									const string if1 = parameters[0];
@@ -344,7 +353,7 @@ void Interpreter::Line(string line)
 							{
 								this->WhileLoop(parameters);
 							}
-							else if (!writingFunc)
+							else if (!CheckWriting)
 							{
 								Function func = this->find_function(namefunction);
 								if (func.get_name() == "")
@@ -374,7 +383,7 @@ void Interpreter::Line(string line)
 								else
 								{
 									vector<vector<string>> lines = func.get_lines();
-									Interpreter interpreter(this->variables);
+									Interpreter interpreter(this->variables, true);
 									for (int i = 0; i < lines.size(); i++)
 									{
 										vector<string> line = lines[i];
@@ -386,6 +395,8 @@ void Interpreter::Line(string line)
 										//cout << Strline << endl;
 										interpreter.Line(Strline);
 									}
+                                    //interpreter.debugVariables();
+                                    this->variables = interpreter.getVariables();
 									
 									//cout << "Funzione esistente" << endl;
 								}
@@ -396,7 +407,7 @@ void Interpreter::Line(string line)
 							cout << "non e' una funzione" << endl;
 						}
 					}
-					else if (String == "{" && !writingFunc)
+					else if (String == "{" && !CheckWriting)
 					{
 						if (this->Ifs.size() > 0)
 						{
@@ -433,12 +444,14 @@ void Interpreter::Line(string line)
 
 							if (writingFunc && i == (splitted.size()-1))
 								this->functions[functions.size() - 1].add_line(splitted);
+                            if (writingWhile && i == (splitted.size()-1))
+                                this->whiles[whiles.size() - 1].add_line(splitted);
 							//cout << VariablesInfos.size() << endl;
 							//this->Ifs.erase(Ifs.size() - 1)
 						}
 						else
 						{
-							if (this->functions.size() > 0)
+							if (this->functions.size() > 0 && writingFunc)
 							{
 								//functions.erase(functions.end() - 1);
 								//cout << VariablesInfos.size() << endl;
@@ -446,6 +459,12 @@ void Interpreter::Line(string line)
 								writingFunc = false;
 								//cout << "Chiusura funzione" << endl;
 							}
+                            else if (this->whiles.size() > 0)
+                            {
+                                writingWhile = false;
+                                cout << "test" << endl;
+                                this->whiles[whiles.size()].execute(this->variables);
+                            }
 							else
 							{
 								//cout << "Chiusura procedure" << endl;
@@ -457,16 +476,28 @@ void Interpreter::Line(string line)
 			//cout << endl;
 			lastString = splitted[i];
 			//line = String;
-			if (i == (splitted.size()-1) && writingFunc)
+			if (i == (splitted.size()-1))
 			{
+                if (writingFunc)
+                {
+                    if((String == "{" || String == "}" || String == ")") && (this->Ifs.size() != 0))
+                    {
+                        //cout << "adding " << String << endl;
+                        //this->functions[functions.size() - 1].add_line();
+                        this->functions[functions.size() - 1].add_line(splitted);
+                    }
+                }
+                else if (writingWhile)
+                {
+                    if((String == "{" || String == "}" || String == ")") && (this->Ifs.size() != 0))
+                    {
+                        //cout << "adding " << String << endl;
+                        //this->functions[functions.size() - 1].add_line();
+                        this->whiles[whiles.size() - 1].add_line(splitted);
+                    }
+                }
 				//cout << String << endl;
 				//cout << (String == "{" || String == "}" || String == ")") << " " << (this->Ifs.size() != 0) << endl;
-				if((String == "{" || String == "}" || String == ")") && (this->Ifs.size() != 0))
-				{
-					//cout << "adding " << String << endl;
-					//this->functions[functions.size() - 1].add_line();
-					this->functions[functions.size() - 1].add_line(splitted);
-				}
 				//cout << "adding line" << endl;
 				//cout << this->functions[0].get_lines().size() << endl;
 			}
@@ -596,18 +627,19 @@ void Interpreter::loadIntVariable(vector<string> splitted, string name)
 		{
 			Variable var;
 			var.setup(name, stoi(value));
-			if (this->Ifs.size() > 0)
+			if (this->Ifs.size() > 0 || this->isExecutingFunc)
 			{
 				int size = VariablesInfos.size();
 				//cout << size << " " << Ifs.size() << endl;
-				if (Ifs.size() > size)
+				if (this->Ifs.size() > size || this->isExecutingFunc)
 				{
 					//cout << "ok" << endl;
 					vector<Variable> vettore;
-					VariablesInfos.push_back(vettore);
+					this->VariablesInfos.push_back(vettore);
 				}
 				//cout << this->VariablesInfos.size() << " " << Ifs.size() << endl;
 				this->VariablesInfos[(this->VariablesInfos.size() - 1)].push_back(var);
+                //cout << "F" << endl;
 			}
 			else
 				this->variables.push_back(var);
@@ -645,10 +677,10 @@ void Interpreter::loadStringVariable(vector<string> splitted, string name)
 		{
 			Variable var;
 			var.setup(name, value);
-			if (this->Ifs.size() > 0)
+			if (this->Ifs.size() > 0 || this->isExecutingFunc)
 			{
 				int size = VariablesInfos.size();
-				if (VariablesInfos.size() <= size)
+				if (Ifs.size() <= size || this->isExecutingFunc)
 				{
 					vector<Variable> vettore;
 					VariablesInfos.push_back(vettore);
@@ -971,47 +1003,14 @@ void Interpreter::ForLoop(const vector<string> assign, const vector<string> chec
 
 void Interpreter::WhileLoop(const vector<string> condition)
 {
-	//Check
-	string VariableNameCheck;
-	string Comparation;
-	string ComparationValue;
-
-	vector<string> Comparations = {
-		"==",
-		">",
-		"<"
-	};
-
-	for (int index = 0; index < condition.size(); index++)
-	{
-		string String = condition[index];
-		cout << String << endl;
-		if (findInVector(Comparations, String))
-		{
-			//cout << "Simbolo" << endl;
-			Comparation += String;
-			int num = 1;
-			if (!findInVector(Comparations, condition[index - 1]))
-				VariableNameCheck = condition[index - 1];
-			if (!findInVector(Comparations, condition[index + 1]))
-				ComparationValue = condition[++index];
-		}
-	}
-
-	cout << VariableNameCheck << " " << Comparation << " " << ComparationValue << endl;
-	Variable* var1 = this->find_variable_pointer(VariableNameCheck);
-	Variable* var2 = this->find_variable_pointer(ComparationValue);
-	string Type1 = var1->get_type();
-	if (Comparation == "==")
-	{
-		if (Type1 == "int")
-		{
-			while (string(1, var1->get_int_value()) == ComparationValue)
-			{
-				cout << "While" << endl;
-			}
-		}
-	}
+    /*while (Value1 == Value2)
+    {
+        cout << "While" << endl;
+    }*/
+    this->writingWhile = true;
+    While whileloop;
+    whileloop.add_condition(condition);
+    this->whiles.push_back(whileloop);
 }
 
 void Interpreter::FindGraffa(vector<string> splitted)
