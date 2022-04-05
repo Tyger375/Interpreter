@@ -27,7 +27,7 @@ Function Interpreter::find_function(string name)
 	Function FUNC;
 	for (int i = 0; i < this->functions.size(); i++)
 	{
-		Function* func = &this->functions[i];
+		Function *func = &this->functions[i];
 		if (func->get_name() == name)
 		{
 			//cout << "Trovata! " << var->get_name() << " = " << var->get_int_value() << endl;
@@ -45,39 +45,42 @@ void Interpreter::print(vector<string> parameters)
 		cout << "Error: no param given" << endl;
 	else
 	{
-		const string firstparameter = parameters[0];
-		//cout << parametri[0] << " " << parametri[1] << endl;
-		if (firstparameter[0] == '"')
+		cout << "Output: ";
+		for (int i = 0; i < parameters.size(); i++)
 		{
-			//cout << primoparametro << " e' una stringa" << endl;
-			cout << "Output: ";
-			this->printString(firstparameter);
-			cout << endl;
-		}
-		else if (!isNan(firstparameter))
-		{
-			cout << "Output: " << stoi(firstparameter) << "\n";
-		}
-		else
-		{
-			//cout << primoparametro << " e' una variabile" << endl;
-			Variable var = this->find_variable(firstparameter);
-			const string type = var.get_type();
-			if (type == "string")
+			const string parameter = parameters[i];
+			if (parameter[0] == '"')
 			{
-				cout << "Output: ";
-				this->printString(var.get_str_value());
-				cout << endl;
-				//cout << "Output: " << var.get_str_value() << endl;
+				//cout << primoparametro << " e' una stringa" << endl;
+				this->printString(parameter);
+				//cout << endl;
 			}
-			else if (type == "int")
+			else if (!isNan(parameter))
 			{
-				cout << "Output: " << var.get_int_value() << endl;
+				cout << stoi(parameter);
 			}
 			else
 			{
-				cout << "Error: invalid variable" << endl;
+				//cout << primoparametro << " e' una variabile" << endl;
+				Variable var = this->find_variable(parameter);
+				const string type = var.get_type();
+				if (type == "string")
+				{
+					this->printString(var.get_str_value());
+					//cout << "Output: " << var.get_str_value() << endl;
+				}
+				else if (type == "int")
+				{
+					cout << var.get_int_value();
+				}
+				else
+				{
+					cout << "Error: invalid variable";
+				}
 			}
+			cout << " ";
 		}
+		cout << endl;
+		//cout << parametri[0] << " " << parametri[1] << endl;
 	}
 }

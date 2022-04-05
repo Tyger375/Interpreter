@@ -1,9 +1,14 @@
 int int_var = 5
 string str_var = "Hello world"
-print("value =")
-print(str_var)
+print("value =", "test")
+//print(str_var)
 
 int ciao = 2
+
+func function(lol) {
+	print("ciao")
+}
+function()
 
 func test()
 {
@@ -17,7 +22,7 @@ func test()
 	print("test2")
 }
 
-print("ok")
+//print("ok")
 
 if (3 == ciao)
 {
@@ -26,8 +31,6 @@ if (3 == ciao)
 	int tre = 3
 	print("ciao lol lmao")
 }
-
-print("ok2")
 
 //while (ciao == 2)
 //{

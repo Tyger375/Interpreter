@@ -241,8 +241,15 @@ void Interpreter::Line(string line)
 						if (lastString != "")
 						{
 							const string namefunction = lastString;
-							//cout << "nome funzione = " << nomefunzione << endl;
+							//cout << "function name = " << namefunction << endl;
+							bool IsNewFunc = false;
+							//cout << "i = " << i << endl;
+							if ((i - 2) >= 0)
+								if(splitted[i-2] == "func")
+									IsNewFunc = true;
+							//cout << IsNewFunc << endl;
 							vector<string> parameters;
+							//cout << parameters.size() << endl;
 							string stringcheck = splitted[this->i];
 							if (writingFunc)
 							{
@@ -344,7 +351,7 @@ void Interpreter::Line(string line)
 								{
 									try
 									{
-										if (splitted[i-3] == "func")
+										if (IsNewFunc)
 										{
 											//cout << "Aggiungo funzione" << endl;
 											Function func;
@@ -358,8 +365,9 @@ void Interpreter::Line(string line)
 											cout << "Error: invalid function" << endl;
 										}
 									}
-									catch (const exception&)
+									catch (const exception& error)
 									{
+										//cout << error.what() << endl;
 										cout << "Error: invalid function" << endl;
 									}
 								}
@@ -674,10 +682,7 @@ void Interpreter::printString(string String)
 			else
 			{
 				//cout << "carattere = " << carattere << " " << (carattere == ' ') << endl;
-				if (character == ' ')
-					cout << " " << string(1, String[++i]);
-				else
-					cout << character;
+				cout << character;
 			}
 		}
 	}
