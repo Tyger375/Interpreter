@@ -15,20 +15,36 @@ void While::add_line(vector<string> line)
     this->lines.push_back(line);
 }
 
-void UpdateVars(string ComparationValue, string VariableNameCheck, Interpreter* interpreter, string* Value1, string* Value2)
+void UpdateVars(string VariableNameCheck, string ComparationValue, Interpreter* interpreter, string* Value1, string* Value2)
 {
-    Variable* var1 = interpreter->find_variable_pointer(VariableNameCheck);
-    Variable* var2 = interpreter->find_variable_pointer(ComparationValue);
-    string Type1 = var1->get_type();
+    Variable VAR1;
+    Variable VAR2;
+    Variable* var1 = &VAR1;
+    Variable* var2 = &VAR2;
 
-    string value1;
+    string value1 = VariableNameCheck;
     string value2 = ComparationValue;
-    if (Type1 == "int")
+
+    if (VariableNameCheck[0] != '"')
+        var1 = interpreter->find_variable_pointer(VariableNameCheck);
+    if (ComparationValue[0] != '"')
+        var2 = interpreter->find_variable_pointer(ComparationValue);
+    
+    string Type1 = var1->get_type();
+    if (Type1 != "")
     {
-        value1 = to_string(var1->get_int_value());
+        if (Type1 == "int")
+        {
+            value1 = to_string(var1->get_int_value());
+        }
+        else if (Type1 == "string")
+        {
+            value1 = var1->get_str_value();
+        }
     }
-    Value1 = &value1;
-    Value2 = &value2;
+
+    *Value1 = value1;
+    *Value2 = value2;
 }
 
 void While::execute(std::vector<Variable> Variables)
@@ -40,15 +56,16 @@ void While::execute(std::vector<Variable> Variables)
     string ComparationValue;
 
     vector<string> Comparations = {
-            "==",
-            ">",
-            "<"
+        "==",
+        ">",
+        "<",
+        "=",
     };
 
     for (int index = 0; index < WhileCondition.size(); index++)
     {
         string String = WhileCondition[index];
-        cout << String << endl;
+        //cout << String << endl;
         if (findInVector(Comparations, String))
         {
             //cout << "Simbolo" << endl;
@@ -61,7 +78,7 @@ void While::execute(std::vector<Variable> Variables)
         }
     }
 
-    cout << VariableNameCheck << " " << Comparation << " " << ComparationValue << endl;
+    //cout << VariableNameCheck << " " << Comparation << " " << ComparationValue << endl;
 
     string Value1;
     string Value2;
@@ -70,10 +87,11 @@ void While::execute(std::vector<Variable> Variables)
 
     if (Comparation == "==")
     {
-
+        //cout << Value1 << " " << Value2 << endl;
         while (Value1 == Value2)
         {
-            cout << "ok" << endl;
+            //cout << Value1 << " " << Value2 << endl;
+            //cout << "ok" << endl;
             vector<vector<string>> lines = this->lines;
             for (int i = 0; i < lines.size(); i++)
             {
@@ -85,6 +103,130 @@ void While::execute(std::vector<Variable> Variables)
                 interpreter.Line(StrLine);
             }
             UpdateVars(VariableNameCheck, ComparationValue, &interpreter, &Value1, &Value2);
+        }
+    }
+    else if (Comparation == ">")
+    {
+        try
+        {
+            int IntValue1 = stoi(Value1);
+            int IntValue2 = stoi(Value2);
+            while (Value1 > Value2)
+            {
+                //cout << Value1 << " " << Value2 << endl;
+                //cout << "ok" << endl;
+                vector<vector<string>> lines = this->lines;
+                for (int i = 0; i < lines.size(); i++)
+                {
+                    vector<string> line = lines[i];
+                    string StrLine;
+                    for (int j = 0; j < line.size(); j++) {
+                        StrLine += (line[j] + " ");
+                    }
+                    interpreter.Line(StrLine);
+                }
+                UpdateVars(VariableNameCheck, ComparationValue, &interpreter, &Value1, &Value2);
+                IntValue1 = stoi(Value1);
+                IntValue2 = stoi(Value2);
+            }
+        }
+        catch(const std::exception& e)
+        {
+            cout << "Error: invalid type in while" << endl;
+            return;
+        }
+    }
+    else if (Comparation == "<")
+    {
+        try
+        {
+            int IntValue1 = stoi(Value1);
+            int IntValue2 = stoi(Value2);
+            while (Value1 < Value2)
+            {
+                //cout << Value1 << " " << Value2 << endl;
+                //cout << "ok" << endl;
+                vector<vector<string>> lines = this->lines;
+                for (int i = 0; i < lines.size(); i++)
+                {
+                    vector<string> line = lines[i];
+                    string StrLine;
+                    for (int j = 0; j < line.size(); j++) {
+                        StrLine += (line[j] + " ");
+                    }
+                    interpreter.Line(StrLine);
+                }
+                UpdateVars(VariableNameCheck, ComparationValue, &interpreter, &Value1, &Value2);
+                IntValue1 = stoi(Value1);
+                IntValue2 = stoi(Value2);
+            }
+        }
+        catch(const std::exception& e)
+        {
+            cout << "Error: invalid type in while" << endl;
+            return;
+        }
+    }
+    else if (Comparation == "<=" || Comparation == "=<")
+    {
+        try
+        {
+            int IntValue1 = stoi(Value1);
+            int IntValue2 = stoi(Value2);
+            while (Value1 <= Value2)
+            {
+                //cout << Value1 << " " << Value2 << endl;
+                //cout << "ok" << endl;
+                vector<vector<string>> lines = this->lines;
+                for (int i = 0; i < lines.size(); i++)
+                {
+                    vector<string> line = lines[i];
+                    string StrLine;
+                    for (int j = 0; j < line.size(); j++) {
+                        StrLine += (line[j] + " ");
+                    }
+                    interpreter.Line(StrLine);
+                }
+                UpdateVars(VariableNameCheck, ComparationValue, &interpreter, &Value1, &Value2);
+                IntValue1 = stoi(Value1);
+                IntValue2 = stoi(Value2);
+            }
+        }
+        catch(const std::exception& e)
+        {
+            cout << "Error: invalid type in while" << endl;
+            return;
+        }
+    }
+    else if (Comparation == ">=" || Comparation == "=>")
+    {
+        try
+        {
+            int IntValue1 = stoi(Value1);
+            int IntValue2 = stoi(Value2);
+            while (Value1 >= Value2)
+            {
+                //cout << Value1 << " " << Value2 << endl;
+                //cout << "ok" << endl;
+                vector<vector<string>> lines = this->lines;
+                for (int i = 0; i < lines.size(); i++)
+                {
+                    vector<string> line = lines[i];
+                    string StrLine;
+                    for (int j = 0; j < line.size(); j++) {
+                        StrLine += (line[j] + " ");
+                    }
+                    interpreter.Line(StrLine);
+                }
+                UpdateVars(VariableNameCheck, ComparationValue, &interpreter, &Value1, &Value2);
+                IntValue1 = stoi(Value1);
+                IntValue2 = stoi(Value2);
+            }
+        }
+        catch(const std::exception& e)
+        {
+            cout << "Error: invalid type in while" << endl;
+            return;
         }
     }
 }

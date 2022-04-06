@@ -1,33 +1,18 @@
-int int_var = 5
-string str_var = "Hello world"
 print("value =", "test")
-//print(str_var)
 
-int ciao = 2
+var ciao = 2
+var ciao2 = 2 + 3
+
+ciao = "ciao"
+
+var ciao3 = "test" + " " + "due" + " " + "tre"
 
 func function(lol) {
-	print("ciao")
+	print("lol", lol)
 }
-//function()
+function(ciao)
 
-print(ciao)
-
-func test()
-{
-	int test = 2
-	ciao = 3
-	//print("test")
-	if (2 == test)
-	{
-		print("ok")
-	}
-	//print("test2")
-}
-
-//test()
-print("ciao", ciao)
-
-//print("ok")
+print(ciao, ciao2)
 
 if (3 == ciao)
 {
@@ -37,15 +22,13 @@ if (3 == ciao)
 	print("ciao lol lmao")
 }
 
-while (ciao == 2)
+while (ciao == "ciao")
 {
-    print("while")
-    ciao = 3
+    print("ciao", ciao)
+    ciao = ciao + 1
 }
 
 //for (int due = 0; due <= 0; due++)
 //{
 
 //}
-
-//test()

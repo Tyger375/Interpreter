@@ -10,8 +10,7 @@ using namespace Utilities;
 void Interpreter::Setup()
 {
 	this->typeVariables = {
-		"int",
-		"string"
+		"var"
 	};
 	this->FindindStaple = false;
 	this->writingFunc = false;
@@ -160,39 +159,24 @@ void Interpreter::Line(string line)
 					{
 						//const
 						string name = lastString;
-						string type;
-						Variable var = this->find_variable(name);
-						if (var.get_type() == "")
-						{
-							int num = 0;
-							while ((i - num) >= 0)
-							{
-								if (findInVector(typeVariables, splitted[this->i - num]))
-								{
-									type = splitted[this->i - num];
-								}
-								num++;
-							}
-						}
-						else
-						{
-							type = var.get_type();
-						}
+						this->loadVariable(splitted, name);
+						//string type;
+						//Variable var = this->find_variable(name);
 						//cout << "adding a variable" << endl;
-						if (type == "int")
-						{
+						//if (type == "int")
+						//{
 							//cout << "adding int var" << endl;
-							this->loadIntVariable(splitted, name);
-						}
-						else if (type == "string")
-						{
+							//this->loadIntVariable(splitted, name);
+						//}
+						//else if (type == "string")
+						//{
 							//cout << "adding string var" << endl;
-							this->loadStringVariable(splitted, name);
-						}
-						else
-						{
-							cout << "Error: invalid variable type" << endl;
-						}
+							//this->loadStringVariable(splitted, name);
+						//}
+						//else
+						//{
+							//cout << "Error: invalid variable type" << endl;
+						//}
 					}
 					else if (String == "+" && !CheckWriting)
 					{
@@ -364,7 +348,7 @@ void Interpreter::Line(string line)
 										{
 											//cout << "Aggiungo funzione" << endl;
 											Function func;
-											func.setup(namefunction);
+											func.setup(namefunction, parameters);
 											//writingFunc = true;
 											this->functions.push_back(func);
 											//cout << functions.size() << endl;
@@ -382,8 +366,50 @@ void Interpreter::Line(string line)
 								}
 								else
 								{
+									vector<string> funcparams = func.get_params();
+									if (funcparams.size() != parameters.size())
+									{
+										cout << "Error: params" << endl;
+										return;
+									}
 									vector<vector<string>> lines = func.get_lines();
-									Interpreter interpreter(this->variables, true);
+									vector<Variable> NewVariables = this->variables;
+									for (int i = 0; i < funcparams.size(); i++)
+									{
+										Variable var;
+										string val = parameters[i];
+										if (isNan(val))
+										{
+											if (val[0] == '"')
+												var.setup(funcparams[i], val);
+											else
+											{
+												Variable find = this->find_variable(val);
+												const string type = find.get_type();
+												if (type != "")
+												{
+													if (type == "string")
+													{
+														var.setup(funcparams[i], find.get_str_value());
+													}
+													else if (type == "int")
+													{
+														var.setup(funcparams[i], find.get_int_value());
+													}
+												}
+												else
+												{
+													cout << "Error: Invalid variable in function" << endl;
+													return;
+												}
+											}
+										}
+										else
+											var.setup(funcparams[i], stoi(val));
+										NewVariables.push_back(var);
+									}
+									
+									Interpreter interpreter(NewVariables, true);
 									for (int i = 0; i < lines.size(); i++)
 									{
 										vector<string> line = lines[i];
@@ -463,7 +489,7 @@ void Interpreter::Line(string line)
                             {
                                 writingWhile = false;
                                 cout << "test" << endl;
-                                this->whiles[whiles.size()].execute(this->variables);
+                                this->whiles[whiles.size()-1].execute(this->variables);
                             }
 							else
 							{
@@ -586,6 +612,77 @@ Variable* Interpreter::find_variable_pointer(string name)
 	return VAR;
 }
 
+void Interpreter::loadVariable(vector<string> splitted, string name)
+{
+	string strvalue = splitted[(++this->i)];
+	Variable Var = this->find_variable(strvalue);
+	
+	string type = Var.get_type();
+	if (type != "")
+	{
+		if (type == "string")
+			strvalue = Var.get_str_value();
+		else if (type == "int")
+			strvalue = to_string(Var.get_int_value());
+	}
+	else
+		if (isNan(strvalue))
+		{
+			if (strvalue[0] == '"')
+				type = "string";
+		}
+		else
+			type = "int";
+
+	if (type == "")
+	{
+		cout << "Error: Invalid variable" << endl;
+		return;
+	}
+	if (splitted.size() > this->i+1 && splitted[this->i + 1] == "+")
+	{
+		string finalType;
+		this->Add(splitted, &strvalue, &finalType, type);
+		type = finalType;
+		//cout << "ended with: " << strvalue << " " << finalType << endl;
+	}
+	Variable var;
+	if (type == "string")
+	{
+		var.setup(name, strvalue);	
+	}
+	else if (type == "int")
+	{
+		var.setup(name, stoi(strvalue));
+	}
+	bool found = false;
+	for (int i = 0; i < this->variables.size(); i++)
+	{
+		Variable* variable = &this->variables[i];
+		if (variable->get_name() == name)
+		{
+			*variable = var;
+			found = true;
+			break;
+		}
+	}
+	if (!found)
+	{
+		if (this->Ifs.size() > 0 || this->isExecutingFunc)
+		{
+			int size = VariablesInfos.size();
+			if (this->Ifs.size() > size || this->isExecutingFunc)
+			{
+				vector<Variable> vettore;
+				this->VariablesInfos.push_back(vettore);
+			}
+			this->VariablesInfos[(this->VariablesInfos.size() - 1)].push_back(var);
+		}
+		else
+			this->variables.push_back(var);
+	}
+}
+
 void Interpreter::loadIntVariable(vector<string> splitted, string name)
 {
 	string typeFinalValue;
@@ -609,41 +706,39 @@ void Interpreter::loadIntVariable(vector<string> splitted, string name)
 	if (!isNan(string(1, (name[0]))))
 	{
 		cout << "Error: a variable's name cannot start with a number" << endl;
+		return;
 	}
-	else
+	bool found = false;
+	for (int i = 0; i < this->variables.size(); i++)
 	{
-		bool found = false;
-		for (int i = 0; i < this->variables.size(); i++)
+		Variable* var = &this->variables[i];
+		if (var->get_name() == name)
 		{
-			Variable* var = &this->variables[i];
-			if (var->get_name() == name)
-			{
-				var->set_value(stoi(value));
-				found = true;
-				break;
-			}
+			var->set_value(stoi(value));
+			found = true;
+			break;
 		}
-		if (!found)
+	}
+	if (!found)
+	{
+		Variable var;
+		var.setup(name, stoi(value));
+		if (this->Ifs.size() > 0 || this->isExecutingFunc)
 		{
-			Variable var;
-			var.setup(name, stoi(value));
-			if (this->Ifs.size() > 0 || this->isExecutingFunc)
+			int size = VariablesInfos.size();
+			//cout << size << " " << Ifs.size() << endl;
+			if (this->Ifs.size() > size || this->isExecutingFunc)
 			{
-				int size = VariablesInfos.size();
-				//cout << size << " " << Ifs.size() << endl;
-				if (this->Ifs.size() > size || this->isExecutingFunc)
-				{
-					//cout << "ok" << endl;
-					vector<Variable> vettore;
-					this->VariablesInfos.push_back(vettore);
-				}
-				//cout << this->VariablesInfos.size() << " " << Ifs.size() << endl;
-				this->VariablesInfos[(this->VariablesInfos.size() - 1)].push_back(var);
-                //cout << "F" << endl;
+				//cout << "ok" << endl;
+				vector<Variable> vettore;
+				this->VariablesInfos.push_back(vettore);
 			}
-			else
-				this->variables.push_back(var);
+			//cout << this->VariablesInfos.size() << " " << Ifs.size() << endl;
+			this->VariablesInfos[(this->VariablesInfos.size() - 1)].push_back(var);
+            //cout << "F" << endl;
 		}
+		else
+			this->variables.push_back(var);
 	}
 
 	//cout << "Output: " << var.get_int_value() << endl;
@@ -718,6 +813,105 @@ void Interpreter::printString(string String)
 			}
 		}
 	}
+}
+
+void Interpreter::Add(std::vector<std::string> splitted, string* value, string* typeFinalValue, string type1)
+{
+	do
+	{
+		if ((this->i + 1) >= splitted.size() || splitted[this->i + 1] == "")
+			break;
+		if (splitted[this->i + 1] == "+")
+		{
+			const string add1 = *value;
+			string add2 = splitted[(this->i += 2)];
+
+			Variable var = this->find_variable(add2);
+			string type = var.get_type();
+			if (type != "")
+			{
+				if (type == "string")
+					add2 = var.get_str_value();
+				else if (type == "int")
+					add2 = to_string(var.get_int_value());
+			}
+			else
+			{
+				if (isNan(add2))
+				{
+					if (add2[0] == '"')
+						type = "string";
+				}
+				else
+					type = "int";
+			}
+			if (type1 == "")
+				if (isNan(add1))
+				{
+					if (add1[0] == '"')
+						type1 = "string";
+				}
+				else
+					type1 = "int";
+			if (type == "")
+			{
+				cout << "Error: Invalid variable" << endl;
+				break;
+			}
+
+			if (type1 != type)
+			{
+				string newVal1;
+				string newVal2;
+				for (int i = 0; i < add1.length(); i++)
+				{
+					if (add1[i] != '"')
+					{
+						newVal1 += add1[i];
+					}
+				}
+				for (int i = 0; i < add2.length(); i++)
+				{
+					if (add2[i] != '"')
+					{
+						newVal2 += add2[i];
+					}
+				}
+				
+				*value = (newVal1 + newVal2);
+				*typeFinalValue = "string";
+			}
+			else
+			{
+				*typeFinalValue = type1;
+				if (type1 == "string")
+				{
+					string result = add1 + add2;
+					string newResult;
+					for (int i = 0; i < result.size(); i++)
+					{
+						if (i == 0 || i == result.size() - 1)
+						{
+							newResult += '"';
+						}
+						else
+						{
+							const char character = result[i];
+							if (character != '"')
+								newResult += character;
+						}
+					}
+					*value = newResult;
+				}
+				else if (type1 == "int")
+				{
+					int result = stoi(add1) + stoi(add2);
+					*value = to_string(result);
+					
+				}
+			}
+		}
+	} while (true);
 }
 
 void Interpreter::AddIntegers(std::vector<std::string> splitted, string* value, string* typeFinalValue)

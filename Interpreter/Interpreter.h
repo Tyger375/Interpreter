@@ -38,9 +38,11 @@ public:
 	Variable* find_variable_pointer(std::string);
 	Function find_function(std::string);
 	//void addizione();
+	void loadVariable(std::vector<std::string>, std::string);
 	void loadIntVariable(std::vector<std::string>, std::string);
 	void loadStringVariable(std::vector<std::string>, std::string);
 	void printString(std::string);
+	void Add(std::vector<std::string>, std::string*, std::string*, std::string);
 	void AddIntegers(std::vector<std::string>, std::string*, std::string*);
 	void AddStrings(std::vector<std::string>, std::string*, std::string*);
 	void print(std::vector<std::string>);

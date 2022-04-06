@@ -9,9 +9,10 @@
 using namespace std;
 using namespace Utilities;
 
-void Function::setup(string name)
+void Function::setup(string name, vector<string> parameters)
 {
 	this->name = name;
+	this->parameters = parameters;
 }
 
 void Function::add_line(vector<string> line)
