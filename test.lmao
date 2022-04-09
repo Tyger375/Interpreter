@@ -1,32 +1,38 @@
-print("value =", "test")
+//print("value =", "test")
 
 var ciao = 2
+
+print(ciao())
+
 var ciao2 = 2 + 3
 
-ciao = "ciao"
+ciao = "lmao"
 
 var ciao3 = "test" + " " + "due" + " " + "tre"
 
-func function(lol) {
-	print("lol", lol)
-}
-function(ciao)
+//func function(lol, due) {
+//	print("lol", lol)
+//	print("due", due)
+//	return due
+//}
 
-print(ciao, ciao2)
+//function(ciao, 3)
 
-if (3 == ciao)
-{
-	print(4)
-	int due = 2
-	int tre = 3
-	print("ciao lol lmao")
-}
+//print(ciao, ciao2)
 
-while (ciao == "ciao")
-{
-    print("ciao", ciao)
-    ciao = ciao + 1
-}
+//if (3 == ciao)
+//{
+//	print(4)
+//	int due = 2
+//	int tre = 3
+//	print("ciao lol lmao")
+//}
+
+//while (ciao == "ciao")
+//{
+//    print("ciao", ciao)
+//    ciao = ciao + 1
+//}
 
 //for (int due = 0; due <= 0; due++)
 //{

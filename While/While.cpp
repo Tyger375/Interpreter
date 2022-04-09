@@ -49,7 +49,8 @@ void UpdateVars(string VariableNameCheck, string ComparationValue, Interpreter* 
 
 void While::execute(std::vector<Variable> Variables)
 {
-    Interpreter interpreter(Variables, true);
+    Function func;
+    Interpreter interpreter(Variables, true, &func);
     //Check
     string VariableNameCheck;
     string Comparation;

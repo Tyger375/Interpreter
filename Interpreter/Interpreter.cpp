@@ -23,10 +23,11 @@ Interpreter::Interpreter()
 	this->Setup();
 }
 
-Interpreter::Interpreter(vector<Variable> oldVariables, bool executingFunction)
+Interpreter::Interpreter(vector<Variable> oldVariables, bool executingFunction, Function* func)
 {
 	this->Setup();
     this->isExecutingFunc = executingFunction;
+    this->FUNC = func;
 	for (int i = 0; i < oldVariables.size(); i++)
 	{
 		this->variables.push_back(oldVariables[i]);
@@ -229,209 +230,240 @@ void Interpreter::Line(string line)
 						}
 						//cout << splitted[(++i)] << " e' l'addendo 2" << endl;
 					}
+                    else if (String == "return" && this->isExecutingFunc)
+                    {
+                        cout << "return statement in function" << endl;
+                        this->SetReturnValue(splitted);
+                    }
 					else if (String == "(")
 					{
-						if (lastString != "")
-						{
-							const string namefunction = lastString;
-							//cout << "function name = " << namefunction << endl;
-							bool IsNewFunc = false;
-							//cout << "i = " << i << endl;
-							if ((i - 2) >= 0)
-								if(splitted[i-2] == "func")
-									IsNewFunc = true;
-							//cout << IsNewFunc << endl;
-							vector<string> parameters;
-							//cout << parameters.size() << endl;
-							string stringcheck = splitted[this->i];
-							if (CheckWriting)
-							{
-								int Integer = this->i;
-								do
-								{
-									//cout << stringacheck << endl;
-									if (stringcheck != "," && stringcheck != "(")
-										if (stringcheck == "=" && splitted[Integer + 1] == "=")
-										{
-											parameters.push_back("==");
-											Integer++;
-										}
-										else
-											parameters.push_back(stringcheck);
-										stringcheck = splitted[++Integer];
-								} while (stringcheck != ")" || Integer >= splitted.size());
-							}
-							else
-							{
-								do
-								{
-									//cout << stringacheck << endl;
-									if (stringcheck != "," && stringcheck != "(")
-										if (stringcheck == "=" && splitted[this->i + 1] == "=")
-										{
-											parameters.push_back("==");
-											this->i++;
-										}
-										else
-											parameters.push_back(stringcheck);
-										stringcheck = splitted[++this->i];
-								} while (stringcheck != ")" || this->i >= splitted.size());
-							}
+                        this->i++;
+						if (lastString == "")
+                        {
+                            cout << "non e' una funzione" << endl;
+                            return;
+                        }
+                        const string namefunction = lastString;
+                        //cout << "function name = " << namefunction << endl;
+                        bool IsNewFunc = false;
+                        //cout << "i = " << i << endl;
+                        if ((i - 2) >= 0)
+                            if(splitted[i-2] == "func")
+                                IsNewFunc = true;
+                        //cout << IsNewFunc << endl;
+                        vector<string> parameters;
+                        //cout << parameters.size() << endl;
+                        string stringcheck = splitted[this->i];
 
-							if (namefunction == "print" && !CheckWriting)
-							{
-								this->print(parameters);
-							}
-							else if (namefunction == "if")
-							{
-								if (!CheckWriting)
-								{
-									//cout << "if statement" << endl;
-									const string if1 = parameters[0];
-									const string comparison = parameters[1];
-									const string if2 = parameters[2];
+                        int num = 0;
+                        this->i++;
+
+                        if (CheckWriting)
+                        {
+                            int Integer = this->i;
+                            do
+                            {
+                                cout << "StringCheck = " << stringcheck << endl;
+                                if (stringcheck != ",")
+                                {
+                                    if (stringcheck == "(")
+                                    {
+                                        cout << "Parentesi" << endl;
+                                        string Word;
+                                        vector<string> paramsInFunction;
+                                        do
+                                        {
+                                            Word = splitted[++Integer];
+                                            cout << "Word = " << Word << endl;
+                                        }
+                                        while (Word == ")" || Integer >= splitted.size());
+                                        num++;
+                                    }
+                                    if (stringcheck == "=" && splitted[Integer + 1] == "=")
+                                    {
+                                        parameters.push_back("==");
+                                        Integer++;
+                                    }
+                                    else
+                                    {
+                                        parameters.push_back(stringcheck);
+                                        //cout << "Stringcheck = " << stringcheck << endl;
+                                    }
+                                    stringcheck = splitted[++Integer];
+                                }
+                            } while ((stringcheck != ")" && num == 0) || Integer >= splitted.size());
+                        }
+                        else
+                        {
+                            do
+                            {
+                                cout << "StringCheck = " << stringcheck << endl;
+                                if (stringcheck != ",")
+                                {
+                                    if (stringcheck == "(")
+                                        num++;
+                                    if (stringcheck == "=" && splitted[this->i + 1] == "=")
+                                    {
+                                        parameters.push_back("==");
+                                        this->i++;
+                                    }
+                                    else
+                                        parameters.push_back(stringcheck);
+                                }
+                                stringcheck = splitted[++this->i];
+                            } while ((stringcheck != ")" && num != 0) || this->i >= splitted.size());
+                        }
+
+                        if (namefunction == "print" && !CheckWriting)
+                        {
+                            this->print(parameters);
+                        }
+                        else if (namefunction == "if")
+                        {
+                            if (!CheckWriting)
+                            {
+                                //cout << "if statement" << endl;
+                                const string if1 = parameters[0];
+                                const string comparison = parameters[1];
+                                const string if2 = parameters[2];
 
 
-									this->If(if1, comparison, if2);
-								}
-								else
-								{
-									this->Ifs.push_back(true);
-								}
-							}
-							else if (namefunction == "for")
-							{
-								cout << "for loop" << endl;
-								int num = 0;
-								vector<string> assign;
-								vector<string> check;
-								vector<string> advancing;
-								for (int index = 0; index < parameters.size(); index++)
-								{
-									if (parameters[index] != ";")
-									{
-										if (num == 0)
-										{
-											assign.push_back(parameters[index]);
-										}
-										else if (num == 1)
-										{
-											check.push_back(parameters[index]);
-										}
-										else if (num == 2)
-										{
-											advancing.push_back(parameters[index]);
-										}
-										else
-											break;
-									}
-									else
-									{
-										num++;
-									}
-								}
-								
-								this->ForLoop(assign, check, advancing);
-							}
-							else if (namefunction == "while")
-							{
-								this->WhileLoop(parameters);
-							}
-							else if (!CheckWriting)
-							{
-								Function func = this->find_function(namefunction);
-								if (func.get_name() == "")
-								{
-									try
-									{
-										if (IsNewFunc)
-										{
-											//cout << "Aggiungo funzione" << endl;
-											Function func;
-											func.setup(namefunction, parameters);
-											//writingFunc = true;
-											this->functions.push_back(func);
-											//cout << functions.size() << endl;
-										}
-										else
-										{
-											cout << "Error: invalid function" << endl;
-										}
-									}
-									catch (const exception& error)
-									{
-										//cout << error.what() << endl;
-										cout << "Error: invalid function" << endl;
-									}
-								}
-								else
-								{
-									vector<string> funcparams = func.get_params();
-									if (funcparams.size() != parameters.size())
-									{
-										cout << "Error: params" << endl;
-										return;
-									}
-									vector<vector<string>> lines = func.get_lines();
-									vector<Variable> NewVariables = this->variables;
-									for (int i = 0; i < funcparams.size(); i++)
-									{
-										Variable var;
-										string val = parameters[i];
-										if (isNan(val))
-										{
-											if (val[0] == '"')
-												var.setup(funcparams[i], val);
-											else
-											{
-												Variable find = this->find_variable(val);
-												const string type = find.get_type();
-												if (type != "")
-												{
-													if (type == "string")
-													{
-														var.setup(funcparams[i], find.get_str_value());
-													}
-													else if (type == "int")
-													{
-														var.setup(funcparams[i], find.get_int_value());
-													}
-												}
-												else
-												{
-													cout << "Error: Invalid variable in function" << endl;
-													return;
-												}
-											}
-										}
-										else
-											var.setup(funcparams[i], stoi(val));
-										NewVariables.push_back(var);
-									}
-									
-									Interpreter interpreter(NewVariables, true);
-									for (int i = 0; i < lines.size(); i++)
-									{
-										vector<string> line = lines[i];
-										string Strline = "";
-										for (int i2 = 0; i2 < line.size(); i2++)
-										{
-											Strline += (line[i2] + " ");
-										}
-										//cout << Strline << endl;
-										interpreter.Line(Strline);
-									}
-                                    //interpreter.debugVariables();
-                                    this->variables = interpreter.getVariables();
-									
-									//cout << "Funzione esistente" << endl;
-								}
-							}
-						}
-						else
-						{
-							cout << "non e' una funzione" << endl;
-						}
+                                this->If(if1, comparison, if2);
+                            }
+                            else
+                            {
+                                this->Ifs.push_back(true);
+                            }
+                        }
+                        else if (namefunction == "for")
+                        {
+                            cout << "for loop" << endl;
+                            int num = 0;
+                            vector<string> assign;
+                            vector<string> check;
+                            vector<string> advancing;
+                            for (int index = 0; index < parameters.size(); index++)
+                            {
+                                if (parameters[index] != ";")
+                                {
+                                    if (num == 0)
+                                    {
+                                        assign.push_back(parameters[index]);
+                                    }
+                                    else if (num == 1)
+                                    {
+                                        check.push_back(parameters[index]);
+                                    }
+                                    else if (num == 2)
+                                    {
+                                        advancing.push_back(parameters[index]);
+                                    }
+                                    else
+                                        break;
+                                }
+                                else
+                                {
+                                    num++;
+                                }
+                            }
+
+                            this->ForLoop(assign, check, advancing);
+                        }
+                        else if (namefunction == "while")
+                        {
+                            this->WhileLoop(parameters);
+                        }
+                        else if (!CheckWriting)
+                        {
+                            Function func = this->find_function(namefunction);
+                            if (func.get_name() == "")
+                            {
+                                try
+                                {
+                                    if (IsNewFunc)
+                                    {
+                                        //cout << "Aggiungo funzione" << endl;
+                                        Function func;
+                                        func.setup(namefunction, parameters);
+                                        //writingFunc = true;
+                                        this->functions.push_back(func);
+                                        //cout << functions.size() << endl;
+                                    }
+                                    else
+                                    {
+                                        cout << "Error: invalid function" << endl;
+                                    }
+                                }
+                                catch (const exception& error)
+                                {
+                                    //cout << error.what() << endl;
+                                    cout << "Error: invalid function" << endl;
+                                }
+                            }
+                            else
+                            {
+                                vector<string> funcparams = func.get_params();
+                                if (funcparams.size() != parameters.size())
+                                {
+                                    cout << "Error: params" << endl;
+                                    return;
+                                }
+                                vector<vector<string>> lines = func.get_lines();
+                                vector<Variable> NewVariables = this->variables;
+                                for (int i = 0; i < funcparams.size(); i++)
+                                {
+                                    Variable var;
+                                    string val = parameters[i];
+                                    if (isNan(val))
+                                    {
+                                        if (val[0] == '"')
+                                            var.setup(funcparams[i], val);
+                                        else
+                                        {
+                                            Variable find = this->find_variable(val);
+                                            const string type = find.get_type();
+                                            if (type != "")
+                                            {
+                                                if (type == "string")
+                                                {
+                                                    var.setup(funcparams[i], find.get_str_value());
+                                                }
+                                                else if (type == "int")
+                                                {
+                                                    var.setup(funcparams[i], find.get_int_value());
+                                                }
+                                            }
+                                            else
+                                            {
+                                                cout << "Error: Invalid variable in function" << endl;
+                                                return;
+                                            }
+                                        }
+                                    }
+                                    else
+                                        var.setup(funcparams[i], stoi(val));
+                                    NewVariables.push_back(var);
+                                }
+
+                                Interpreter interpreter(NewVariables, true, &func);
+                                for (int i = 0; i < lines.size(); i++)
+                                {
+                                    vector<string> line = lines[i];
+                                    string Strline = "";
+                                    for (int i2 = 0; i2 < line.size(); i2++)
+                                    {
+                                        Strline += (line[i2] + " ");
+                                    }
+                                    //cout << Strline << endl;
+                                    interpreter.Line(Strline);
+                                }
+                                //interpreter.debugVariables();
+                                this->variables = interpreter.getVariables();
+                                //cout << "returned value type: " << func.get_return().get_type() << endl;
+
+                                //cout << "Funzione esistente" << endl;
+                            }
+                        }
 					}
 					else if (String == "{" && !CheckWriting)
 					{
@@ -538,78 +570,9 @@ void Interpreter::Line(string line)
 	}
 	catch (const exception& error)
 	{
-		cout << error.what() << endl;
+		cout << "internal error: " << error.what() << endl;
 	}
 	//cout << endl;
-}
-
-Variable Interpreter::find_variable(string name)
-{
-	//bool found = false;
-	Variable VAR;
-	for (int i = 0; i < this->variables.size(); i++)
-	{
-		Variable* var = &this->variables[i];
-		if (var->get_name() == name)
-		{
-			//found = true;
-			//cout << "Trovata! " << var->get_name() << " = " << var->get_int_value() << endl;
-			VAR = *var;
-			break;
-			//return *var;
-		}
-	}
-	for (int i = 0; i < this->VariablesInfos.size(); i++)
-	{
-		for (int i2 = 0; i2 < this->VariablesInfos[i].size(); i2++)
-		{
-			Variable* var = &this->VariablesInfos[i][i2];
-			if (var->get_name() == name)
-			{
-				//found = true;
-				//cout << "Trovata! " << var->get_name() << " = " << var->get_int_value() << endl;
-				VAR = *var;
-				break;
-				//return *var;
-			}
-		}
-	}
-	return VAR;
-}
-
-Variable* Interpreter::find_variable_pointer(string name)
-{
-	//bool found = false;
-	Variable var;
-	Variable* VAR = &var;
-	for (int i = 0; i < this->variables.size(); i++)
-	{
-		Variable* var = &this->variables[i];
-		if (var->get_name() == name)
-		{
-			//found = true;
-			//cout << "Trovata! " << var->get_name() << " = " << var->get_int_value() << endl;
-			VAR = var;
-			break;
-			//return *var;
-		}
-	}
-	for (int i = 0; i < this->VariablesInfos.size(); i++)
-	{
-		for (int i2 = 0; i2 < this->VariablesInfos[i].size(); i2++)
-		{
-			Variable* var = &this->VariablesInfos[i][i2];
-			if (var->get_name() == name)
-			{
-				//found = true;
-				//cout << "Trovata! " << var->get_name() << " = " << var->get_int_value() << endl;
-				static Variable* VAR = var;
-				break;
-				//return *var;
-			}
-		}
-	}
-	return VAR;
 }
 
 void Interpreter::loadVariable(vector<string> splitted, string name)
@@ -626,13 +589,7 @@ void Interpreter::loadVariable(vector<string> splitted, string name)
 			strvalue = to_string(Var.get_int_value());
 	}
 	else
-		if (isNan(strvalue))
-		{
-			if (strvalue[0] == '"')
-				type = "string";
-		}
-		else
-			type = "int";
+        type = getTypeVar(strvalue);
 
 	if (type == "")
 	{
@@ -673,8 +630,8 @@ void Interpreter::loadVariable(vector<string> splitted, string name)
 			int size = VariablesInfos.size();
 			if (this->Ifs.size() > size || this->isExecutingFunc)
 			{
-				vector<Variable> vettore;
-				this->VariablesInfos.push_back(vettore);
+				vector<Variable> Vector;
+				this->VariablesInfos.push_back(Vector);
 			}
 			this->VariablesInfos[(this->VariablesInfos.size() - 1)].push_back(var);
 		}
@@ -837,22 +794,10 @@ void Interpreter::Add(std::vector<std::string> splitted, string* value, string* 
 			}
 			else
 			{
-				if (isNan(add2))
-				{
-					if (add2[0] == '"')
-						type = "string";
-				}
-				else
-					type = "int";
+                type = getTypeVar(add2);
 			}
 			if (type1 == "")
-				if (isNan(add1))
-				{
-					if (add1[0] == '"')
-						type1 = "string";
-				}
-				else
-					type1 = "int";
+                type1 = getTypeVar(add1);
 			if (type == "")
 			{
 				cout << "Error: Invalid variable" << endl;
@@ -1205,41 +1150,4 @@ void Interpreter::WhileLoop(const vector<string> condition)
     While whileloop;
     whileloop.add_condition(condition);
     this->whiles.push_back(whileloop);
-}
-
-void Interpreter::FindGraffa(vector<string> splitted)
-{
-	bool found = false;
-	int numopenedstaples = 0;
-	do
-	{
-        cout << this->i << " " << splitted.size() << endl;
-		if (this->i >= splitted.size()-1)
-		{
-			break;
-		}
-        cout << "cock " << splitted[this->i] << endl;
-		cout << splitted[this->i] << " " << " " << numopenedstaples << endl;
-		if (splitted[this->i] == "{")
-			numopenedstaples++;
-		if (splitted[this->i] == "}")
-			numopenedstaples--;
-        this->i++;
-        cout << endl;
-	} while (splitted[this->i] != "}" && numopenedstaples > 0);
-	if (splitted[this->i] == "}" && numopenedstaples == 0)
-		found = true;
-	//cout << "trovata = " << trovata << endl;
-
-	this->FindindStaple = !found;
-
-	if (found)
-	{
-		this->Ifs.erase(this->Ifs.end() - 1);
-		//this->FindindGraffa = false;
-	}
-	/*for (int i = 0; i < this->Ifs.size(); i++)
-	{
-		cout << "Ifs " << i << " " << Ifs[i] << endl;
-	}*/
 }

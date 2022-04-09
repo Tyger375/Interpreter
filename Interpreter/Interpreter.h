@@ -20,13 +20,16 @@ private:
 	bool FindindStaple;
 	bool writingFunc;
     bool writingWhile;
+    Function* FUNC;
 
     bool isExecutingFunc;
 
 	void Setup();
+
+    void SetReturnValue(vector<string>);
 public:
 	Interpreter();
-	Interpreter(vector<Variable>, bool);
+	Interpreter(vector<Variable>, bool, Function*);
 	void start(std::string);
 	void Line(std::string line);
 	void debugVariables();

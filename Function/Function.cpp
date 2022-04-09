@@ -15,6 +15,12 @@ void Function::setup(string name, vector<string> parameters)
 	this->parameters = parameters;
 }
 
+void Function::set_return(Variable var)
+{
+    this->returned = true;
+    this->ReturnedValue = var;
+}
+
 void Function::add_line(vector<string> line)
 {
 	//cout << line.size() << endl;
@@ -46,10 +52,12 @@ void Interpreter::print(vector<string> parameters)
 		cout << "Error: no param given" << endl;
 	else
 	{
+        cout << "Debug params size " << parameters.size() << endl;
 		cout << "Output: ";
 		for (int i = 0; i < parameters.size(); i++)
 		{
 			const string parameter = parameters[i];
+            cout << "Debug param: " << parameter << endl;
 			if (parameter[0] == '"')
 			{
 				//cout << primoparametro << " e' una stringa" << endl;
@@ -84,4 +92,44 @@ void Interpreter::print(vector<string> parameters)
 		cout << endl;
 		//cout << parametri[0] << " " << parametri[1] << endl;
 	}
+}
+
+void Interpreter::SetReturnValue(vector<string> splitted)
+{
+    if ((splitted.size()-1) != i)
+    {
+        string ReturningVal = splitted[++i];
+        //cout << "returning " << ReturningVal << endl;
+        string type;
+        type = getTypeVar(ReturningVal);
+        Variable var;
+        if (type == "")
+        {
+            var = find_variable(ReturningVal);
+            if (var.get_type() == "")
+            {
+                cout << "Error: Invalid variable returned" << endl;
+                return;
+            }
+            else
+            {
+                this->FUNC->set_return(var);
+            }
+        }
+        else
+        {
+            if (type == "string")
+                var.setup("", ReturningVal);
+            else if (type == "int")
+                var.setup("", stoi(ReturningVal));
+            else
+            {
+                cout << "Error: Invalid type" << endl;
+            }
+
+            this->FUNC->set_return(var);
+        }
+    }
+    else
+        cout << "returning nothing" << endl;
 }

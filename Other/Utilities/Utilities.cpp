@@ -1,4 +1,5 @@
 #include "Utilities.h"
+#include "../../Interpreter/Interpreter.h"
 #include <iostream>
 #include <vector>
 #include <string>
@@ -94,82 +95,6 @@ vector<string> Utilities::split(string String, char splitter)
 	return words;
 }
 
-vector<char> Utilities::searchOperatori(string String)
-{
-	vector<string> operatori = {
-		"+",
-		"-",
-		"/",
-		"*",
-		"="
-	};
-	string Parola = "";
-	vector<string> Parole;
-	vector<char> Operatori;
-	for (int i = 0; i < String.length(); i++)
-	{
-		const char carattere = String[i];
-		const string charToString = string(1, carattere);
-		//cout << charToString << endl;
-		bool FoundInVector = findInVector(operatori, charToString);
-		if (FoundInVector || i == String.length() - 1)
-		{
-			if (i == String.length() - 1)
-			{
-				Parola += charToString;
-			}
-			if (FoundInVector)
-			{
-				Operatori.push_back(carattere);
-			}
-			//cout << Parola << endl;
-			Parole.push_back(Parola);
-			Parola = "";
-		}
-		else
-		{
-			Parola += charToString;
-		}
-	}
-	return Operatori;
-}
-
-vector<string> Utilities::OperatoriParole(string String)
-{
-	vector<string> operatori = {
-		"+",
-		"-",
-		"/",
-		"*",
-		"="
-	};
-	string Parola = "";
-	vector<string> Parole;
-	vector<char> Operatori;
-	for (int i = 0; i < String.length(); i++)
-	{
-		const char carattere = String[i];
-		const string charToString = string(1, carattere);
-		//cout << charToString << endl;
-		bool FoundInVector = findInVector(operatori, charToString);
-		if (FoundInVector || i == String.length() - 1)
-		{
-			if (i == String.length() - 1 && !FoundInVector && charToString != "")
-			{
-				Parola += charToString;
-			}
-			//cout << Parola << endl;
-			Parole.push_back(Parola);
-			Parola = "";
-		}
-		else
-		{
-			Parola += charToString;
-		}
-	}
-	return Parole;
-}
-
 bool Utilities::findInVector(vector<string> list, string key)
 {
 	bool trovato = false;
@@ -195,4 +120,86 @@ bool Utilities::isNan(string String)
 	{
 		return true;
 	}
+}
+
+string Utilities::getTypeVar(std::string val)
+{
+    if (isNan(val))
+    {
+        if (val[0] == '"')
+            return "string";
+        else
+            return "";
+    }
+    else
+        return "int";
+}
+
+Variable Interpreter::find_variable(string name)
+{
+    //bool found = false;
+    Variable VAR;
+    for (int i = 0; i < this->variables.size(); i++)
+    {
+        Variable* var = &this->variables[i];
+        if (var->get_name() == name)
+        {
+            //found = true;
+            //cout << "Trovata! " << var->get_name() << " = " << var->get_int_value() << endl;
+            VAR = *var;
+            break;
+            //return *var;
+        }
+    }
+    for (int i = 0; i < this->VariablesInfos.size(); i++)
+    {
+        for (int i2 = 0; i2 < this->VariablesInfos[i].size(); i2++)
+        {
+            Variable* var = &this->VariablesInfos[i][i2];
+            if (var->get_name() == name)
+            {
+                //found = true;
+                //cout << "Trovata! " << var->get_name() << " = " << var->get_int_value() << endl;
+                VAR = *var;
+                break;
+                //return *var;
+            }
+        }
+    }
+    return VAR;
+}
+
+Variable* Interpreter::find_variable_pointer(string name)
+{
+    //bool found = false;
+    Variable var;
+    Variable* VAR = &var;
+    for (int i = 0; i < this->variables.size(); i++)
+    {
+        Variable* var = &this->variables[i];
+        if (var->get_name() == name)
+        {
+            //found = true;
+            //cout << "Trovata! " << var->get_name() << " = " << var->get_int_value() << endl;
+            VAR = var;
+            break;
+            //return *var;
+        }
+    }
+    for (int i = 0; i < this->VariablesInfos.size(); i++)
+    {
+        for (int i2 = 0; i2 < this->VariablesInfos[i].size(); i2++)
+        {
+            Variable* var = &this->VariablesInfos[i][i2];
+            if (var->get_name() == name)
+            {
+                //found = true;
+                //cout << "Trovata! " << var->get_name() << " = " << var->get_int_value() << endl;
+                static Variable* VAR = var;
+                break;
+                //return *var;
+            }
+        }
+    }
+    return VAR;
 }
