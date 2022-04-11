@@ -2,7 +2,7 @@
 
 var ciao = 2
 
-print(ciao())
+print(ciao("due"))
 
 var ciao2 = 2 + 3
 

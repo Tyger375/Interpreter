@@ -1,4 +1,5 @@
-#pragma once
+#ifndef VARIABLE_VARIABLE_H
+#define VARIABLE_VARIABLE_H
 #include <iostream>
 #include <vector>
 #include <string>
@@ -29,3 +30,5 @@ private:
 	std::string valueType;
 	std::string name;
 };
+
+#endif

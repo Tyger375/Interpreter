@@ -52,7 +52,6 @@ void Interpreter::print(vector<string> parameters)
 		cout << "Error: no param given" << endl;
 	else
 	{
-        cout << "Debug params size " << parameters.size() << endl;
 		cout << "Output: ";
 		for (int i = 0; i < parameters.size(); i++)
 		{
@@ -132,4 +131,64 @@ void Interpreter::SetReturnValue(vector<string> splitted)
     }
     else
         cout << "returning nothing" << endl;
+}
+
+void Function::execute(vector<string> params, Interpreter* interpreter)
+{
+    if (this->parameters.size() != params.size())
+    {
+        cout << "Error: params" << endl;
+        return;
+    }
+    vector<vector<string>> lines = this->get_lines();
+    vector<Variable> NewVariables = interpreter->variables;
+    for (int i = 0; i < params.size(); i++)
+    {
+        Variable var;
+        string val = parameters[i];
+        if (isNan(val))
+        {
+            if (val[0] == '"')
+                var.setup(params[i], val);
+            else
+            {
+                Variable find = interpreter->find_variable(val);
+                const string type = find.get_type();
+                if (type != "")
+                {
+                    if (type == "string")
+                    {
+                        var.setup(params[i], find.get_str_value());
+                    }
+                    else if (type == "int")
+                    {
+                        var.setup(params[i], find.get_int_value());
+                    }
+                }
+                else
+                {
+                    cout << "Error: Invalid variable in function" << endl;
+                    return;
+                }
+            }
+        }
+        else
+            var.setup(params[i], stoi(val));
+        NewVariables.push_back(var);
+    }
+
+    Interpreter interpreter1(NewVariables, true, this);
+    for (int i = 0; i < lines.size(); i++)
+    {
+        vector<string> line = lines[i];
+        string Strline = "";
+        for (int i2 = 0; i2 < line.size(); i2++)
+        {
+            Strline += (line[i2] + " ");
+        }
+        //cout << Strline << endl;
+        interpreter1.Line(Strline);
+    }
+    //interpreter.debugVariables();
+    interpreter->variables = interpreter1.getVariables();
 }

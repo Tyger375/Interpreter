@@ -1,4 +1,6 @@
-#pragma once
+#ifndef UTILITIES_UTILITIES_H
+#define UTILITIES_UTILITIES_H
+
 #include <iostream>
 #include <fstream>
 #include <string>
@@ -11,3 +13,5 @@ namespace Utilities
 	bool findInVector(std::vector<std::string>, std::string);
     std::string getTypeVar(std::string);
 };
+
+#endif

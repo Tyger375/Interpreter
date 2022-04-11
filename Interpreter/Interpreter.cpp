@@ -6,6 +6,7 @@
 
 using namespace std;
 using namespace Utilities;
+using namespace interpreter;
 
 void Interpreter::Setup()
 {
@@ -240,7 +241,7 @@ void Interpreter::Line(string line)
                         this->i++;
 						if (lastString == "")
                         {
-                            cout << "non e' una funzione" << endl;
+                            cout << "not a function" << endl;
                             return;
                         }
                         const string namefunction = lastString;
@@ -257,6 +258,10 @@ void Interpreter::Line(string line)
 
                         int num = 0;
                         this->i++;
+
+                        /*for (int j = 0; j < splitted.size(); ++j) {
+                            cout << splitted[j] << endl;
+                        }*/
 
                         if (CheckWriting)
                         {
@@ -297,21 +302,56 @@ void Interpreter::Line(string line)
                         {
                             do
                             {
+                                if (this->i >= splitted.size()) break;
                                 cout << "StringCheck = " << stringcheck << endl;
+                                //cout << splitted[this->i-1] << endl;
+                                //cout << "num = " << num << endl;
+                                cout << "i = " << this->i << endl;
+                                //cout << "splitted size = " << splitted.size() << endl;
                                 if (stringcheck != ",")
                                 {
                                     if (stringcheck == "(")
-                                        num++;
+                                    {
+                                        cout << "function" << endl;
+                                        vector<string> params;
+                                        while (true)
+                                        {
+                                            string param = splitted[i];
+                                            cout << param << endl;
+                                            if (param == ")")
+                                                break;
+                                            params.push_back(param);
+                                            if (i >= splitted.size()-1)
+                                                break;
+                                            this->i++;
+                                        }
+                                        cout << "params size = " << params.size() << endl;
+                                        //executing function
+
+                                        //num++;
+                                    }
+                                    if (stringcheck == ")")
+                                    {
+                                        cout << "end function" << endl;
+                                        num--;
+                                    }
                                     if (stringcheck == "=" && splitted[this->i + 1] == "=")
                                     {
                                         parameters.push_back("==");
                                         this->i++;
                                     }
                                     else
+                                        //cout << "adding " << stringcheck << endl;
                                         parameters.push_back(stringcheck);
                                 }
-                                stringcheck = splitted[++this->i];
-                            } while ((stringcheck != ")" && num != 0) || this->i >= splitted.size());
+                                stringcheck = splitted[this->i];
+                                if (this->i < splitted.size()-1)
+                                    this->i++;
+                                else
+                                    break;
+                            } while (true);
+                            //cout << num << endl;
+                            //cout << (stringcheck != ")") << (num <= 0) << (this->i < splitted.size()) << endl;
                         }
 
                         if (namefunction == "print" && !CheckWriting)
@@ -403,62 +443,7 @@ void Interpreter::Line(string line)
                             else
                             {
                                 vector<string> funcparams = func.get_params();
-                                if (funcparams.size() != parameters.size())
-                                {
-                                    cout << "Error: params" << endl;
-                                    return;
-                                }
-                                vector<vector<string>> lines = func.get_lines();
-                                vector<Variable> NewVariables = this->variables;
-                                for (int i = 0; i < funcparams.size(); i++)
-                                {
-                                    Variable var;
-                                    string val = parameters[i];
-                                    if (isNan(val))
-                                    {
-                                        if (val[0] == '"')
-                                            var.setup(funcparams[i], val);
-                                        else
-                                        {
-                                            Variable find = this->find_variable(val);
-                                            const string type = find.get_type();
-                                            if (type != "")
-                                            {
-                                                if (type == "string")
-                                                {
-                                                    var.setup(funcparams[i], find.get_str_value());
-                                                }
-                                                else if (type == "int")
-                                                {
-                                                    var.setup(funcparams[i], find.get_int_value());
-                                                }
-                                            }
-                                            else
-                                            {
-                                                cout << "Error: Invalid variable in function" << endl;
-                                                return;
-                                            }
-                                        }
-                                    }
-                                    else
-                                        var.setup(funcparams[i], stoi(val));
-                                    NewVariables.push_back(var);
-                                }
 
-                                Interpreter interpreter(NewVariables, true, &func);
-                                for (int i = 0; i < lines.size(); i++)
-                                {
-                                    vector<string> line = lines[i];
-                                    string Strline = "";
-                                    for (int i2 = 0; i2 < line.size(); i2++)
-                                    {
-                                        Strline += (line[i2] + " ");
-                                    }
-                                    //cout << Strline << endl;
-                                    interpreter.Line(Strline);
-                                }
-                                //interpreter.debugVariables();
-                                this->variables = interpreter.getVariables();
                                 //cout << "returned value type: " << func.get_return().get_type() << endl;
 
                                 //cout << "Funzione esistente" << endl;
