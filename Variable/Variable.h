@@ -24,6 +24,7 @@ public:
 	std::string get_str_value();
 	inline std::string get_type() { return this->valueType; }
 	inline std::string get_name() { return this->name; }
+    std::string get_value();
 private:
 	int IntValue;
 	std::string StrValue;

@@ -5,6 +5,7 @@
 
 using namespace std;
 using namespace Utilities;
+using namespace interpreter;
 
 void Interpreter::debugVariables()
 {

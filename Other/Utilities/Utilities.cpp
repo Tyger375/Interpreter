@@ -5,6 +5,7 @@
 #include <string>
 
 using namespace std;
+using namespace interpreter;
 
 vector<string> Utilities::split(string String, char splitter)
 {
@@ -202,4 +203,29 @@ Variable* Interpreter::find_variable_pointer(string name)
         }
     }
     return VAR;
+}
+
+void Interpreter::printString(string String)
+{
+    for (int i = 0; i < String.length(); i++)
+    {
+        char character = String[i];
+        if (character != '"')
+        {
+            if (character == '\\')
+            {
+                string parola = (string(1, character) + string(1, String[++i]));
+                //cout << endl << "parola = " << parola << (parola == "\\n") << endl;
+                if (parola == "\\n")
+                {
+                    cout << endl;
+                }
+            }
+            else
+            {
+                //cout << "carattere = " << carattere << " " << (carattere == ' ') << endl;
+                cout << character;
+            }
+        }
+    }
 }

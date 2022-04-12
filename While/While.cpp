@@ -7,6 +7,7 @@
 
 using namespace std;
 using namespace Utilities;
+using namespace interpreter;
 
 void While::add_line(vector<string> line)
 {
@@ -235,4 +236,16 @@ void While::execute(std::vector<Variable> Variables)
 void While::add_condition(vector<string> ComparationLine)
 {
     this->WhileCondition = ComparationLine;
+}
+
+void Interpreter::WhileLoop(const vector<string> condition)
+{
+    /*while (Value1 == Value2)
+    {
+        cout << "While" << endl;
+    }*/
+    this->writingWhile = true;
+    While whileloop;
+    whileloop.add_condition(condition);
+    this->whiles.push_back(whileloop);
 }

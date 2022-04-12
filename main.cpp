@@ -8,7 +8,7 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-    Interpreter interpreter;
+    interpreter::Interpreter interpreter;
     if (argc == 2)
     {
         interpreter.start(argv[1]);
