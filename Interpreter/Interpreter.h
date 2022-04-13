@@ -15,14 +15,20 @@ class interpreter::Interpreter
 {
 private:
     int i;
+    int line;
     std::vector<std::string> typeVariables;
     std::vector<Function> functions;
     std::vector<While> whiles;
     std::vector<bool> Ifs;
     std::vector<std::vector<Variable>> VariablesInfos;
+    bool error;
     bool FindindStaple;
     bool writingFunc;
     bool writingWhile;
+
+    bool FindingElse;
+    int FindingFromLine;
+
     Function* FUNC;
 
     bool isExecutingFunc;
@@ -41,6 +47,7 @@ private:
     void loadStringVariable(std::vector<std::string>, std::string);
     //Functions
     void print(std::vector<std::string>);
+    std::string Typeof(std::vector<std::string>, bool*);
     void If(std::string, std::string, std::string);
     //for (i=0;i>0;i++)
     void ForLoop(std::vector<std::string>, std::vector<std::string>, std::vector<std::string>);
@@ -49,10 +56,11 @@ private:
 public:
     Interpreter(std::vector<Variable>, bool, Function*);
     Interpreter();
-    void start(std::string);
+    void start(std::string, bool);
     void Line(std::string line);
     void debugVariables();
     void debugFunctions();
+    void PrintError(std::string);
 
     inline std::vector<Variable> getVariables() const { return this->variables; };
 

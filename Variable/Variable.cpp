@@ -109,7 +109,7 @@ void Interpreter::loadVariable(vector<string> splitted, string name)
                     Function FUNCTION = this->find_function(FunctionName);
                     if (FUNCTION.get_name() == "")
                     {
-                        cout << "Error: Invalid function" << endl;
+                        this->PrintError("Invalid function");
                         return;
                     }
                     else
@@ -153,7 +153,7 @@ void Interpreter::loadVariable(vector<string> splitted, string name)
         string type2 = returnedVar.get_type();
         if (!Returning)
         {
-            cout << "Error: Function returned nothing" << endl;
+            this->PrintError("Function returned nothing");
             return;
         }
         //cout << type2 << " " << returnedVar.get_value() << endl;
@@ -175,7 +175,7 @@ void Interpreter::loadVariable(vector<string> splitted, string name)
 
     if (type == "")
     {
-        cout << "Error: Invalid variable" << endl;
+        this->PrintError("Invalid variable");
         return;
     }
     if (splitted.size() > this->i+1 && splitted[this->i + 1] == "+")
@@ -244,7 +244,7 @@ void Interpreter::loadIntVariable(vector<string> splitted, string name)
     //cout << valore << " e' il valore della variabile" << endl;
     if (!isNan(string(1, (name[0]))))
     {
-        cout << "Error: a variable's name cannot start with a number" << endl;
+        this->PrintError("A variable's name cannot start with a number");
         return;
     }
     bool found = false;
@@ -292,7 +292,7 @@ void Interpreter::loadStringVariable(vector<string> splitted, string name)
     //cout << valore << " e' il valore della variabile" << endl;
     if (!isNan(string(1, (name[0]))))
     {
-        cout << "Error: a variable's name cannot start with a number" << endl;
+        this->PrintError("A variable's name cannot start with a number");
     }
     else
     {

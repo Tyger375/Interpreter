@@ -50,48 +50,106 @@ Function Interpreter::find_function(string name)
 void Interpreter::print(vector<string> parameters)
 {
 	if (parameters.size() == 0)
-		cout << "Error: no param given" << endl;
-	else
-	{
-		cout << "Output: ";
-		for (int i = 0; i < parameters.size(); i++)
-		{
-			const string parameter = parameters[i];
-            //cout << "Debug param: " << parameter << endl;
-			if (parameter[0] == '"')
-			{
-				//cout << primoparametro << " e' una stringa" << endl;
-				this->printString(parameter);
-				//cout << endl;
-			}
-			else if (!isNan(parameter))
-			{
-				cout << stoi(parameter);
-			}
-			else
-			{
-				//cout << primoparametro << " e' una variabile" << endl;
-				Variable var = this->find_variable(parameter);
-				const string type = var.get_type();
-				if (type == "string")
-				{
-					this->printString(var.get_str_value());
-					//cout << "Output: " << var.get_str_value() << endl;
-				}
-				else if (type == "int")
-				{
-					cout << var.get_int_value();
-				}
-				else
-				{
-					cout << "Error: invalid variable";
-				}
-			}
-			cout << " ";
-		}
-		cout << endl;
-		//cout << parametri[0] << " " << parametri[1] << endl;
-	}
+    {
+        this->PrintError("No param given");
+        return;
+    }
+
+
+    cout << "Output: ";
+    for (int i = 0; i < parameters.size(); i++)
+    {
+        const string parameter = parameters[i];
+        //cout << "Debug param: " << parameter << endl;
+        if (parameter[0] == '"')
+        {
+            //cout << primoparametro << " e' una stringa" << endl;
+            this->printString(parameter);
+            //cout << endl;
+        }
+        else if (!isNan(parameter))
+        {
+            cout << stoi(parameter);
+        }
+        else
+        {
+            //cout << primoparametro << " e' una variabile" << endl;
+            Variable var = this->find_variable(parameter);
+            const string type = var.get_type();
+            if (type == "string")
+            {
+                this->printString(var.get_str_value());
+                //cout << "Output: " << var.get_str_value() << endl;
+            }
+            else if (type == "int")
+            {
+                cout << var.get_int_value();
+            }
+            else
+            {
+                this->PrintError("Invalid variable");
+            }
+        }
+        cout << " ";
+    }
+    cout << endl;
+    //cout << parametri[0] << " " << parametri[1] << endl;
+}
+
+string Interpreter::Typeof(vector<string> parameters, bool* Returning)
+{
+    if (parameters.size() == 0)
+    {
+        this->PrintError("No param given");
+        *Returning = false;
+        return "";
+    }
+
+    const string parameter = parameters[0];
+    string Val;
+
+    if (parameter[0] == '"')
+    {
+        Val = parameter;
+    }
+    else if (!isNan(parameter))
+    {
+        Val = parameter;
+    }
+    else
+    {
+        Variable var = this->find_variable(parameter);
+        if (var.get_type() == "")
+        {
+            this->PrintError("Invalid variable");
+            *Returning = false;
+            return "";
+        }
+        const string type = var.get_type();
+        if (type == "string")
+        {
+            string VALUE = var.get_str_value();
+            const string Type2 = getTypeVar(VALUE);
+            if (Type2 == "int")
+                VALUE.erase(std::remove(VALUE.begin(), VALUE.end(), '"'), VALUE.end());
+            else
+                VALUE = '"' + VALUE + '"';
+            Val = VALUE;
+        }
+        else if (type == "int")
+        {
+            Val = to_string(var.get_int_value());
+        }
+        else
+        {
+            this->PrintError("Invalid variable");
+        }
+    }
+
+    string type = getTypeVar(Val);
+    //cout << Val << " " << type << endl;
+    *Returning = true;
+    return type;
 }
 
 void Interpreter::SetReturnValue(vector<string> splitted)
@@ -108,7 +166,7 @@ void Interpreter::SetReturnValue(vector<string> splitted)
             var = find_variable(ReturningVal);
             if (var.get_type() == "")
             {
-                cout << "Error: Invalid variable returned" << endl;
+                this->PrintError("Invalid variable returned");
                 return;
             }
             else
@@ -124,7 +182,7 @@ void Interpreter::SetReturnValue(vector<string> splitted)
                 var.setup("", stoi(ReturningVal));
             else
             {
-                cout << "Error: Invalid type" << endl;
+                this->PrintError("Invalid type");
             }
 
             this->FUNC->set_return(var);
@@ -144,15 +202,33 @@ Variable Interpreter::executeFunction(const string& namefunction, bool CheckWrit
         *Returning = true;
         return ReturnedVariable;
     }
+    else if (namefunction == "in")
+    {
+        string Var;
+        cin >> Var;
+        *Returning = true;
+        ReturnedVariable.setup("", Var);
+        return ReturnedVariable;
+    }
+    else if (namefunction == "type")
+    {
+        string type = this->Typeof(parameters, Returning);
+        ReturnedVariable.setup("", type);
+        return ReturnedVariable;
+    }
     else if (namefunction == "if")
     {
         if (!CheckWriting)
         {
             //cout << "if statement" << endl;
+            if (parameters.size() < 3)
+            {
+                this->PrintError("Something missing in if statement");
+                return ReturnedVariable;
+            }
             const string if1 = parameters[0];
             const string comparison = parameters[1];
             const string if2 = parameters[2];
-
 
             this->If(if1, comparison, if2);
         }
@@ -227,13 +303,13 @@ Variable Interpreter::executeFunction(const string& namefunction, bool CheckWrit
                 }
                 else
                 {
-                    cout << "Error: invalid function" << endl;
+                    this->PrintError("Invalid function");
                 }
             }
             catch (const exception& error)
             {
                 //cout << error.what() << endl;
-                cout << "Error: invalid function" << endl;
+                this->PrintError("Invalid function");
             }
             *Returning = false;
             return ReturnedVariable;
@@ -267,7 +343,7 @@ void Interpreter::executeCustomFunction(Function* func, vector<string> parameter
 {
     if (func->get_params().size() != parameters.size())
     {
-        cout << "Error: params" << endl;
+        this->PrintError("Params");
         return;
     }
     vector<vector<string>> lines = func->get_lines();
@@ -304,7 +380,7 @@ void Interpreter::executeCustomFunction(Function* func, vector<string> parameter
                 }
                 else
                 {
-                    cout << "Error: Invalid variable in function" << endl;
+                    this->PrintError("Invalid variable in function");
                     return;
                 }
             }

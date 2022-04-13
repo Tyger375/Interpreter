@@ -134,7 +134,7 @@ void While::execute(std::vector<Variable> Variables)
         }
         catch(const std::exception& e)
         {
-            cout << "Error: invalid type in while" << endl;
+            interpreter.PrintError("Invalid type in while");
             return;
         }
     }
@@ -165,7 +165,7 @@ void While::execute(std::vector<Variable> Variables)
         }
         catch(const std::exception& e)
         {
-            cout << "Error: invalid type in while" << endl;
+            interpreter.PrintError("Invalid type in while");
             return;
         }
     }
@@ -196,7 +196,7 @@ void While::execute(std::vector<Variable> Variables)
         }
         catch(const std::exception& e)
         {
-            cout << "Error: invalid type in while" << endl;
+            interpreter.PrintError("Invalid type in while");
             return;
         }
     }
@@ -227,7 +227,7 @@ void While::execute(std::vector<Variable> Variables)
         }
         catch(const std::exception& e)
         {
-            cout << "Error: invalid type in while" << endl;
+            interpreter.PrintError("Invalid type in while");
             return;
         }
     }

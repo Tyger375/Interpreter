@@ -229,3 +229,10 @@ void Interpreter::printString(string String)
         }
     }
 }
+
+void Interpreter::PrintError(std::string error)
+{
+    cout << "Error at line " << this->line << ":" << endl
+    << error << endl;
+    this->error = true;
+}

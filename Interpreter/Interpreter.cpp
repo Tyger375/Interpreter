@@ -13,10 +13,13 @@ void Interpreter::Setup()
 	this->typeVariables = {
 		"var"
 	};
+    this->line = 0;
 	this->FindindStaple = false;
+    this->FindingElse = false;
 	this->writingFunc = false;
     this->writingWhile = false;
     this->isExecutingFunc = false;
+    this->error = false;
 
     vector<string> params;
     Function outFunc;
@@ -31,9 +34,14 @@ void Interpreter::Setup()
     Function inFunc;
     inFunc.setup("in", params);
 
-    this->functions.push_back(printFunc);
+    Function typeFunc;
+    typeFunc.setup("type", params);
+
+    this->functions.push_back(outFunc);
     this->functions.push_back(whileFunc);
     this->functions.push_back(ifFunc);
+    this->functions.push_back(inFunc);
+    this->functions.push_back(typeFunc);
 }
 
 Interpreter::Interpreter()
@@ -53,7 +61,7 @@ Interpreter::Interpreter(vector<Variable> oldVariables, bool executingFunction, 
 	
 }
 
-void Interpreter::start(std::string nomefile)
+void Interpreter::start(std::string nomefile, bool debug)
 {
 	fstream newfile;
 	newfile.open(nomefile, ios::in);
@@ -62,10 +70,16 @@ void Interpreter::start(std::string nomefile)
 		string tp;
 		while (getline(newfile, tp))
 		{
+            if (this->error)
+                break;
+            this->line++;
 			this->Line(tp);
 		}
-		//this->debugVariables();
-		//this->debugFunctions();
+        if (debug)
+        {
+            this->debugVariables();
+            this->debugFunctions();
+        }
 		/*for (int i = 0; i < this->VariablesInfos.size(); i++)
 		{
 			for (int i2 = 0; i2 < VariablesInfos[i].size(); i2++)
@@ -96,7 +110,7 @@ void Interpreter::start(std::string nomefile)
 	}
 	else
 	{
-		cout << "Error: file not found" << endl;
+		this->PrintError("File not found");
 	}
 }
 
@@ -117,6 +131,7 @@ void Interpreter::Line(string line)
 		//bool writingFunc = false;
 		for (this->i = 0; this->i < splitted.size(); this->i++)
 		{
+            if (this->error) break;
 			const string String = splitted[i];
 			//cout << String << endl;
 
@@ -132,32 +147,27 @@ void Interpreter::Line(string line)
 			//cout << "writingFunc = " << writingFunc << endl;
 			if (this->Ifs.size() == 0)
 			{
-				//cout << "wtf " << String << endl;
                 if (i == (splitted.size()-1))
                 {
                     if (this->functions.size() > 0 && writingFunc)
-                    {
                         this->functions[functions.size() - 1].add_line(splitted);
-                    }
                     else if (this->whiles.size() > 0 && writingWhile)
-                    {
                         this->whiles[whiles.size() - 1].add_line(splitted);
-                    }
                 }
 			}
 
             if (this->Ifs.size() != 0)
             {
-                if (!this->Ifs[Ifs.size()-1])
+                if (!this->Ifs[Ifs.size()-1] && !this->FindingElse)
                 {
                     if (String == "}")
                     {
-                        this->Ifs.erase(this->Ifs.end() - 1);
+                        //this->Ifs.erase(this->Ifs.end() - 1);
+                        this->FindingElse = true;
+                        this->FindingFromLine = this->line;
                     }
                     else
-                    {
                         return;
-                    }
                 }
             }
             /*
@@ -253,11 +263,16 @@ void Interpreter::Line(string line)
                         //cout << "return statement in function" << endl;
                         this->SetReturnValue(splitted);
                     }
+                    else if (String == "else" && this->FindingElse)
+                    {
+                        this->FindingElse = false;
+                        this->Ifs[Ifs.size()-1] = !Ifs[Ifs.size()-1];
+                    }
 					else if (String == "(")
 					{
 						if (lastString == "")
                         {
-                            cout << "Error: Not a function" << endl;
+                            this->PrintError("Not a function");
                             return;
                         }
                         const string namefunction = lastString;
@@ -311,7 +326,7 @@ void Interpreter::Line(string line)
                                         Function FUNCTION = this->find_function(FunctionName);
                                         if (FUNCTION.get_name() == "")
                                         {
-                                            cout << "Error: Invalid function" << endl;
+                                            this->PrintError("Invalid function");
                                             return;
                                         }
                                         else
@@ -326,7 +341,7 @@ void Interpreter::Line(string line)
                                         if (num <= 0)
                                             break;
                                     }
-                                    else if (stringcheck == "=" && splitted[Integer + 1] == "=")
+                                    else if (stringcheck == "=" && (Integer+1) < splitted.size() && splitted[Integer + 1] == "=")
                                     {
                                         parameters.push_back("==");
                                         Integer++;
@@ -355,7 +370,6 @@ void Interpreter::Line(string line)
                                 //cout << "splitted size = " << splitted.size() << endl;
                                 if (stringcheck != ",")
                                 {
-                                    //cout << "word = " << stringcheck << endl;
                                     if (stringcheck == "(")
                                     {
                                         string FunctionName = splitted[i-1];
@@ -386,7 +400,7 @@ void Interpreter::Line(string line)
                                         Function FUNCTION = this->find_function(FunctionName);
                                         if (FUNCTION.get_name() == "")
                                         {
-                                            cout << "Error: Invalid function" << endl;
+                                            this->PrintError("Invalid function");
                                             return;
                                         }
                                         else
@@ -403,10 +417,13 @@ void Interpreter::Line(string line)
                                         if (num <= 0)
                                             break;
                                     }
-                                    else if (stringcheck == "=" && splitted[this->i + 1] == "=")
+                                    else if (stringcheck == "=" && (this->i+1) < splitted.size()-1)
                                     {
-                                        parameters.push_back("==");
-                                        this->i++;
+                                        if (splitted[this->i + 1] == "=")
+                                        {
+                                            parameters.push_back("==");
+                                            this->i++;
+                                        }
                                     }
                                     else
                                         //cout << "adding parameter: " << stringcheck << endl;
@@ -460,7 +477,9 @@ void Interpreter::Line(string line)
 						if (this->Ifs.size() > 0)
 						{
 							//cout << "Chiusura if" << endl;
-							Ifs.erase(Ifs.end() - 1);
+							//Ifs.erase(Ifs.end() - 1);
+                            this->FindingElse = true;
+                            this->FindingFromLine = this->line;
 							//cout << VariablesInfos.size() << endl;
 							if (VariablesInfos.size() > 0)
 								this->VariablesInfos.erase(VariablesInfos.end() - 1);
@@ -518,6 +537,13 @@ void Interpreter::Line(string line)
                         //this->functions[functions.size() - 1].add_line();
                         this->whiles[whiles.size() - 1].add_line(splitted);
                     }
+                }
+
+                //cout << "FindingElse = " << FindingElse << endl;
+                if (this->FindingElse && this->line != this->FindingFromLine)
+                {
+                    this->FindingElse = false;
+                    this->Ifs.erase(this->Ifs.end() - 1);
                 }
 				//cout << String << endl;
 				//cout << (String == "{" || String == "}" || String == ")") << " " << (this->Ifs.size() != 0) << endl;
@@ -598,7 +624,7 @@ void Interpreter::Add(std::vector<std::string> splitted, string* value, string* 
                             Function FUNCTION = this->find_function(FunctionName);
                             if (FUNCTION.get_name() == "")
                             {
-                                cout << "Error: Invalid function" << endl;
+                                this->PrintError("Invalid function");
                                 return;
                             }
                             else
@@ -638,7 +664,7 @@ void Interpreter::Add(std::vector<std::string> splitted, string* value, string* 
                 string type2 = returnedVar.get_type();
                 if (!Returning)
                 {
-                    cout << "Error: Function returned nothing" << endl;
+                    this->PrintError("Function returned nothing");
                     return;
                 }
 
@@ -663,7 +689,7 @@ void Interpreter::Add(std::vector<std::string> splitted, string* value, string* 
                 type1 = getTypeVar(add1);
 			if (type == "")
 			{
-				cout << "Error: Invalid variable" << endl;
+				this->PrintError("Invalid variable");
 				break;
 			}
 
@@ -756,7 +782,7 @@ void Interpreter::AddIntegers(std::vector<std::string> splitted, string* value, 
 
 			if (isNan1 || isNan2)
 			{
-				cout << "Error: invalid type of value" << endl;
+				this->PrintError("Invalid type of value");
 				*typeFinalValue = "invalid";
 				break;
 				/*
@@ -847,7 +873,7 @@ void Interpreter::If(const string if1, const string comparison, const string if2
 
 		if (var1.get_type() == "")
 		{
-			cout << "Error: variable not found" << endl;
+			this->PrintError("Variable not found");
 			this->Ifs.push_back(false);
 			return;
 		}
@@ -881,7 +907,7 @@ void Interpreter::If(const string if1, const string comparison, const string if2
 		Variable var2 = this->find_variable(if2);
 		if (var2.get_type() == "")
 		{
-			cout << "Error: variable not found" << endl;
+			this->PrintError("Variable not found");
 			this->Ifs.push_back(false);
 			return;
 		}

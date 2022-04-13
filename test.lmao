@@ -9,14 +9,14 @@ func function(due)
 var test = function("test")
 test = test + " " + function("ciao")
 out("test", test)
+var input = "ciao"
 
-//if (ciao == 2)
-//{
-//	print(4)
-//	int due = 2
-//	int tre = 3
-//	out("ciao lol lmao")
-//}
+out("input", input, type(input))
+
+if (type(input) == "string")
+{
+	out("oks")
+}
 
 //while (ciao == "ciao")
 //{
