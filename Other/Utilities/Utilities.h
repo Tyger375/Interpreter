@@ -12,6 +12,8 @@ namespace Utilities
 	std::vector<std::string> split(std::string, char);
 	bool findInVector(std::vector<std::string>, std::string);
     std::string getTypeVar(std::string);
+    bool to_bool(std::string);
+    std::string to_string(bool);
 };
 
 #endif

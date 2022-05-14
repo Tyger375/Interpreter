@@ -16,8 +16,20 @@ void Variable::setup(string nome, int val)
 	this->valueType = "int";
 }
 
+void Variable::setup(string nome, bool val)
+{
+    this->BoolValue = val;
+    this->name = nome;
+    this->valueType = "bool";
+}
+
 void Variable::setup(string nome, string val)
 {
+    if (val[0] != '"' && val != "")
+    {
+        //cout << "adding " << '"' << " to " << val << endl;
+        //val = '"' + val + '"';
+    }
 	this->StrValue = val;
 	this->name = nome;
 	this->valueType = "string";
@@ -33,6 +45,11 @@ void Variable::set_value(string newval)
 	this->StrValue = newval;
 }
 
+void Variable::set_value(bool newval)
+{
+    this->BoolValue = newval;
+}
+
 int Variable::get_int_value()
 {
 	return this->IntValue;
@@ -43,12 +60,19 @@ string Variable::get_str_value()
 	return this->StrValue;
 }
 
+bool Variable::get_bool_value()
+{
+    return this->BoolValue;
+}
+
 string Variable::get_value()
 {
     if (this->valueType == "string")
         return ('"' + this->StrValue + '"');
     else if (this->valueType == "int")
         return to_string(this->IntValue);
+    else if (this->valueType == "bool")
+        return string(1, this->BoolValue);
     else
         return "";
 }
@@ -59,6 +83,7 @@ void Interpreter::loadVariable(vector<string> splitted, string name)
     Variable Var = this->find_variable(strvalue);
 
     string type = Var.get_type();
+    //cout << type << endl;
 
     if (splitted.size() > (this->i+1) && splitted[this->i + 1] == "(")
     {
@@ -116,7 +141,7 @@ void Interpreter::loadVariable(vector<string> splitted, string name)
                     {
                         bool Returning;
                         Variable returned = this->executeFunction(FunctionName, CheckWriting, params, false, &Returning);
-                        //cout << "value = " << returned.get_value() << endl;
+                        cout << "value = " << returned.get_value() << endl;
                         parameters[parameters.size()-1] = returned.get_value();
                     }
                     //num++;
@@ -169,6 +194,8 @@ void Interpreter::loadVariable(vector<string> splitted, string name)
             strvalue = Var.get_str_value();
         else if (type == "int")
             strvalue = to_string(Var.get_int_value());
+        else if (type == "bool")
+            strvalue = to_string(Var.get_bool_value());
     }
     else
         type = getTypeVar(strvalue);
@@ -178,22 +205,31 @@ void Interpreter::loadVariable(vector<string> splitted, string name)
         this->PrintError("Invalid variable");
         return;
     }
-    if (splitted.size() > this->i+1 && splitted[this->i + 1] == "+")
+    if (splitted.size() > this->i+1 && (splitted[this->i + 1] == "+" || splitted[this->i + 1] == "-"))
     {
         string finalType;
-        this->Add(splitted, &strvalue, &finalType, type);
+        this->Operation(splitted, &strvalue, &finalType, type);
         type = finalType;
         //cout << "ended with: " << strvalue << " " << finalType << endl;
     }
     Variable var;
     if (type == "string")
-    {
         var.setup(name, strvalue);
-    }
     else if (type == "int")
     {
+        //cout << strvalue << endl;
         var.setup(name, stoi(strvalue));
     }
+    else if (type == "bool")
+    {
+        bool VAL;
+        if (strvalue == "true")
+            VAL = true;
+        else
+            VAL = false;
+        var.setup(name, VAL);
+    }
+
     bool found = false;
     for (int i = 0; i < this->variables.size(); i++)
     {

@@ -12,17 +12,18 @@ void Interpreter::debugVariables()
 	for (int i = 0; i < this->variables.size(); i++)
 	{
 		Variable var = variables[i];
-		const string type = var.get_type();
-		cout << var.get_name();
-		if (type == "string")
-		{
-			cout << " " << var.get_str_value() << endl;
-		}
-		else if (type == "int")
-		{
-			cout << " " << var.get_int_value() << endl;
-		}
+		cout << var.get_name() << " " << var.get_value() << endl;
 	}
+    cout << "Others: " << endl;
+    for (int i = 0; i < this->VariablesInfos.size(); i++)
+    {
+        vector<Variable> vars = VariablesInfos[i];
+        for (int j = 0; j < vars.size(); ++j)
+        {
+            Variable var = VariablesInfos[i][j];
+            cout << var.get_name() << " " << var.get_value() << endl;
+        }
+    }
 }
 
 void Interpreter::debugFunctions()

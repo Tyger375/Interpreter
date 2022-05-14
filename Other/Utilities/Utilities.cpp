@@ -23,7 +23,8 @@ vector<string> Utilities::split(string String, char splitter)
 		";",
 		"<",
 		">",
-		"/"
+		"/",
+        "&"
 	};
 	string word = "";
 	vector<string> words;
@@ -110,6 +111,22 @@ bool Utilities::findInVector(vector<string> list, string key)
 	return trovato;
 }
 
+bool Utilities::to_bool(std::string String)
+{
+    if (String == "true")
+        return true;
+    else
+        return false;
+}
+
+string Utilities::to_string(bool Bool)
+{
+    if (Bool)
+        return "true";
+    else
+        return "false";
+}
+
 bool Utilities::isNan(string String)
 {
 	try
@@ -125,15 +142,18 @@ bool Utilities::isNan(string String)
 
 string Utilities::getTypeVar(std::string val)
 {
-    if (isNan(val))
-    {
+    if (isNan(val)) {
         if (val[0] == '"')
             return "string";
-        else
+        else if (val == "true" || val == "false") {
+            //cout << "returning bool" << endl;
+            return "bool";
+        } else
             return "";
-    }
-    else
+    } else {
+        //cout << "returning int" << endl;
         return "int";
+    }
 }
 
 Variable Interpreter::find_variable(string name)

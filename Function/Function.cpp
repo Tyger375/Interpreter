@@ -26,6 +26,9 @@ void Function::add_line(vector<string> line)
 {
 	//cout << line.size() << endl;
 	// Ao er contributore
+    //for (int i = 0; i < line.size(); ++i) {
+        //cout << line[i] << endl;
+    //}
 	this->lines.push_back(line);
 }
 
@@ -78,12 +81,21 @@ void Interpreter::print(vector<string> parameters)
             const string type = var.get_type();
             if (type == "string")
             {
+                //cout << "debug = " << var.get_str_value() << endl;
                 this->printString(var.get_str_value());
                 //cout << "Output: " << var.get_str_value() << endl;
             }
             else if (type == "int")
             {
                 cout << var.get_int_value();
+            }
+            else if (type == "bool")
+            {
+                bool Val = var.get_bool_value();
+                if (Val == true)
+                    cout << "true";
+                else
+                    cout << "false";
             }
             else
             {
@@ -207,12 +219,15 @@ Variable Interpreter::executeFunction(const string& namefunction, bool CheckWrit
         string Var;
         cin >> Var;
         *Returning = true;
+        if (isNan(Var))
+            Var = '"' + Var + '"';
         ReturnedVariable.setup("", Var);
         return ReturnedVariable;
     }
     else if (namefunction == "type")
     {
         string type = this->Typeof(parameters, Returning);
+        //cout << "debugging type = " << type << endl;
         ReturnedVariable.setup("", type);
         return ReturnedVariable;
     }
@@ -226,11 +241,14 @@ Variable Interpreter::executeFunction(const string& namefunction, bool CheckWrit
                 this->PrintError("Something missing in if statement");
                 return ReturnedVariable;
             }
+
+            /*
             const string if1 = parameters[0];
             const string comparison = parameters[1];
             const string if2 = parameters[2];
+            */
 
-            this->If(if1, comparison, if2);
+            this->If(parameters);
         }
         else
         {

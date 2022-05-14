@@ -1,4 +1,9 @@
-var hi = 2
+var hi = 0
+
+var testbool = true
+
+var boh = testbool + 2
+out(boh)
 
 func function(due)
 {
@@ -7,22 +12,30 @@ func function(due)
 }
 
 var test = function("test")
+out(test)
 test = test + " " + function("ciao")
+out(test)
 out("test", test)
 var input = "ciao"
 
 out("input", input, type(input))
 
-if (type(input) == "string")
+//var IN = in()
+
+if (type(input) == "string" && hi == "ciao" && "string" == "string")
 {
 	out("oks")
 }
+else
+{
+    out("test")
+}
 
-//while (ciao == "ciao")
-//{
-//    out("ciao", ciao)
-//    ciao = ciao + 1
-//}
+while (hi < 5 && testbool == true)
+{
+    out("ciao", hi)
+    hi = hi + 1
+}
 
 //for (int due = 0; due <= 0; due++)
 //{
