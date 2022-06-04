@@ -6,28 +6,29 @@
 using namespace std;
 using namespace Utilities;
 
-bool interpreter::Interpreter::Addition(string* value, string* typeFinalValue, vector<string> splitted, string type1)
+bool interpreter::Interpreter::Addition(string* value, string* typeFinalValue, vector<string> splitted, string type1, int* j)
 {
     const string add1 = *value;
-    string add2 = splitted[(this->i += 2)];
+    string add2 = splitted[(*j += 2)];
 
     Variable var = this->find_variable(add2);
 
     string type = var.get_type();
 
-    if (splitted.size() > (this->i+1) && splitted[this->i + 1] == "(")
+    if (splitted.size() > (*j+1) && splitted[*j + 1] == "(")
     {
         string namefunction = splitted[i];
 
-        this->i += 2;
+        *j += 2;
 
-        string String = splitted[this->i];
+        string String = splitted[*j];
         vector<string> parameters;
         bool CheckWriting = writingFunc || writingWhile;
         int num = 0;
         do
         {
-            if (this->i >= splitted.size()) break;
+            //cout << splitted.size() << " " << *j << endl;
+            if (*j >= splitted.size()) break;
 
             if (String == ")")
                 break;
@@ -36,12 +37,12 @@ bool interpreter::Interpreter::Addition(string* value, string* typeFinalValue, v
             {
                 if (String == "(")
                 {
-                    string FunctionName = splitted[i-1];
+                    string FunctionName = splitted[*j-1];
                     vector<string> params;
-                    this->i++;
+                    *j++;
                     while (true)
                     {
-                        string param = splitted[i];
+                        string param = splitted[*j];
                         if (param == ")")
                         {
                             num--;
@@ -49,9 +50,9 @@ bool interpreter::Interpreter::Addition(string* value, string* typeFinalValue, v
                         }
                         if (param != ",")
                             params.push_back(param);
-                        if (i >= splitted.size()-1)
+                        if (*j >= splitted.size()-1)
                             break;
-                        this->i++;
+                        *j++;
                     }
 
                     //executing function
@@ -73,20 +74,24 @@ bool interpreter::Interpreter::Addition(string* value, string* typeFinalValue, v
                     if (num <= 0)
                         break;
                 }
-                else if (String == "=" && splitted[this->i + 1] == "=")
+                else if (String == "=" && splitted[*j + 1] == "=")
                 {
                     parameters.push_back("==");
-                    this->i++;
+                    *j++;
                 }
                 else
                     parameters.push_back(String);
             }
 
-            if (this->i < splitted.size()-1)
-                this->i++;
+            //cout << *j << " "  << splitted.size() << endl;
+            if (*j < splitted.size()-1)
+            {
+                *j += 1;
+                //cout << *j << " "  << splitted.size() << endl;
+                String = splitted[*j];
+            }
             else
                 break;
-            String = splitted[this->i];
         } while (true);
 
         /*for (int j = 0; j < parameters.size(); ++j) {
@@ -121,6 +126,7 @@ bool interpreter::Interpreter::Addition(string* value, string* typeFinalValue, v
     {
         type = getTypeVar(add2);
     }
+
     if (type1 == "")
         type1 = getTypeVar(add1);
     if (type == "")
@@ -190,22 +196,22 @@ bool interpreter::Interpreter::Addition(string* value, string* typeFinalValue, v
     return false;
 }
 
-bool interpreter::Interpreter::Subtraction(string* value, string* typeFinalValue, vector<string> splitted, string type1)
+bool interpreter::Interpreter::Subtraction(string* value, string* typeFinalValue, vector<string> splitted, string type1, int* j)
 {
     const string add1 = *value;
-    string add2 = splitted[(this->i += 2)];
+    string add2 = splitted[(*j += 2)];
 
     Variable var = this->find_variable(add2);
 
     string type = var.get_type();
 
-    if (splitted.size() > (this->i+1) && splitted[this->i + 1] == "(")
+    if (splitted.size() > (*j+1) && splitted[*j + 1] == "(")
     {
-        string namefunction = splitted[i];
+        string namefunction = splitted[*j];
 
-        this->i += 2;
+        *j += 2;
 
-        string String = splitted[this->i];
+        string String = splitted[*j];
         vector<string> parameters;
         bool CheckWriting = writingFunc || writingWhile;
         int num = 0;
@@ -220,12 +226,12 @@ bool interpreter::Interpreter::Subtraction(string* value, string* typeFinalValue
             {
                 if (String == "(")
                 {
-                    string FunctionName = splitted[i-1];
+                    string FunctionName = splitted[*j-1];
                     vector<string> params;
-                    this->i++;
+                    *j++;
                     while (true)
                     {
-                        string param = splitted[i];
+                        string param = splitted[*j];
                         if (param == ")")
                         {
                             num--;
@@ -233,9 +239,9 @@ bool interpreter::Interpreter::Subtraction(string* value, string* typeFinalValue
                         }
                         if (param != ",")
                             params.push_back(param);
-                        if (i >= splitted.size()-1)
+                        if (*j >= splitted.size()-1)
                             break;
-                        this->i++;
+                        *j++;
                     }
 
                     //executing function
@@ -257,20 +263,20 @@ bool interpreter::Interpreter::Subtraction(string* value, string* typeFinalValue
                     if (num <= 0)
                         break;
                 }
-                else if (String == "=" && splitted[this->i + 1] == "=")
+                else if (String == "=" && splitted[*j + 1] == "=")
                 {
                     parameters.push_back("==");
-                    this->i++;
+                    *j++;
                 }
                 else
                     parameters.push_back(String);
             }
 
-            if (this->i < splitted.size()-1)
-                this->i++;
+            if (*j < splitted.size()-1)
+                *j++;
             else
                 break;
-            String = splitted[this->i];
+            String = splitted[*j];
         } while (true);
 
         /*for (int j = 0; j < parameters.size(); ++j) {

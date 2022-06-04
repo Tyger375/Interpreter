@@ -74,6 +74,23 @@ void Interpreter::print(vector<string> parameters)
         {
             cout << stoi(parameter);
         }
+        else if (parameter == "true" || parameter == "false")
+        {
+            cout << parameter;
+        }
+        else if (parameter[0] == '[')
+        {
+            //cout << "List" << endl;
+            int index = 0;
+            this->writingList.push_back(true);
+            this->loadList(split(parameter, ' '), false, &index);
+
+            //cout << ListWriting.size() << endl;
+            this->printList(ListWriting[0]);
+            //cout << "test" << endl;
+            this->ListWriting.erase(ListWriting.end()-1);
+            //cout << "F" << endl;
+        }
         else
         {
             //cout << primoparametro << " e' una variabile" << endl;
@@ -97,6 +114,10 @@ void Interpreter::print(vector<string> parameters)
                 else
                     cout << "false";
             }
+            else if (type == "list")
+            {
+                this->printList(var);
+            }
             else
             {
                 this->PrintError("Invalid variable");
@@ -105,7 +126,6 @@ void Interpreter::print(vector<string> parameters)
         cout << " ";
     }
     cout << endl;
-    //cout << parametri[0] << " " << parametri[1] << endl;
 }
 
 string Interpreter::Typeof(vector<string> parameters, bool* Returning)
@@ -151,6 +171,10 @@ string Interpreter::Typeof(vector<string> parameters, bool* Returning)
         else if (type == "int")
         {
             Val = to_string(var.get_int_value());
+        }
+        else if (type == "bool")
+        {
+            Val = to_string(var.get_bool_value());
         }
         else
         {

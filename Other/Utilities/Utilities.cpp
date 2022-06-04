@@ -6,6 +6,7 @@
 
 using namespace std;
 using namespace interpreter;
+using Utilities::to_string;
 
 vector<string> Utilities::split(string String, char splitter)
 {
@@ -24,7 +25,9 @@ vector<string> Utilities::split(string String, char splitter)
 		"<",
 		">",
 		"/",
-        "&"
+        "&",
+        "[",
+        "]"
 	};
 	string word = "";
 	vector<string> words;
@@ -145,10 +148,11 @@ string Utilities::getTypeVar(std::string val)
     if (isNan(val)) {
         if (val[0] == '"')
             return "string";
-        else if (val == "true" || val == "false") {
-            //cout << "returning bool" << endl;
+        else if (val[0] == '[')
+            return "list";
+        else if (val == "true" || val == "false")
             return "bool";
-        } else
+        else
             return "";
     } else {
         //cout << "returning int" << endl;
@@ -165,11 +169,8 @@ Variable Interpreter::find_variable(string name)
         Variable* var = &this->variables[i];
         if (var->get_name() == name)
         {
-            //found = true;
-            //cout << "Trovata! " << var->get_name() << " = " << var->get_int_value() << endl;
             VAR = *var;
             break;
-            //return *var;
         }
     }
     for (int i = 0; i < this->VariablesInfos.size(); i++)
@@ -179,11 +180,8 @@ Variable Interpreter::find_variable(string name)
             Variable* var = &this->VariablesInfos[i][i2];
             if (var->get_name() == name)
             {
-                //found = true;
-                //cout << "Trovata! " << var->get_name() << " = " << var->get_int_value() << endl;
                 VAR = *var;
                 break;
-                //return *var;
             }
         }
     }
@@ -200,11 +198,8 @@ Variable* Interpreter::find_variable_pointer(string name)
         Variable* var = &this->variables[i];
         if (var->get_name() == name)
         {
-            //found = true;
-            //cout << "Trovata! " << var->get_name() << " = " << var->get_int_value() << endl;
             VAR = var;
             break;
-            //return *var;
         }
     }
     for (int i = 0; i < this->VariablesInfos.size(); i++)
@@ -214,11 +209,8 @@ Variable* Interpreter::find_variable_pointer(string name)
             Variable* var = &this->VariablesInfos[i][i2];
             if (var->get_name() == name)
             {
-                //found = true;
-                //cout << "Trovata! " << var->get_name() << " = " << var->get_int_value() << endl;
                 static Variable* VAR = var;
                 break;
-                //return *var;
             }
         }
     }
@@ -235,7 +227,6 @@ void Interpreter::printString(string String)
             if (character == '\\')
             {
                 string parola = (string(1, character) + string(1, String[++i]));
-                //cout << endl << "parola = " << parola << (parola == "\\n") << endl;
                 if (parola == "\\n")
                 {
                     cout << endl;
@@ -243,11 +234,55 @@ void Interpreter::printString(string String)
             }
             else
             {
-                //cout << "carattere = " << carattere << " " << (carattere == ' ') << endl;
                 cout << character;
             }
         }
     }
+}
+
+string Utilities::GetListValue(Variable variable)
+{
+    string String = "[";
+    vector<Variable> items = variable.get_list_value();
+    for (int j = 0; j < items.size(); j++) {
+        Variable item = items[j];
+        string type = item.get_type();
+        if (type == "string")
+            String += item.get_str_value();
+        else if (type == "int")
+            String += std::to_string(item.get_int_value());
+        else if (type == "bool")
+            String += to_string(item.get_bool_value());
+        else if (type == "list")
+            String += GetListValue(item);
+        if (j != items.size()-1)
+            String += ", ";
+    }
+    String += "]";
+    return String;
+}
+
+void Interpreter::printList(Variable variable)
+{
+    string String = "[";
+    vector<Variable> items = variable.get_list_value();
+    for (int j = 0; j < items.size(); j++) {
+        Variable item = items[j];
+        string type = item.get_type();
+        //cout << "type = " << type << endl;
+        if (type == "string")
+            String += item.get_str_value();
+        else if (type == "int")
+            String += to_string(item.get_int_value());
+        else if (type == "bool")
+            String += to_string(item.get_bool_value());
+        else if (type == "list")
+            String += Utilities::GetListValue(item);
+        if (j != items.size()-1)
+            String += ", ";
+    }
+    String += "]";
+    cout << String;
 }
 
 void Interpreter::PrintError(std::string error)

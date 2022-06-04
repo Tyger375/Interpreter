@@ -25,6 +25,9 @@ private:
     bool FindindStaple;
     bool writingFunc;
     bool writingWhile;
+    std::vector<bool> writingList;
+
+    std::vector<Variable> ListWriting;
 
     bool FindingElse;
     int FindingFromLine;
@@ -38,12 +41,17 @@ private:
     void SetReturnValue(std::vector<std::string>);
     void executeCustomFunction(Function*, std::vector<std::string>);
     void loadVariable(std::vector<std::string>, std::string);
+    Variable loadVariableWithoutWriting(std::vector<std::string>, std::string);
     void printString(std::string);
-    void Operation(std::vector<std::string>, std::string*, std::string*, std::string);
+    void Operation(std::vector<std::string>, std::string*, std::string*, const std::string&, int*);
+
+    //List
+    void printList(Variable);
+    void loadList(std::vector<std::string>, bool, int*);
 
     //Operations
-    bool Addition(std::string*, std::string*, std::vector<std::string>, std::string);
-    bool Subtraction(std::string*, std::string*, std::vector<std::string>, std::string);
+    bool Addition(std::string*, std::string*, std::vector<std::string>, std::string, int*);
+    bool Subtraction(std::string*, std::string*, std::vector<std::string>, std::string, int*);
 
     //Deprecated
     void AddIntegers(std::vector<std::string>, std::string*, std::string*);

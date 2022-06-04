@@ -18,6 +18,7 @@ void Interpreter::Setup()
     this->FindingElse = false;
 	this->writingFunc = false;
     this->writingWhile = false;
+    //this->writingList = false;
     this->isExecutingFunc = false;
     this->error = false;
 
@@ -80,6 +81,7 @@ void Interpreter::start(std::string nomefile, bool debug)
             this->debugVariables();
             this->debugFunctions();
         }
+
 		/*for (int i = 0; i < this->VariablesInfos.size(); i++)
 		{
 			for (int i2 = 0; i2 < VariablesInfos[i].size(); i2++)
@@ -134,13 +136,16 @@ void Interpreter::Line(string line)
             if (this->error) break;
 			const string String = splitted[i];
 
+            //cout << String << endl;
+
+            //cout << Ifs.size() << " " << this->ListWriting.size() << " " << this->writingFunc << " " << this->writingWhile << endl;
+
             if (this->i == 0 && String != "else")
             {
                 if (this->FindingElse && this->line != this->FindingFromLine)
                 {
                     this->FindingElse = false;
                     this->Ifs.erase(this->Ifs.end() - 1);
-                    //cout << "line " << this->line << ", " << FindingElse << endl;
                 }
             }
 
@@ -153,7 +158,6 @@ void Interpreter::Line(string line)
 				}
 			}
 
-			//cout << "writingFunc = " << writingFunc << endl;
 			if (this->Ifs.size() == 0)
 			{
                 if (i == (splitted.size()-1))
@@ -183,14 +187,29 @@ void Interpreter::Line(string line)
 			if (this->FindindStaple)
 				this->FindGraffa(splitted);
             */
-			//cout << stringa << endl;
 			//vector<char> Operatori = searchOperatori(stringa);
 			//vector<string> Parole = OperatoriParole(stringa);
+
+            if (this->writingList.size() > 0 && this->writingList[writingList.size()-1])
+            {
+                if (String == "]")
+                {
+                    this->writingList.erase(this->writingList.end() - 1);
+                    if (this->writingList.size() == 0)
+                        this->printList(this->ListWriting[0]);
+                }
+                else
+                {
+                    this->loadList(splitted, true, &i);
+                }
+            }
+
 			bool FoundInVector = findInVector(typeVariables, lastString);
             bool CheckWriting = writingFunc || writingWhile;
 
-			if (!findInVector(typeVariables, String))
+			if (!findInVector(typeVariables, String) && this->writingList.size() <= 0)
 			{
+                //cout << "Entering with " << String << endl;
 				if (!FoundInVector)
 				{
 					if (String == "=" && !CheckWriting)
@@ -198,27 +217,9 @@ void Interpreter::Line(string line)
 						//const
 						string name = lastString;
 						this->loadVariable(splitted, name);
-						//string type;
-						//Variable var = this->find_variable(name);
-						//cout << "adding a variable" << endl;
-						//if (type == "int")
-						//{
-							//cout << "adding int var" << endl;
-							//this->loadIntVariable(splitted, name);
-						//}
-						//else if (type == "string")
-						//{
-							//cout << "adding string var" << endl;
-							//this->loadStringVariable(splitted, name);
-						//}
-						//else
-						//{
-							//cout << "Error: invalid variable type" << endl;
-						//}
 					}
 					else if (String == "+" && !CheckWriting)
 					{
-						//cout << lastStringa << " e' l'addendo 1" << endl;
 						string add1 = lastString;
 						string add2 = splitted[(++this->i)];
 
@@ -226,7 +227,6 @@ void Interpreter::Line(string line)
 						const string type = Var.get_type();
 						if (type != "")
 						{
-							//cout << "e' una variabile" << endl;
 							if (type == "string")
 								add1 = Var.get_str_value();
 							else if (type == "int")
@@ -237,39 +237,29 @@ void Interpreter::Line(string line)
 						const string type2 = Var2.get_type();
 						if (type2 != "")
 						{
-							//cout << "e' una variabile" << endl;
 							if (type2 == "string")
 								add2 = Var2.get_str_value();
 							else if (type2 == "int")
 								add2 = to_string(Var2.get_int_value());
 						}
-						//cout << addendo1 << " e' l'addendo 1" << endl;
-						//cout << addendo2 << " e' l'addendo 2" << endl;
 						bool isNan1 = isNan(add1);
 						bool isNan2 = isNan(add2);
 
 						if (isNan1 || isNan2)
 						{
-							//cout << "Output: " << (addendo1 + addendo2) << endl;
 							string value = add1 + add2;
 							string typeFinalValue;
 							this->AddStrings(splitted, &value, &typeFinalValue);
-							//cout << "Output: " << valore << endl;
 						}
 						else
 						{
 							string value = to_string(stoi(add1) + stoi(add2));
 							string typeFinalValue;
 							this->AddIntegers(splitted, &value, &typeFinalValue);
-							//cout << valore << endl;
-							//cout << "Output: " << stoi(valore) << endl;
-							//cout << "Output: " << (stoi(addendo1) + stoi(addendo2)) << endl;
 						}
-						//cout << splitted[(++i)] << " e' l'addendo 2" << endl;
 					}
                     else if (String == "return" && this->isExecutingFunc)
                     {
-                        //cout << "return statement in function" << endl;
                         this->SetReturnValue(splitted);
                     }
                     else if (String == "else" && this->FindingElse)
@@ -279,25 +269,25 @@ void Interpreter::Line(string line)
                     }
 					else if (String == "(")
 					{
+                        //cout << "entered" << endl;
 						if (lastString == "")
                         {
                             this->PrintError("Not a function");
                             return;
                         }
                         const string namefunction = lastString;
-                        //cout << "function name = " << namefunction << endl;
                         bool IsNewFunc = false;
-                        //cout << "i = " << i << endl;
+
                         if ((i - 2) >= 0)
                             if(splitted[i-2] == "func")
                                 IsNewFunc = true;
-                        //cout << IsNewFunc << endl;
+
                         vector<string> parameters;
-                        //cout << parameters.size() << endl;
 
                         int num = 0;
 
                         this->i++;
+
                         string stringcheck = splitted[this->i];
                         /*for (int j = 0; j < splitted.size(); ++j) {
                             cout << splitted[j] << endl;
@@ -416,11 +406,6 @@ void Interpreter::Line(string line)
                                                 break;
                                             this->i++;
                                         }
-                                        /*cout << "printing params" << endl;
-                                        for (int j = 0; j < params.size(); ++j) {
-                                            cout << params[j] << endl;
-                                        }*/
-                                        //cout << "params size = " << params.size() << endl;
                                         //executing function
                                         Function FUNCTION = this->find_function(FunctionName);
                                         if (FUNCTION.get_name() == "")
@@ -441,6 +426,113 @@ void Interpreter::Line(string line)
                                     {
                                         if (num <= 0)
                                             break;
+                                    }
+                                    else if (stringcheck == "[")
+                                    {
+                                        //Array member
+                                        string VariableName = splitted[i-1];
+
+                                        Variable var = this->find_variable(VariableName);
+                                        if (var.get_type() != "")
+                                        {
+                                            //cout << VariableName << endl;
+                                            if (i+1 < splitted.size())
+                                            {
+                                                string index = splitted[i+1];
+                                                if (index == "]")
+                                                {
+                                                    this->PrintError("No index");
+                                                    return;
+                                                }
+                                                if (getTypeVar(index) != "int")
+                                                {
+                                                    this->PrintError("Invalid index type");
+                                                    return;
+                                                }
+                                                i++;
+                                                parameters.erase(parameters.end() - 1);
+                                                //cout << (var.get_list_value()[stoi(index)]).get_type() << endl;
+                                                Variable member = var.get_list_value()[stoi(index)];
+                                                string type = member.get_type();
+                                                if (type == "string")
+                                                    parameters.push_back(member.get_str_value());
+                                                else if (type == "int")
+                                                    parameters.push_back(to_string(member.get_int_value()));
+                                                else if (type == "bool")
+                                                    parameters.push_back(to_string(member.get_bool_value()));
+                                                else if (type == "list")
+                                                    parameters.push_back(GetListValue(member));
+                                            }
+                                        }
+                                        else if (parameters.size() > 0 && getTypeVar(parameters[parameters.size()-1]) == "list")
+                                        {
+                                            //member inside a list
+                                            string index = splitted[i+1];
+                                            if (index == "]")
+                                            {
+                                                this->PrintError("No index");
+                                                return;
+                                            }
+                                            if (getTypeVar(index) != "int")
+                                            {
+                                                this->PrintError("Invalid index type");
+                                                return;
+                                            }
+                                            i++;
+                                            //parameters.erase(parameters.end() - 1);
+                                            //cout << (var.get_list_value()[stoi(index)]).get_type() << endl;
+                                            int index2 = 0;
+                                            this->writingList.push_back(true);
+                                            this->loadList(split(parameters[parameters.size()-1], ' '), false, &index2);
+
+                                            Variable member = this->ListWriting[0].get_list_value()[stoi(index)];
+                                            string type = member.get_type();
+                                            parameters.erase(parameters.end()-1);
+                                            if (type == "string")
+                                                parameters.push_back(member.get_str_value());
+                                            else if (type == "int")
+                                                parameters.push_back(to_string(member.get_int_value()));
+                                            else if (type == "bool")
+                                                parameters.push_back(to_string(member.get_bool_value()));
+                                            else if (type == "list")
+                                                parameters.push_back(GetListValue(member));
+                                            this->ListWriting.erase(ListWriting.end()-1);
+
+                                            while (this->writingList.size() != 0)
+                                            {
+                                                this->writingList.erase(writingList.end()-1);
+                                            }
+                                        }
+                                        else
+                                        {
+                                            string FinalString = "[";
+                                            int num2 = 0;
+                                            i++;
+                                            while (true)
+                                            {
+                                                string String2 = splitted[i];
+                                                FinalString += String2;
+                                                if (String2 == "[")
+                                                    num2++;
+                                                else if (String2 == "]")
+                                                {
+                                                    if (num2 <= 0)
+                                                        break;
+                                                    else
+                                                        num2--;
+                                                }
+                                                i++;
+                                                if (i > splitted.size()-1)
+                                                    break;
+                                            }
+                                            //this->PrintError("Invalid variable: " + VariableName);
+                                            //return;
+                                            parameters.push_back(FinalString);
+                                        }
+                                    }
+                                    else if (stringcheck == "]")
+                                    {
+
                                     }
                                     else if (stringcheck == "=" && (this->i+1) < splitted.size()-1)
                                     {
@@ -519,12 +611,11 @@ void Interpreter::Line(string line)
                                 cout << "param = " << parameters[j] << endl;
                             }
                             cout << "finished" << endl;*/
-                            //cout << num << endl;
-                            //cout << (stringcheck != ")") << (num <= 0) << (this->i < splitted.size()) << endl;
                         }
 
                         bool Returning;
                         this->executeFunction(namefunction, CheckWriting, parameters, IsNewFunc, &Returning);
+                        //cout << i << " " << splitted.size() << endl;
 					}
 					else if (String == "{" && !CheckWriting)
 					{
@@ -534,7 +625,7 @@ void Interpreter::Line(string line)
 							const int lastelem = Ifs.size() - 1;
 							if (!this->Ifs[lastelem])
 							{
-								cout << "If falso" << endl;
+								//cout << "If falso" << endl;
 								//this->FindGraffa(splitted);
 							}
 						}
@@ -555,13 +646,8 @@ void Interpreter::Line(string line)
 					{
 						if (this->Ifs.size() > 0)
 						{
-							//cout << "Chiusura if, line " << this->line << endl;
-                            //cout << "before FindingElse = " << FindingElse << endl;
-							//Ifs.erase(Ifs.end() - 1);
                             this->FindingElse = true;
-                            //cout << "after FindingElse = " << FindingElse << endl;
                             this->FindingFromLine = this->line;
-							//cout << VariablesInfos.size() << endl;
 							if (VariablesInfos.size() > 0)
 								this->VariablesInfos.erase(VariablesInfos.end() - 1);
 
@@ -569,23 +655,16 @@ void Interpreter::Line(string line)
 								this->functions[functions.size() - 1].add_line(splitted);
                             if (writingWhile && i == (splitted.size()-1))
                                 this->whiles[whiles.size() - 1].add_line(splitted);
-							//cout << VariablesInfos.size() << endl;
-							//this->Ifs.erase(Ifs.size() - 1)
 						}
 						else
 						{
 							if (this->functions.size() > 0 && writingFunc)
 							{
-								//functions.erase(functions.end() - 1);
-								//cout << VariablesInfos.size() << endl;
-								//this->VariablesInfos.erase(VariablesInfos.end() - 1);
 								writingFunc = false;
-								//cout << "Chiusura funzione" << endl;
 							}
                             else if (this->whiles.size() > 0)
                             {
                                 writingWhile = false;
-                                //cout << "test" << endl;
                                 this->whiles[whiles.size()-1].execute(this->variables);
                             }
 							else
@@ -596,17 +675,18 @@ void Interpreter::Line(string line)
 					}
 				}
 			}
-			//cout << endl;
-			lastString = splitted[i];
-			//line = String;
+
+            if (i == splitted.size())
+                i = splitted.size() - 1;
+
+            lastString = splitted[i];
+
 			if (i == (splitted.size()-1))
 			{
                 if (writingFunc)
                 {
                     if((String == "{" || String == "}" || String == ")") && (this->Ifs.size() != 0))
                     {
-                        //cout << "adding " << String << endl;
-                        //this->functions[functions.size() - 1].add_line();
                         this->functions[functions.size() - 1].add_line(splitted);
                     }
                 }
@@ -614,54 +694,39 @@ void Interpreter::Line(string line)
                 {
                     if((String == "{" || String == "}" || String == ")") && (this->Ifs.size() != 0))
                     {
-                        //cout << "adding " << String << endl;
-                        //this->functions[functions.size() - 1].add_line();
                         this->whiles[whiles.size() - 1].add_line(splitted);
                     }
                 }
-
-                //cout << "FindingElse = " << FindingElse << endl;
-				//cout << String << endl;
-				//cout << (String == "{" || String == "}" || String == ")") << " " << (this->Ifs.size() != 0) << endl;
-				//cout << "adding line" << endl;
-				//cout << this->functions[0].get_lines().size() << endl;
 			}
-			/**/
 		}
         if (this->FindingElse && this->line != this->FindingFromLine)
         {
             this->FindingElse = false;
             this->Ifs.erase(this->Ifs.end() - 1);
         }
-		/*if (this->Ifs.size() == 0 && this->FindindGraffa)
-		{
-			cout << "Error: expected { after if statement" << endl;
-			return;
-		}*/
-		//cout << lastStringa << endl;
 	}
 	catch (const exception& error)
 	{
 		cout << "internal error: " << error.what() << endl;
 	}
-	//cout << endl;
 }
 
-void Interpreter::Operation(std::vector<std::string> splitted, string* value, string* typeFinalValue, string type1)
+void Interpreter::Operation(std::vector<std::string> splitted, string* value, string* typeFinalValue, const string& type1, int* j)
 {
 	do
 	{
-		if ((this->i + 1) >= splitted.size() || splitted[this->i + 1] == "")
+		if ((*j + 1) >= splitted.size() || splitted[*j + 1] == "")
 			break;
-		if (splitted[this->i + 1] == "+")
+
+		if (splitted[*j + 1] == "+")
 		{
-            bool notError = this->Addition(value, typeFinalValue, splitted, type1);
+            bool notError = this->Addition(value, typeFinalValue, splitted, type1, j);
             if (!notError)
                 break;
 		}
-        else if (splitted[this->i + 1] == "-")
+        else if (splitted[*j + 1] == "-")
         {
-            bool notError = this->Subtraction(value, typeFinalValue, splitted, type1);
+            bool notError = this->Subtraction(value, typeFinalValue, splitted, type1, j);
             if (!notError)
                 break;
         }
@@ -672,7 +737,6 @@ void Interpreter::AddIntegers(std::vector<std::string> splitted, string* value, 
 {
 	do
 	{
-		//cout << valore << endl;
 		if ((this->i + 1) >= splitted.size() || splitted[this->i + 1] == "")
 			break;
 		if (splitted[this->i + 1] == "+")
@@ -684,18 +748,14 @@ void Interpreter::AddIntegers(std::vector<std::string> splitted, string* value, 
 			const string type = var.get_type();
 			if (type != "")
 			{
-				//cout << "e' una variabile" << endl;
 				if (type == "string")
 					add2 = var.get_str_value();
 				else if (type == "int")
 					add2 = to_string(var.get_int_value());
 			}
-			//cout << addendo1 << " e' l'addendo 1" << endl;
-			//cout << addendo2 << " e' l'addendo 2" << endl;
+
 			bool isNan1 = isNan(add1);
 			bool isNan2 = isNan(add2);
-
-			//cout << isNan1 << " " << isNan2 << endl;
 
 			if (isNan1 || isNan2)
 			{
@@ -711,17 +771,11 @@ void Interpreter::AddIntegers(std::vector<std::string> splitted, string* value, 
 			else
 			{
 				int risultato = stoi(add1) + stoi(add2);
-				//cout << "risultato = " << risultato << endl;
+
 				*value = to_string(risultato);
-				//cout << "addendo1 = " << addendo1 << endl;
-				//cout << "addendo2 = " << addendo2 << endl;
 				*typeFinalValue = "int";
-				//valore = (stoi(addendo1) + stoi(addendo2));
-				//cout << "valore here: " << valore << endl;
-				//cout << "output: " << valore << endl;
 			}
 		}
-		//cout << "fine" << endl;
 	} while (true);
 }
 
@@ -750,15 +804,8 @@ void Interpreter::AddStrings(std::vector<std::string> splitted, string* value, s
 						newResult += carattere;
 				}
 			}
-			//cout << "risultato = " << newRisultato << endl;
 			*value = newResult;
-			//cout << "addendo1 = " << addendo1 << endl;
-			//cout << "addendo2 = " << addendo2 << endl;
 			*typeFinalValue = "string";
-			//cout << addendo1 << " e' l'addendo 1" << endl;
-			//cout << addendo2 << " e' l'addendo 2" << endl;
-
-			//cout << isNan1 << " " << isNan2 << endl;
 		}
 	} while (true);
 }
@@ -831,8 +878,6 @@ void Interpreter::If(vector<string> parameters) //const string if1, const string
         string if1 = Condition[0];
         string Comparator = Condition[1];
         string if2 = Condition[2];
-
-        //cout << "test = " << if1 << " " << if2 << endl;
 
         bool isStr1 = (if1[0] == '"');
         bool isStr2 = (if2[0] == '"');
@@ -937,83 +982,63 @@ void Interpreter::If(vector<string> parameters) //const string if1, const string
         bool FinalValue;
 
         if (Comparator == "==") {
-            //cout << "1 and 2 = " << Val1 << " " << Val2 << endl;
             if (Type1 == Type2)
             {
                 if (Type1 == "int")
                 {
-                    if (stoi(Val1) == stoi(Val2)) {
-                        //cout << "true" << endl;
+                    if (stoi(Val1) == stoi(Val2))
                         FinalValue = true;
-                    } else {
-                        //cout << "false" << endl;
+                    else
                         FinalValue = false;
-                    }
                 }
                 else if (Type1 == "string")
                 {
-                    if (Val1 == Val2) {
-                        //cout << "true" << endl;
+                    if (Val1 == Val2)
                         FinalValue = true;
-                    } else {
-                        //cout << "false" << endl;
+                    else
                         FinalValue = false;
-                    }
                 }
                 else if (Type1 == "bool")
                 {
-                    if (to_bool(Val1) == to_bool(Val2)) {
-                        //cout << "true" << endl;
+                    if (to_bool(Val1) == to_bool(Val2))
                         FinalValue = true;
-                    } else {
-                        //cout << "false" << endl;
+                    else
                         FinalValue = false;
-                    }
                 }
             }
             else
             {
-                if (Val1 == Val2) {
-                    //cout << "true" << endl;
+                if (Val1 == Val2)
                     FinalValue = true;
-                } else {
-                    //cout << "false" << endl;
+                else
                     FinalValue = false;
-                }
             }
-        } else if (Comparator == ">=" || Comparator == "=>") {
+        }
+        else if (Comparator == ">=" || Comparator == "=>")
+        {
             if (Type1 == Type2)
             {
                 if (Type1 == "int")
                 {
-                    if (stoi(Val1) >= stoi(Val2)) {
-                        //cout << "true" << endl;
+                    if (stoi(Val1) >= stoi(Val2))
                         FinalValue = true;
-                    } else {
-                        //cout << "false" << endl;
+                    else
                         FinalValue = false;
-                    }
                 }
                 else if (Type1 == "string")
                 {
-                    if (Val1 >= Val2) {
-                        //cout << "true" << endl;
+                    if (Val1 >= Val2)
                         FinalValue = true;
-                    } else {
-                        //cout << "false" << endl;
+                    else
                         FinalValue = false;
-                    }
                 }
             }
             else
             {
-                if (Val1 >= Val2) {
-                    //cout << "true" << endl;
+                if (Val1 >= Val2)
                     FinalValue = true;
-                } else {
-                    //cout << "false" << endl;
+                else
                     FinalValue = false;
-                }
             }
         }
 
@@ -1030,7 +1055,6 @@ void Interpreter::If(vector<string> parameters) //const string if1, const string
         }
     }
 
-	//cout << "Final = " << Checks[0] << endl;
     this->Ifs.push_back(Checks[0]);
 }
 
