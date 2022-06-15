@@ -189,9 +189,10 @@ void Interpreter::Line(string line)
             {
                 if (String == "]")
                 {
-                    this->writingList.erase(this->writingList.end() - 1);
-                    if (this->writingList.size() == 0)
-                        this->printList(this->ListWriting[0]);
+                    /*this->writingList.erase(this->writingList.end() - 1);
+                    if (this->writingList.size() == 0)*/
+                    //this->printList(this->ListWriting[0]);
+                    this->loadList(splitted, true, &i);
                 }
                 else
                 {

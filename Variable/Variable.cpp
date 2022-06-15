@@ -421,78 +421,66 @@ Variable Interpreter::loadVariableWithoutWriting(vector<string> splitted, string
 void Interpreter::loadList(vector<string> splitted, bool write, int* index)
 {
     //Loading list variable
-    //cout << "writingList = " << writingList.size() << endl;
-    //cout << "ListWriting = " << ListWriting.size() << endl;
-    vector<string> All = {};
     for (; *index < splitted.size(); (*index)++) {
         string String = splitted[*index];
         //cout << "String = " << String << ", index = " << *index << ", line = " << this->line << endl;
         if (String == "[")
         {
-            //cout << "here" << endl;
             //Another list
-            bool Bool = All.size() >= 2;
+            bool Bool = listAll.size() >= 2;
 
             if (Bool)
-            {
-                this->loadVariableWithoutWriting(All, "");
-            }
+                this->loadVariableWithoutWriting(listAll, "");
             else
-            {
                 this->writingList.push_back(true);
-            }
 
-            (*index)++;
-            while (true)
+            if (((*index) + 1) < splitted.size()-1)
             {
-                All.push_back(splitted[*index]);
                 (*index)++;
-                if (splitted.size() < *index)
+                while (true)
                 {
-                    return;
+                    listAll.push_back(splitted[*index]);
+                    (*index)++;
+                    if (splitted.size() < *index)
+                    {
+                        return;
+                    }
+                    if (splitted[*index] == "]" || splitted[*index] == "," || splitted[*index] == "[")
+                        break;
                 }
-                if (splitted[*index] == "]" || splitted[*index] == "," || splitted[*index] == "[")
-                    break;
             }
-            //cout << "ended = " << splitted[*index] << endl;
-            //cout << "size2 = " << this->writingList.size() << endl;
-
-            Variable var2 = this->loadVariableWithoutWriting(All, "");
-
 
             Variable list;
             vector<Variable> LIST;
             list.setup("", LIST);
-            //cout << var2.get_value() << endl;
-            //this->printList(list);
-            //cout << endl;
+
             this->ListWriting.push_back(list);
-            this->ListWriting[ListWriting.size()-1].add_item_list(var2);
-            //cout << "printing list = ";
-            //printList(this->ListWriting[ListWriting.size()-1]);
-            //cout << endl;
-            All = {};
+            if (!listAll.empty())
+            {
+                Variable var2 = this->loadVariableWithoutWriting(listAll, "");
+                this->ListWriting[ListWriting.size()-1].add_item_list(var2);
+            }
+            listAll = {};
         }
         else if (String == ",")
         {
-            if (!All.empty())
+            if (!listAll.empty())
             {
-                Variable var = this->loadVariableWithoutWriting(All, "");
+                Variable var = this->loadVariableWithoutWriting(listAll, "");
                 this->ListWriting[ListWriting.size() - 1].add_item_list(var);
-                All = {};
+                listAll = {};
             }
         }
-        else if (String == "]")// && (splitted.size()-1 > (*index)+1 && splitted[(*index)+1] != ","))
+        else if (String == "]")
         {
             //Ending of list/sub-list
-            //cout << "here2" << endl;
             this->writingList.erase(this->writingList.end() - 1);
 
-            if (!All.empty())
+            if (!listAll.empty())
             {
-                Variable var = this->loadVariableWithoutWriting(All, "");
+                Variable var = this->loadVariableWithoutWriting(listAll, "");
                 this->ListWriting[ListWriting.size() - 1].add_item_list(var);
-                All = {};
+                listAll = {};
             }
 
             if (writingList.empty())
@@ -501,11 +489,11 @@ void Interpreter::loadList(vector<string> splitted, bool write, int* index)
                 {
                     if (this->ListWriting.size()-1 > 0)
                     {
-                        if (All.size() > 0)
+                        if (listAll.size() > 0)
                         {
-                            Variable var = this->loadVariableWithoutWriting(All, "");
+                            Variable var = this->loadVariableWithoutWriting(listAll, "");
                             this->ListWriting[ListWriting.size() - 1].add_item_list(var);
-                            All = {};
+                            listAll = {};
                         }
                         this->ListWriting[ListWriting.size()-2].add_item_list(ListWriting[ListWriting.size()-1]);
                         this->ListWriting.erase(this->ListWriting.end() - 1);
@@ -556,9 +544,7 @@ void Interpreter::loadList(vector<string> splitted, bool write, int* index)
             }
         }
         else
-        {
-            All.push_back(String);
-        }
+            listAll.push_back(String);
     }
 }
 

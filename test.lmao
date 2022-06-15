@@ -8,7 +8,24 @@ out(list)
 
 var testbool = true
 
-var testlist = ["due", 2+3, true, ["ciao", 2, [3, ["funziona!!!", 2], 5], 4]]
+var testlist = [
+    "due",
+    2+3,
+    true,
+    [
+        "ciao",
+        2,
+        [
+            3,
+            [
+                "funziona!!!",
+                2
+            ],
+            5
+        ],
+        4
+    ]
+]
 
 out(testlist)
 out(testlist[0])

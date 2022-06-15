@@ -21,6 +21,7 @@ private:
     std::vector<While> whiles;
     std::vector<bool> Ifs;
     std::vector<std::vector<Variable>> VariablesInfos;
+    std::vector<std::string> listAll;
     bool error;
     bool FindindStaple;
     bool writingFunc;
