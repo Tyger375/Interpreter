@@ -1,5 +1,6 @@
 #include "../Other/Utilities/Utilities.h"
 #include <iostream>
+#include <utility>
 #include <vector>
 #include <string>
 #include "While.h"
@@ -89,7 +90,8 @@ bool Update(Interpreter* interpreter, While* aWhile)
 
     vector<string> operators;
     int conditionnum = 0;
-    for (int j = 0; j < aWhile->WhileCondition.size(); ++j) {
+    for (int j = 0; j < aWhile->WhileCondition.size(); ++j)
+    {
         string param = aWhile->WhileCondition[j];
         if (findInVector(ValidOperators1, param))
         {
@@ -119,6 +121,7 @@ bool Update(Interpreter* interpreter, While* aWhile)
 
     vector<string> ValidOperators = {
             "==",
+            "!=",
             ">=",
             "=>",
             "<=",
@@ -289,6 +292,51 @@ bool Update(Interpreter* interpreter, While* aWhile)
                 }
             }
         }
+        else if (Comparator == "!=") {
+            if (Type1 == Type2)
+            {
+                if (Type1 == "int")
+                {
+                    if (stoi(Val1) != stoi(Val2)) {
+                        //cout << "true" << endl;
+                        FinalValue = true;
+                    } else {
+                        //cout << "false" << endl;
+                        FinalValue = false;
+                    }
+                }
+                else if (Type1 == "string")
+                {
+                    if (Val1 != Val2) {
+                        //cout << "true" << endl;
+                        FinalValue = true;
+                    } else {
+                        //cout << "false" << endl;
+                        FinalValue = false;
+                    }
+                }
+                else if (Type1 == "bool")
+                {
+                    if (to_bool(Val1) != to_bool(Val2)) {
+                        //cout << "true" << endl;
+                        FinalValue = true;
+                    } else {
+                        //cout << "false" << endl;
+                        FinalValue = false;
+                    }
+                }
+            }
+            else
+            {
+                if (Val1 != Val2) {
+                    //cout << "true" << endl;
+                    FinalValue = true;
+                } else {
+                    //cout << "false" << endl;
+                    FinalValue = false;
+                }
+            }
+        }
         else if (Comparator == ">=" || Comparator == "=>")
         {
             if (Val1 >= Val2)
@@ -361,7 +409,7 @@ bool Update(Interpreter* interpreter, While* aWhile)
 void While::execute(std::vector<Variable> Variables)
 {
     Function func;
-    Interpreter interpreter(Variables, true, &func);
+    Interpreter interpreter(move(Variables), true, &func);
     //Check
     /*string VariableNameCheck;
     string Comparation;
@@ -544,14 +592,12 @@ void While::execute(std::vector<Variable> Variables)
 
     bool Updated = Update(&interpreter, this);
 
-    //cout << "Final = " << Updated << endl;
     while (Updated)
     {
         //cout << Value1 << " " << Value2 << endl;
         vector<vector<string>> lines = this->lines;
-        for (int i = 0; i < lines.size(); i++)
+        for (auto line : lines)
         {
-            vector<string> line = lines[i];
             string StrLine;
             for (int j = 0; j < line.size(); j++) {
                 StrLine += (line[j] + " ");
@@ -561,7 +607,6 @@ void While::execute(std::vector<Variable> Variables)
         }
         Updated = Update(&interpreter, this);
         //interpreter.debugVariables();
-        //cout << "--------------" << endl;
     }
 }
 

@@ -9,7 +9,7 @@ using namespace Utilities;
 bool interpreter::Interpreter::Addition(string* value, string* typeFinalValue, vector<string> splitted, string type1, int* j)
 {
     const string add1 = *value;
-    string add2 = splitted[(*j += 2)];
+    string add2 = splitted[((*j) += 2)];
 
     Variable var = this->find_variable(add2);
 
@@ -83,11 +83,9 @@ bool interpreter::Interpreter::Addition(string* value, string* typeFinalValue, v
                     parameters.push_back(String);
             }
 
-            //cout << *j << " "  << splitted.size() << endl;
             if (*j < splitted.size()-1)
             {
                 *j += 1;
-                //cout << *j << " "  << splitted.size() << endl;
                 String = splitted[*j];
             }
             else
@@ -123,9 +121,7 @@ bool interpreter::Interpreter::Addition(string* value, string* typeFinalValue, v
             add2 = var.get_value();
     }
     else
-    {
         type = getTypeVar(add2);
-    }
 
     if (type1 == "")
         type1 = getTypeVar(add1);
@@ -134,8 +130,6 @@ bool interpreter::Interpreter::Addition(string* value, string* typeFinalValue, v
         this->PrintError("Invalid variable");
         return false;
     }
-
-    //cout << type1 << " " << type << endl;
 
     if (type1 != type)
     {
@@ -182,7 +176,6 @@ bool interpreter::Interpreter::Addition(string* value, string* typeFinalValue, v
                         newResult += character;
                 }
             }
-            //cout << "result = " << newResult << endl;
             *value = newResult;
             return true;
         }

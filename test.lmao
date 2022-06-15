@@ -1,42 +1,56 @@
 var hi = 0
 
+out(type(hi))
+
+var list = [hi]
+var test_str = "heheheha"
+out(list)
+
 var testbool = true
 
-var testlist = ["due", 2+3, true, ["ciao", 2, [3, ["funziona!!!"]]]]
+var testlist = ["due", 2+3, true, ["ciao", 2, [3, ["funziona!!!", 2], 5], 4]]
 
+out(testlist)
 out(testlist[0])
 //out(true)
 out([2,3][0])
 out([3,5,6,["ciao"]])
 out([3,5,6,["ciao"]][3][0])
-out(testlist[3][2][1][0])
+out(testlist)
+testlist.add(["heheheha", 2])
+out(testlist)
+testlist[4][0] = false
+out(testlist)
+testlist[3].add("hi")
+out(testlist)
 
 func function(due)
 {
-    var ciao2 = due + 1
-    return ciao2
+    due.add("2")
+    return due
 }
 
-var test = function("test")
-out(test)
-//test = test + " " + function("ciao")
-//out(test)
-//out("test", test)
-//var input = "ciao"
+var test = function(["test"])
+out(function(["test",2, 4+4]))
+out("test", test)
 
-//out("input", input, type(input))
+var input = "ciao"
 
-//if (type(input) == "string" && hi == "ciao" && "string" == "string")
-//{
-//	out("oks")
-//}
-//else
-//{
-//    out("test")
-//}
+out(input)
 
-//while (hi < 5 && testbool == true)
-//{
-    //out("ciao", hi)
-//    hi = hi + 1
-//}
+out("input", input, type(input))
+
+if (type(input) == "string" && hi == "ciao" && "string" == "string")
+{
+	out("oks")
+}
+else
+{
+    out("test")
+}
+
+while (hi < 5 && testbool == true)
+{
+    out("ciao", hi)
+    hi = hi + 1
+}

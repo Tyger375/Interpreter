@@ -2,6 +2,16 @@
 
 An interpreter made in C++ just for fun.
 
+- [Syntax](#Syntax)
+  - [Variables](#Variables)
+    - [Updating variables](#Updating variables)
+    - [Lists](#Lists)
+  - [Functions](#Functions)
+    - [Internal functions](#Internal functions)
+  - [If statement](#If statement)
+  - [While loop](#While loop)
+- [Links and socials](#Links and socials)
+
 ## Compiler
 
 This compiler has two modes: <br>
@@ -14,6 +24,8 @@ This compiler has two modes: <br>
 ```
 var int_variable = 2
 var str_variable = "string variable"
+var bool_variable = true
+var list_variable = [int_variable, str_variable, bool_variable]
 ```
 
 Available types:<br>
@@ -29,6 +41,20 @@ variable = variable - 1 //<- 1
 var var2 = variable + " hello" //<- "2 hello"
 
 var2 = variable - 2 //<- error
+```
+
+#### Lists
+
+```
+var list = ["hi"]
+
+out(list[0])
+
+list[0] = 2
+
+list.add(["another list", 2])
+
+out(list[0][0])
 ```
 
 ### Functions
@@ -72,10 +98,20 @@ if (1 == 2)
 {
     //code
 }
+else
+{
+    //code
+}
 ```
 
-Now, only "==" is available <br>
-else/else-if statements will be added soon.
+"==",
+"!=",
+">=",
+"=>",
+"<=",
+"=<" <br>
+These are the available comparators<br>
+else-if statements will be added soon.
 
 ### While loop
 

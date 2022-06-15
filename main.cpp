@@ -47,7 +47,6 @@ int main(int argc, char** argv)
                 }
             }
         }
-
         interpreter.start(argv[1], debug);
     }
     else

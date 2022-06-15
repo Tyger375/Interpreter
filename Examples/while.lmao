@@ -1,0 +1,8 @@
+input = in()
+
+while (input != "end")
+{
+    input = in()
+}
+
+out("ended!")

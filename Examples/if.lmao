@@ -1,0 +1,10 @@
+input = in()
+
+if (input == "hi")
+{
+    out("hi!")
+}
+else
+{
+    out("something")
+}

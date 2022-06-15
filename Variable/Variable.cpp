@@ -1,6 +1,7 @@
 #include "../Other/Utilities/Utilities.h"
 #include "../Interpreter/Interpreter.h"
 #include <iostream>
+#include <utility>
 #include <vector>
 #include <string>
 #include "Variable.h"
@@ -9,36 +10,81 @@ using namespace std;
 using namespace Utilities;
 using namespace interpreter;
 
+void Interpreter::internal_add(Variable* variable, vector<string> parameters, bool* error)
+{
+    /*for (int i = 0; i < parameters.size(); ++i) {
+        cout << parameters[i] << endl;
+    }*/
+    if (parameters.empty())
+    {
+        *error = true;
+        return;
+    }
+
+    Variable var;
+    if (parameters[0][0] == '[')
+    {
+        int index = 0;
+        //this->writingList.push_back(true);
+        this->loadList(split(parameters[0], ' '), false, &index);
+
+        //cout << ListWriting.size() << endl;
+        var = ListWriting[0];
+        this->ListWriting.erase(ListWriting.end()-1);
+    }
+    else
+        var = this->loadVariableWithoutWriting(parameters, "");
+
+    variable->add_item_list(var);
+    //variable->ListValue.push_back(var);
+}
+
+void Interpreter::execute_internal_function(Variable* variable, const string& functionname, vector<string> parameters, bool* error)
+{
+    if (variable->get_type() == "list")
+    {
+        if (functionname == "add")
+        {
+            this->internal_add(variable, move(parameters), error);
+        }
+    }
+    else
+    {
+        cout << "here2" << endl;
+        *error = true;
+    }
+}
+
 void Variable::setup(string name, int val)
 {
 	this->IntValue = val;
-	this->name = name;
+	this->name = move(name);
 	this->valueType = "int";
 }
 
 void Variable::setup(string name, bool val)
 {
     this->BoolValue = val;
-    this->name = name;
+    this->name = move(name);
     this->valueType = "bool";
 }
 
-void Variable::setup(std::string name, std::vector<Variable> val)
+void Variable::setup(string name, vector<Variable> val)
 {
-    this->name = name;
+    this->name = move(name);
     this->valueType = "list";
-    this->ListValue = val;
+    this->ListValue = move(val);
 }
 
 void Variable::setup(string name, string val)
 {
-    if (val[0] != '"' && val != "")
+    /*if (val[0] != '"' && !val.empty())
     {
         //cout << "adding " << '"' << " to " << val << endl;
         //val = '"' + val + '"';
-    }
-	this->StrValue = val;
-	this->name = name;
+    }*/
+	this->StrValue = move(val);
+	this->name = move(name);
 	this->valueType = "string";
 }
 
@@ -49,7 +95,7 @@ void Variable::set_value(int newval)
 
 void Variable::set_value(string newval)
 {
-	this->StrValue = newval;
+	this->StrValue = move(newval);
 }
 
 void Variable::set_value(bool newval)
@@ -64,19 +110,20 @@ string Variable::get_value()
     else if (this->valueType == "int")
         return to_string(this->IntValue);
     else if (this->valueType == "bool")
-        return string(1, this->BoolValue);
+        return to_string(this->BoolValue);
+    else if (this->valueType == "list")
+        return GetListValue(*this);
     else
         return "";
 }
 
-void Interpreter::loadVariable(vector<string> splitted, string name)
+void Interpreter::loadVariable(vector<string> splitted, const string& name)
 {
     //cout << this->i << endl;
     string strvalue = splitted[(++this->i)];
     Variable Var = this->find_variable(strvalue);
 
     string type = Var.get_type();
-    //cout << type << endl;
 
     if (splitted.size() > (this->i+1) && splitted[this->i + 1] == "(")
     {
@@ -86,80 +133,8 @@ void Interpreter::loadVariable(vector<string> splitted, string name)
         string String = splitted[this->i];
         vector<string> parameters;
         bool CheckWriting = writingFunc || writingWhile;
-        int num = 0;
-        do
-        {
-            if (this->i >= splitted.size()) break;
 
-            if (String == ")")
-                break;
-
-            if (String != ",")
-            {
-                //cout << "word = " << stringcheck << endl;
-                if (String == "(")
-                {
-                    string FunctionName = splitted[i-1];
-                    //cout << "function name = " << splitted[i-1] << endl;
-                    vector<string> params;
-                    this->i++;
-                    while (true)
-                    {
-                        string param = splitted[i];
-                        //cout << param << endl;
-                        if (param == ")")
-                        {
-                            num--;
-                            break;
-                        }
-                        if (param != ",")
-                            params.push_back(param);
-                        if (i >= splitted.size()-1)
-                            break;
-                        this->i++;
-                    }
-                    /*cout << "printing params" << endl;
-                    for (int j = 0; j < params.size(); ++j) {
-                        cout << params[j] << endl;
-                    }*/
-                    //cout << "params size = " << params.size() << endl;
-                    //executing function
-                    Function FUNCTION = this->find_function(FunctionName);
-                    if (FUNCTION.get_name() == "")
-                    {
-                        this->PrintError("Invalid function");
-                        return;
-                    }
-                    else
-                    {
-                        bool Returning;
-                        Variable returned = this->executeFunction(FunctionName, CheckWriting, params, false, &Returning);
-                        //cout << "value = " << returned.get_value() << endl;
-                        parameters[parameters.size()-1] = returned.get_value();
-                    }
-                    //num++;
-                }
-                else if (num <= 0 && String == ")")
-                {
-                    if (num <= 0)
-                        break;
-                }
-                else if (String == "=" && splitted[this->i + 1] == "=")
-                {
-                    parameters.push_back("==");
-                    this->i++;
-                }
-                else
-                    //cout << "adding parameter: " << stringcheck << endl;
-                    parameters.push_back(String);
-            }
-
-            if (this->i < splitted.size()-1)
-                this->i++;
-            else
-                break;
-            String = splitted[this->i];
-        } while (true);
+        this->WriteParameters(splitted, &parameters, CheckWriting, false, &this->i);
 
         /*for (int j = 0; j < parameters.size(); ++j) {
             cout << parameters[j] << endl;
@@ -174,16 +149,20 @@ void Interpreter::loadVariable(vector<string> splitted, string name)
             this->PrintError("Function returned nothing");
             return;
         }
-        //cout << type2 << " " << returnedVar.get_value() << endl;
+
         if (type2 == "string")
             strvalue = returnedVar.get_str_value();
         else if (type2 == "int")
             strvalue = to_string(returnedVar.get_int_value());
+        else if (type2 == "list")
+            strvalue = GetListValue(returnedVar);
+        else if (type2 == "bool")
+            strvalue = to_string(returnedVar.get_bool_value());
         type = type2;
     }
     else if (splitted[this->i] == "[")
     {
-        //cout << "It's a list" << endl;
+        //List
         Variable VAR;
         vector<Variable> LIST = {};
         VAR.setup(name, LIST);
@@ -199,11 +178,13 @@ void Interpreter::loadVariable(vector<string> splitted, string name)
             strvalue = to_string(Var.get_int_value());
         else if (type == "bool")
             strvalue = to_string(Var.get_bool_value());
+        else if (type == "list")
+            strvalue = GetListValue(Var);
     }
     else
         type = getTypeVar(strvalue);
 
-    if (type == "")
+    if (type.empty())
     {
         this->PrintError("Invalid variable");
         return;
@@ -213,16 +194,12 @@ void Interpreter::loadVariable(vector<string> splitted, string name)
         string finalType;
         this->Operation(splitted, &strvalue, &finalType, type, &this->i);
         type = finalType;
-        //cout << "ended with: " << strvalue << " " << finalType << endl;
     }
     Variable var;
     if (type == "string")
         var.setup(name, strvalue);
     else if (type == "int")
-    {
-        //cout << strvalue << endl;
         var.setup(name, stoi(strvalue));
-    }
     else if (type == "bool")
     {
         bool VAL;
@@ -232,11 +209,21 @@ void Interpreter::loadVariable(vector<string> splitted, string name)
             VAL = false;
         var.setup(name, VAL);
     }
+    else if (type == "list")
+    {
+        int index = 0;
+        //this->writingList.push_back(true);
+        this->loadList(split(strvalue, ' '), false, &index);
+
+        var.setup(name, ListWriting[0].get_list_value());
+
+        this->ListWriting.erase(ListWriting.end()-1);
+    }
 
     bool found = false;
-    for (int i = 0; i < this->variables.size(); i++)
+    for (int j = 0; j < this->variables.size(); j++)
     {
-        Variable* variable = &this->variables[i];
+        Variable* variable = &this->variables[j];
         if (variable->get_name() == name)
         {
             *variable = var;
@@ -246,7 +233,7 @@ void Interpreter::loadVariable(vector<string> splitted, string name)
     }
     if (!found)
     {
-        if (this->Ifs.size() > 0 || this->isExecutingFunc)
+        if (!this->Ifs.empty() || this->isExecutingFunc)
         {
             int size = VariablesInfos.size();
             if (this->Ifs.size() > size || this->isExecutingFunc)
@@ -269,7 +256,6 @@ Variable Interpreter::loadVariableWithoutWriting(vector<string> splitted, string
 
     if (splitted.size() > (j+1) && splitted[j + 1] == "(")
     {
-        //cout << "function" << endl;
         string namefunction = splitted[j];
         j += 2;
         string String = splitted[j];
@@ -285,17 +271,14 @@ Variable Interpreter::loadVariableWithoutWriting(vector<string> splitted, string
 
             if (String != ",")
             {
-                //cout << "word = " << stringcheck << endl;
                 if (String == "(")
                 {
                     string FunctionName = splitted[j-1];
-                    //cout << "function name = " << splitted[i-1] << endl;
                     vector<string> params;
                     j++;
                     while (true)
                     {
                         string param = splitted[j];
-                        //cout << param << endl;
                         if (param == ")")
                         {
                             num--;
@@ -324,7 +307,6 @@ Variable Interpreter::loadVariableWithoutWriting(vector<string> splitted, string
                     {
                         bool Returning;
                         Variable returned = this->executeFunction(FunctionName, CheckWriting, params, false, &Returning);
-                        //cout << "value = " << returned.get_value() << endl;
                         parameters[parameters.size()-1] = returned.get_value();
                     }
                     //num++;
@@ -340,7 +322,6 @@ Variable Interpreter::loadVariableWithoutWriting(vector<string> splitted, string
                     j++;
                 }
                 else
-                    //cout << "adding parameter: " << stringcheck << endl;
                     parameters.push_back(String);
             }
 
@@ -365,7 +346,6 @@ Variable Interpreter::loadVariableWithoutWriting(vector<string> splitted, string
             Variable var;
             return var;
         }
-        //cout << type2 << " " << returnedVar.get_value() << endl;
         if (type2 == "string")
             strvalue = returnedVar.get_str_value();
         else if (type2 == "int")
@@ -373,42 +353,48 @@ Variable Interpreter::loadVariableWithoutWriting(vector<string> splitted, string
         type = type2;
     }
     else if (splitted[j] == "[") {
-        //cout << "It's a list" << endl;
+        //List
         Variable VAR;
         vector<Variable> LIST = {};
         VAR.setup(name, LIST);
         this->ListWriting.push_back(VAR);
         this->writingList.push_back(true);
-        //cout << ListWriting.size() << " " << writingList.size() << endl;
         return VAR;
+    }
+    else if (!(this->find_variable(strvalue)).get_type().empty())
+    {
+        Variable VAR = this->find_variable(strvalue);
+        type = VAR.get_type();
+        if (type == "string")
+            strvalue = VAR.get_str_value();
+        else if (type == "int")
+            strvalue = to_string(VAR.get_int_value());
+        else if (type == "bool")
+            strvalue = to_string(VAR.get_bool_value());
+        else if (type == "list")
+            strvalue = GetListValue(VAR);
     }
     else
         type = getTypeVar(strvalue);
 
-    //cout << type << " " << splitted[0] << " " << strvalue << endl;
-
-    if (type == "")
+    if (type.empty())
     {
-        //cout << "here" << endl;
         this->PrintError("Invalid variable");
         Variable var;
         return var;
     }
+
     if (splitted.size() > j+1 && (splitted[j + 1] == "+" || splitted[j + 1] == "-"))
     {
         string finalType;
         this->Operation(splitted, &strvalue, &finalType, type, &j);
         type = finalType;
-        //cout << "ended with: " << strvalue << " " << finalType << endl;
     }
     Variable var;
     if (type == "string")
         var.setup(name, strvalue);
     else if (type == "int")
-    {
-        //cout << strvalue << endl;
         var.setup(name, stoi(strvalue));
-    }
     else if (type == "bool")
     {
         bool VAL;
@@ -418,34 +404,48 @@ Variable Interpreter::loadVariableWithoutWriting(vector<string> splitted, string
             VAL = false;
         var.setup(name, VAL);
     }
+    else if (type == "list")
+    {
+        int index = 0;
+        //this->writingList.push_back(true);
+        this->loadList(split(strvalue, ' '), false, &index);
+
+        var.setup(name, ListWriting[0].get_list_value());
+
+        this->ListWriting.erase(ListWriting.end()-1);
+    }
 
     return var;
 }
 
-void Interpreter::loadList(std::vector<std::string> splitted, bool write, int* index)
+void Interpreter::loadList(vector<string> splitted, bool write, int* index)
 {
+    //Loading list variable
+    //cout << "writingList = " << writingList.size() << endl;
+    //cout << "ListWriting = " << ListWriting.size() << endl;
     vector<string> All = {};
-    //cout << *index << " " << index << endl;
     for (; *index < splitted.size(); (*index)++) {
         string String = splitted[*index];
-        //cout << String << endl;
+        //cout << "String = " << String << ", index = " << *index << ", line = " << this->line << endl;
         if (String == "[")
         {
-            //cout << "it's [" << endl;
+            //cout << "here" << endl;
+            //Another list
             bool Bool = All.size() >= 2;
+
             if (Bool)
             {
                 this->loadVariableWithoutWriting(All, "");
             }
+            else
+            {
+                this->writingList.push_back(true);
+            }
 
-            //cout << (splitted[i] != ",") << " " << (splitted[i] != "]") << " " << (splitted.size() < i) << endl;
             (*index)++;
             while (true)
             {
                 All.push_back(splitted[*index]);
-                //cout << splitted.size() << " " << *index << endl;
-                //cout << (splitted[i] == ",") << " " << (splitted[i] == "]") << " " << (splitted.size() < i) << endl;
-                //cout << splitted
                 (*index)++;
                 if (splitted.size() < *index)
                 {
@@ -453,16 +453,9 @@ void Interpreter::loadList(std::vector<std::string> splitted, bool write, int* i
                 }
                 if (splitted[*index] == "]" || splitted[*index] == "," || splitted[*index] == "[")
                     break;
-                //cout << (splitted[i] != ",") << " " << (splitted[i] != "]") << " " << (splitted.size() < i) << endl;
             }
-
-
-            /*cout << "printing All: " << endl;
-            for (int j = 0; j < All.size(); ++j) {
-                cout << All[j] << endl;
-            }
-            cout << "Ended" << endl;*/
-
+            //cout << "ended = " << splitted[*index] << endl;
+            //cout << "size2 = " << this->writingList.size() << endl;
 
             Variable var2 = this->loadVariableWithoutWriting(All, "");
 
@@ -470,107 +463,102 @@ void Interpreter::loadList(std::vector<std::string> splitted, bool write, int* i
             Variable list;
             vector<Variable> LIST;
             list.setup("", LIST);
+            //cout << var2.get_value() << endl;
+            //this->printList(list);
+            //cout << endl;
             this->ListWriting.push_back(list);
             this->ListWriting[ListWriting.size()-1].add_item_list(var2);
-            //cout << "ListWriting size = " << ListWriting.size() << endl;
-            //String = splitted[*index];
+            //cout << "printing list = ";
+            //printList(this->ListWriting[ListWriting.size()-1]);
+            //cout << endl;
             All = {};
-        }
-        else if (String == "]")
-        {
-            this->writingList.erase(this->writingList.end() - 1);
-
-            if (ListWriting.size() == 1)
-            {
-                if (All.size() > 0)
-                {
-                    Variable var = this->loadVariableWithoutWriting(All, "");
-                    this->ListWriting[ListWriting.size() - 1].add_item_list(var);
-                    All = {};
-                }
-            }
-
-            while (true)
-            {
-                if (this->ListWriting.size()-1 > 0)
-                {
-                    if (All.size() > 0)
-                    {
-                        Variable var = this->loadVariableWithoutWriting(All, "");
-                        this->ListWriting[ListWriting.size() - 1].add_item_list(var);
-                        All = {};
-                    }
-                    this->ListWriting[ListWriting.size()-2].add_item_list(ListWriting[ListWriting.size()-1]);
-                    /*if (this->ListWriting.size()-2 <= 0)
-                    {
-                        if (write)
-                        {
-                            cout << "deleting" << endl;
-                            this->ListWriting.erase(this->ListWriting.end() - 1);
-                        }
-                    }
-                    else*/
-                    this->ListWriting.erase(this->ListWriting.end() - 1);
-                }
-                else
-                    break;
-            }
-            //cout << ListWriting.size() << " " << write << endl;
-            if (writingList.size() == 0 && write)
-            {
-                //this->printList(this->ListWriting[0]);
-                //cout << endl;
-                Variable var = this->ListWriting[0];
-                string name = var.get_name();
-                //cout << "name = " << name << endl;
-                bool found = false;
-                for (int j = 0; j < this->variables.size(); j++)
-                {
-                    Variable* variable = &this->variables[j];
-                    if (variable->get_name() == name)
-                    {
-                        *variable = var;
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found)
-                {
-                    if (this->Ifs.size() > 0 || this->isExecutingFunc)
-                    {
-                        int size = VariablesInfos.size();
-                        if (this->Ifs.size() > size || this->isExecutingFunc)
-                        {
-                            vector<Variable> Vector;
-                            this->VariablesInfos.push_back(Vector);
-                        }
-                        this->VariablesInfos[(this->VariablesInfos.size() - 1)].push_back(var);
-                    }
-                    else
-                        this->variables.push_back(var);
-                }
-                //cout << var.get_type() << endl;
-                this->ListWriting.erase(this->ListWriting.end() - 1);
-            }
-            if (this->writingList.size() == 0)
-                return;
         }
         else if (String == ",")
         {
-            if (All.size() > 0)
+            if (!All.empty())
             {
                 Variable var = this->loadVariableWithoutWriting(All, "");
                 this->ListWriting[ListWriting.size() - 1].add_item_list(var);
-                //cout << "Added variable with type = " << var.get_type() << endl;
                 All = {};
+            }
+        }
+        else if (String == "]")// && (splitted.size()-1 > (*index)+1 && splitted[(*index)+1] != ","))
+        {
+            //Ending of list/sub-list
+            //cout << "here2" << endl;
+            this->writingList.erase(this->writingList.end() - 1);
+
+            if (!All.empty())
+            {
+                Variable var = this->loadVariableWithoutWriting(All, "");
+                this->ListWriting[ListWriting.size() - 1].add_item_list(var);
+                All = {};
+            }
+
+            if (writingList.empty())
+            {
+                while (true)
+                {
+                    if (this->ListWriting.size()-1 > 0)
+                    {
+                        if (All.size() > 0)
+                        {
+                            Variable var = this->loadVariableWithoutWriting(All, "");
+                            this->ListWriting[ListWriting.size() - 1].add_item_list(var);
+                            All = {};
+                        }
+                        this->ListWriting[ListWriting.size()-2].add_item_list(ListWriting[ListWriting.size()-1]);
+                        this->ListWriting.erase(this->ListWriting.end() - 1);
+                    }
+                    else
+                        break;
+                }
+                if (writingList.empty() && write)
+                {
+                    //Adding value to variable
+                    Variable var = this->ListWriting[0];
+                    string name = var.get_name();
+                    bool found = false;
+                    for (int j = 0; j < this->variables.size(); j++)
+                    {
+                        Variable* variable = &this->variables[j];
+                        if (variable->get_name() == name)
+                        {
+                            *variable = var;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found)
+                    {
+                        if (!this->Ifs.empty() || this->isExecutingFunc)
+                        {
+                            int size = VariablesInfos.size();
+                            if (this->Ifs.size() > size || this->isExecutingFunc)
+                            {
+                                vector<Variable> Vector;
+                                this->VariablesInfos.push_back(Vector);
+                            }
+                            this->VariablesInfos[(this->VariablesInfos.size() - 1)].push_back(var);
+                        }
+                        else
+                            this->variables.push_back(var);
+                    }
+                    this->ListWriting.erase(this->ListWriting.end() - 1);
+                }
+                if (this->writingList.size() == 0)
+                    return;
+            }
+            else
+            {
+                this->ListWriting[ListWriting.size()-2].add_item_list(ListWriting[ListWriting.size()-1]);
+                this->ListWriting.erase(this->ListWriting.end() - 1);
             }
         }
         else
         {
-            //cout << "Adding = " << String << endl;
             All.push_back(String);
         }
-        //cout << String << endl;
     }
 }
 
@@ -594,7 +582,6 @@ void Interpreter::loadIntVariable(vector<string> splitted, string name)
     {
         return;
     }
-    //cout << valore << " e' il valore della variabile" << endl;
     if (!isNan(string(1, (name[0]))))
     {
         this->PrintError("A variable's name cannot start with a number");
@@ -618,22 +605,16 @@ void Interpreter::loadIntVariable(vector<string> splitted, string name)
         if (this->Ifs.size() > 0 || this->isExecutingFunc)
         {
             int size = VariablesInfos.size();
-            //cout << size << " " << Ifs.size() << endl;
             if (this->Ifs.size() > size || this->isExecutingFunc)
             {
-                //cout << "ok" << endl;
                 vector<Variable> vettore;
                 this->VariablesInfos.push_back(vettore);
             }
-            //cout << this->VariablesInfos.size() << " " << Ifs.size() << endl;
             this->VariablesInfos[(this->VariablesInfos.size() - 1)].push_back(var);
-            //cout << "F" << endl;
         }
         else
             this->variables.push_back(var);
     }
-
-    //cout << "Output: " << var.get_int_value() << endl;
 }
 void Interpreter::loadStringVariable(vector<string> splitted, string name)
 {
@@ -641,7 +622,6 @@ void Interpreter::loadStringVariable(vector<string> splitted, string name)
     string value = splitted[(++this->i)];
 
     this->AddStrings(splitted, &value, &typeFinalValue);
-    //cout << valore << " e' il valore della variabile" << endl;
     if (!isNan(string(1, (name[0]))))
     {
         this->PrintError("A variable's name cannot start with a number");
@@ -677,6 +657,4 @@ void Interpreter::loadStringVariable(vector<string> splitted, string name)
                 this->variables.push_back(var);
         }
     }
-
-    //cout << "Output: " << var.get_int_value() << endl;
 }

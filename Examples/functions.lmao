@@ -1,0 +1,8 @@
+func function(param)
+{
+    param = param + "."
+    return param
+}
+
+returned = function("hi")
+out(function("hi"))

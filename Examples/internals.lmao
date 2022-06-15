@@ -1,0 +1,4 @@
+out("hi")
+input = in()
+out("input =", input)
+out("type =", type(input))

@@ -19,7 +19,7 @@ void Function::setup(string name, vector<string> parameters)
 void Function::set_return(Variable var)
 {
     this->returned = true;
-    this->ReturnedValue = var;
+    this->ReturnedValue = move(var);
 }
 
 void Function::add_line(vector<string> line)
@@ -41,7 +41,6 @@ Function Interpreter::find_function(string name)
 		Function *func = &this->functions[i];
 		if (func->get_name() == name)
 		{
-			//cout << "Trovata! " << var->get_name() << " = " << var->get_int_value() << endl;
 			FUNC = *func;
 			break;
 			//return *func;
@@ -63,13 +62,8 @@ void Interpreter::print(vector<string> parameters)
     for (int i = 0; i < parameters.size(); i++)
     {
         const string parameter = parameters[i];
-        //cout << "Debug param: " << parameter << endl;
         if (parameter[0] == '"')
-        {
-            //cout << primoparametro << " e' una stringa" << endl;
             this->printString(parameter);
-            //cout << endl;
-        }
         else if (!isNan(parameter))
         {
             cout << stoi(parameter);
@@ -80,27 +74,27 @@ void Interpreter::print(vector<string> parameters)
         }
         else if (parameter[0] == '[')
         {
-            //cout << "List" << endl;
             int index = 0;
-            this->writingList.push_back(true);
+            //this->writingList.push_back(true);
+            //cout << "parameter = " << parameter << endl;
             this->loadList(split(parameter, ' '), false, &index);
 
-            //cout << ListWriting.size() << endl;
             this->printList(ListWriting[0]);
-            //cout << "test" << endl;
+
             this->ListWriting.erase(ListWriting.end()-1);
-            //cout << "F" << endl;
+
+            while (!this->writingList.empty())
+            {
+                this->writingList.erase(writingList.end()-1);
+            }
         }
         else
         {
-            //cout << primoparametro << " e' una variabile" << endl;
             Variable var = this->find_variable(parameter);
             const string type = var.get_type();
             if (type == "string")
             {
-                //cout << "debug = " << var.get_str_value() << endl;
                 this->printString(var.get_str_value());
-                //cout << "Output: " << var.get_str_value() << endl;
             }
             else if (type == "int")
             {
@@ -193,7 +187,6 @@ void Interpreter::SetReturnValue(vector<string> splitted)
     if ((splitted.size()-1) != i)
     {
         string ReturningVal = splitted[++i];
-        //cout << "returning " << ReturningVal << endl;
         string type;
         type = getTypeVar(ReturningVal);
         Variable var;
@@ -206,9 +199,7 @@ void Interpreter::SetReturnValue(vector<string> splitted)
                 return;
             }
             else
-            {
                 this->FUNC->set_return(var);
-            }
         }
         else
         {
@@ -333,15 +324,11 @@ Variable Interpreter::executeFunction(const string& namefunction, bool CheckWrit
         {
             try
             {
-                //cout << "isNewFunc = " << IsNewFunc << endl;
                 if (IsNewFunc)
                 {
-                    //cout << "Aggiungo funzione" << endl;
                     Function func;
                     func.setup(namefunction, parameters);
-                    //writingFunc = true;
                     this->functions.push_back(func);
-                    //cout << functions.size() << endl;
                 }
                 else
                 {
@@ -350,7 +337,6 @@ Variable Interpreter::executeFunction(const string& namefunction, bool CheckWrit
             }
             catch (const exception& error)
             {
-                //cout << error.what() << endl;
                 this->PrintError("Invalid function");
             }
             *Returning = false;
@@ -358,9 +344,7 @@ Variable Interpreter::executeFunction(const string& namefunction, bool CheckWrit
         }
         else
         {
-            //vector<string> funcparams = func.get_params();
             this->executeCustomFunction(&func, parameters);
-            //cout << "returned value type: " << func.get_return().get_type() << endl;
 
             Variable returnedVar = func.get_return();
 
@@ -368,10 +352,7 @@ Variable Interpreter::executeFunction(const string& namefunction, bool CheckWrit
 
             func.set_return(var);
 
-            //cout << func.get_return().get_value() << " " << returnedVar.get_value() << endl;
-
             return returnedVar;
-            //cout << "Funzione esistente" << endl;
         }
     }
     else
@@ -383,7 +364,7 @@ Variable Interpreter::executeFunction(const string& namefunction, bool CheckWrit
 
 void Interpreter::executeCustomFunction(Function* func, vector<string> parameters)
 {
-    if (func->get_params().size() != parameters.size())
+    if (func->get_params().size() > parameters.size())
     {
         this->PrintError("Params");
         return;
@@ -392,18 +373,28 @@ void Interpreter::executeCustomFunction(Function* func, vector<string> parameter
     vector<Variable> NewVariables = this->variables;
     vector<Variable> ParamsToVars;
 
-    for (int i = 0; i < parameters.size(); i++)
+    for (int j = 0; j < parameters.size(); j++)
     {
         Variable var;
-        string val = parameters[i];
-        //cout << "val = " << val << endl;
+        string val = parameters[j];
         if (isNan(val))
         {
-            //cout << "adding var" << endl;
             if (val[0] == '"')
             {
-                //cout << "adding " << val << endl;
-                var.setup(func->get_params()[i], val);
+                var.setup(func->get_params()[j], val);
+            }
+            else if (val[0] == '[')
+            {
+                //this->writingList.push_back(true);
+                int index = j;
+
+                this->loadList(split(val, ' '), false, &index);
+                var.setup(func->get_params()[j], ListWriting[0].get_list_value());
+                this->ListWriting.erase(ListWriting.end()-1);
+                if (!writingList.empty())
+                    writingList.erase(writingList.end()-1);
+
+                j = index;
             }
             else
             {
@@ -412,13 +403,13 @@ void Interpreter::executeCustomFunction(Function* func, vector<string> parameter
                 if (type != "")
                 {
                     if (type == "string")
-                    {
-                        var.setup(func->get_params()[i], find.get_str_value());
-                    }
+                        var.setup(func->get_params()[j], find.get_str_value());
                     else if (type == "int")
-                    {
-                        var.setup(func->get_params()[i], find.get_int_value());
-                    }
+                        var.setup(func->get_params()[j], find.get_int_value());
+                    else if (type == "bool")
+                        var.setup(func->get_params()[j], find.get_bool_value());
+                    else if (type == "list")
+                        var.setup(func->get_params()[j], find.get_list_value());
                 }
                 else
                 {
@@ -428,16 +419,10 @@ void Interpreter::executeCustomFunction(Function* func, vector<string> parameter
             }
         }
         else
-            var.setup(func->get_params()[i], stoi(val));
+            var.setup(func->get_params()[j], stoi(val));
         NewVariables.push_back(var);
         ParamsToVars.push_back(var);
     }
-
-    /*cout << "printing vars" << endl;
-    for (int j = 0; j < NewVariables.size(); ++j)
-    {
-        cout << NewVariables[j].get_name() << " " << NewVariables[j].get_value() << endl;
-    }*/
 
     Interpreter interpreter(NewVariables, true, func);
 
@@ -449,7 +434,6 @@ void Interpreter::executeCustomFunction(Function* func, vector<string> parameter
         {
             Strline += (line[i2] + " ");
         }
-        //cout << Strline << endl;
         interpreter.Line(Strline);
     }
 

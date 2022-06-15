@@ -40,7 +40,7 @@ private:
 
     void SetReturnValue(std::vector<std::string>);
     void executeCustomFunction(Function*, std::vector<std::string>);
-    void loadVariable(std::vector<std::string>, std::string);
+    void loadVariable(std::vector<std::string>, const std::string&);
     Variable loadVariableWithoutWriting(std::vector<std::string>, std::string);
     void printString(std::string);
     void Operation(std::vector<std::string>, std::string*, std::string*, const std::string&, int*);
@@ -66,6 +66,13 @@ private:
     void ForLoop(std::vector<std::string>, std::vector<std::string>, std::vector<std::string>);
     void WhileLoop(std::vector<std::string>);
     void FindGraffa(std::vector<std::string>);
+    void WriteParameters(std::vector<std::string>, std::vector<std::string>*, bool, bool, int*);
+
+    void execute_internal_function(Variable*, const std::string&, std::vector<std::string>, bool*);
+
+    //Internal functions
+    //Lists
+    void internal_add(Variable*, std::vector<std::string>, bool*);
 public:
 
     Interpreter(std::vector<Variable>, bool, Function*);
