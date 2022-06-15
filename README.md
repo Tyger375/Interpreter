@@ -4,13 +4,13 @@ An interpreter made in C++ just for fun.
 
 - [Syntax](#Syntax)
   - [Variables](#Variables)
-    - [Updating variables](#Updating variables)
+    - [Updating variables](#Updating-variables)
     - [Lists](#Lists)
   - [Functions](#Functions)
-    - [Internal functions](#Internal functions)
-  - [If statement](#If statement)
-  - [While loop](#While loop)
-- [Links and socials](#Links and socials)
+    - [Internal functions](#Internal-functions)
+  - [If statement](#If-statement)
+  - [While loop](#While-loop)
+- [Links and socials](#Links-and-socials)
 
 ## Compiler
 
