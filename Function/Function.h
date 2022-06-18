@@ -6,7 +6,8 @@
 #include <vector>
 #include <string>
 
-//using namespace std;
+using std::string;
+using std::vector;
 
 class Function;
 
@@ -19,14 +20,13 @@ private:
     Variable ReturnedValue;
     bool returned;
 public:
-    bool is_return() { return this->returned; };
     void set_return(Variable);
     Variable get_return() { return this->ReturnedValue; }
-	void setup(std::string, std::vector<std::string>);
-	void add_line(std::vector<std::string>);
-	inline std::vector<std::vector<std::string>> get_lines() { return this->lines; };
-	inline std::string get_name() { return this->name; };
-	inline std::vector<std::string> get_params() { return this->parameters; }
+	void setup(string, vector<string>);
+	void add_line(const vector<string>&);
+	inline vector<vector<string>> get_lines() { return this->lines; };
+	inline string get_name() { return this->name; };
+	inline vector<string> get_params() { return this->parameters; }
 };
 
 #endif

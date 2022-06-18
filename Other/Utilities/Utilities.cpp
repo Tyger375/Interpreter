@@ -10,7 +10,7 @@ using Utilities::to_string;
 
 vector<string> Utilities::split(string String, char splitter)
 {
-	vector<string> operatori = {
+	vector<string> operators = {
 		"+",
 		"-",
 		"/",
@@ -30,35 +30,33 @@ vector<string> Utilities::split(string String, char splitter)
         "]",
         "."
 	};
-	string word = "";
+	string word;
 	vector<string> words;
-	bool isStringa = false;
+	bool isString = false;
 	try
 	{
 		for (int i = 0; i < (String.length()); i++)
 		{
-			char pog = String[i];
-			//cout << pog << endl;
-			//cout << i << stringa.length() << endl;
-			if (((pog == splitter && !isStringa) || i == String.length() - 1))
+			char character = String[i];
+			if (((character == splitter && !isString) || i == String.length() - 1))
 			{
 				//cout << word << endl;
-				if (pog == splitter && word != "" && !isStringa) {
+				if (character == splitter && !word.empty() && !isString) {
 					words.push_back(word);
 					word = "";
 				}
 				else if (i == String.length() - 1)
 				{
-					if (findInVector(operatori, string(1, pog)))
+					if (findInVector(operators, string(1, character)))
 					{
-						if (word != "")
+						if (!word.empty())
 							words.push_back(word);
-						words.push_back(string(1, pog));
+						words.emplace_back(1, character);
 						word = "";
 					}
 					else
 					{
-						word += pog;
+						word += character;
 						words.push_back(word);
 						word = "";
 					}
@@ -66,56 +64,49 @@ vector<string> Utilities::split(string String, char splitter)
 			}
 			else
 			{
-				string chartostring = string(1, pog);
-				if (pog == '"')
+				string char_to_string = string(1, character);
+				if (character == '"')
 				{
-					isStringa = !isStringa;
-					word += pog;
+                    isString = !isString;
+					word += character;
 				}
-				else if (findInVector(operatori, chartostring) && !isStringa)
+				else if (findInVector(operators, char_to_string) && !isString)
 				{
-					//cout << word << " " << pog << endl;
-					if (word != "")
+					if (!word.empty())
 						words.push_back(word);
-					words.push_back(string(1, pog));
+					words.emplace_back(1, character);
 					word = "";
 				}
 				else
 				{
-					//cout << pog << endl;
-					if (pog != '\t')
-						word += pog;
+					if (character != '\t')
+						word += character;
 				}
 			}
-			//cout << word << endl;
 		}
 	}
 	catch (const exception& test)
 	{
 		cout << test.what() << endl;
 	}
-	/*for (int i = 0; i < (words.size() - 1); i++)
-	{
-		cout << &words[i] << endl;
-	}*/
 	return words;
 }
 
-bool Utilities::findInVector(vector<string> list, string key)
+bool Utilities::findInVector(const vector<string>& list, const string& key)
 {
-	bool trovato = false;
-	for (int i = 0; i < list.size(); i++)
+	bool found = false;
+	for (auto & i : list)
 	{
-		if (list[i] == key)
+		if (i == key)
 		{
-			trovato = true;
+            found = true;
 			break;
 		}
 	}
-	return trovato;
+	return found;
 }
 
-bool Utilities::to_bool(std::string String)
+bool Utilities::to_bool(const std::string& String)
 {
     if (String == "true")
         return true;
@@ -131,11 +122,11 @@ string Utilities::to_string(bool Bool)
         return "false";
 }
 
-bool Utilities::isNan(string String)
+bool Utilities::isNan(const string& string)
 {
 	try
 	{
-		int intero = stoi(String);
+        __attribute__((unused)) int integer = stoi(string);
 		return false;
 	}
 	catch (const exception&)
@@ -161,24 +152,24 @@ string Utilities::getTypeVar(std::string val)
     }
 }
 
-Variable Interpreter::find_variable(string name)
+Variable Interpreter::find_variable(const string& name)
 {
     //bool found = false;
     Variable VAR;
-    for (int i = 0; i < this->variables.size(); i++)
+    for (auto & variable : this->variables)
     {
-        Variable* var = &this->variables[i];
+        Variable* var = &variable;
         if (var->get_name() == name)
         {
             VAR = *var;
             break;
         }
     }
-    for (int i = 0; i < this->VariablesInfos.size(); i++)
+    for (auto & VariablesInfo : this->VariablesInfos)
     {
-        for (int i2 = 0; i2 < this->VariablesInfos[i].size(); i2++)
+        for (auto & i2 : VariablesInfo)
         {
-            Variable* var = &this->VariablesInfos[i][i2];
+            Variable* var = &i2;
             if (var->get_name() == name)
             {
                 VAR = *var;
@@ -189,28 +180,28 @@ Variable Interpreter::find_variable(string name)
     return VAR;
 }
 
-Variable* Interpreter::find_variable_pointer(string name)
+Variable* Interpreter::find_variable_pointer(const string& name)
 {
     //bool found = false;
     Variable var;
     Variable* VAR = &var;
-    for (int i = 0; i < this->variables.size(); i++)
+    for (auto & variable : this->variables)
     {
-        Variable* var = &this->variables[i];
-        if (var->get_name() == name)
+        Variable* local_var = &variable;
+        if (local_var->get_name() == name)
         {
-            VAR = var;
+            VAR = local_var;
             break;
         }
     }
-    for (int i = 0; i < this->VariablesInfos.size(); i++)
+    for (auto & VariablesInfo : this->VariablesInfos)
     {
-        for (int i2 = 0; i2 < this->VariablesInfos[i].size(); i2++)
+        for (auto & i2 : VariablesInfo)
         {
-            Variable* var = &this->VariablesInfos[i][i2];
-            if (var->get_name() == name)
+            Variable* local_var = &i2;
+            if (local_var->get_name() == name)
             {
-                static Variable* VAR = var;
+                __attribute__((unused)) static Variable* VAR = local_var;
                 break;
             }
         }
@@ -227,8 +218,8 @@ void Interpreter::printString(string String)
         {
             if (character == '\\')
             {
-                string parola = (string(1, character) + string(1, String[++i]));
-                if (parola == "\\n")
+                string word = (string(1, character) + string(1, String[++i]));
+                if (word == "\\n")
                 {
                     cout << endl;
                 }
@@ -286,9 +277,9 @@ void Interpreter::printList(Variable variable)
     cout << String;
 }
 
-void Interpreter::PrintError(std::string error)
+void Interpreter::PrintError(const string& param_error)
 {
     cout << "Error at line " << this->line << ":" << endl
-    << error << endl;
+         << param_error << endl;
     this->error = true;
 }

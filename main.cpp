@@ -1,5 +1,4 @@
 #include <iostream>
-#include <fstream>
 #include <string>
 #include <vector>
 #include "./Interpreter/Interpreter.h"
@@ -21,9 +20,8 @@ int main(int argc, char** argv)
             words.push_back(word);
         }
 
-        for (int i = 0; i < words.size(); ++i)
+        for (auto word : words)
         {
-            string word = words[i];
             if (word.length() > 2)
             {
                 if (word[0] == '-' && word[1] == '-')

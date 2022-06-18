@@ -54,6 +54,9 @@ list[0] = 2
 
 list.add(["another list", 2])
 
+list.remove(0)
+list.remove(-1)
+
 out(list[0][0])
 ```
 

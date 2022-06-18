@@ -2,18 +2,18 @@
 #include "Function.h"
 #include "../Interpreter/Interpreter.h"
 #include <iostream>
+#include <utility>
 #include <vector>
 #include <string>
-#include "../Variable/Variable.h"
 
 using namespace std;
 using namespace Utilities;
 using namespace interpreter;
 
-void Function::setup(string name, vector<string> parameters)
+void Function::setup(string name_var, vector<string> parameters_var)
 {
-	this->name = name;
-	this->parameters = parameters;
+	this->name = move(name_var);
+	this->parameters = move(parameters_var);
 }
 
 void Function::set_return(Variable var)
@@ -22,36 +22,31 @@ void Function::set_return(Variable var)
     this->ReturnedValue = move(var);
 }
 
-void Function::add_line(vector<string> line)
+void Function::add_line(const vector<string>& line)
 {
-	//cout << line.size() << endl;
-	// Ao er contributore
-    //for (int i = 0; i < line.size(); ++i) {
-        //cout << line[i] << endl;
-    //}
 	this->lines.push_back(line);
 }
 
-Function Interpreter::find_function(string name)
+Function Interpreter::find_function(const string& name)
 {
 	//bool found = false;
-	Function FUNC;
-	for (int i = 0; i < this->functions.size(); i++)
+	Function local_FUNC;
+	for (auto & function : this->functions)
 	{
-		Function *func = &this->functions[i];
+		Function *func = &function;
 		if (func->get_name() == name)
 		{
-			FUNC = *func;
+            local_FUNC = *func;
 			break;
 			//return *func;
 		}
 	}
-	return FUNC;
+	return local_FUNC;
 }
 
-void Interpreter::print(vector<string> parameters)
+void Interpreter::print(const vector<string>& parameters)
 {
-	if (parameters.size() == 0)
+	if (parameters.empty())
     {
         this->PrintError("No param given");
         return;
@@ -59,9 +54,8 @@ void Interpreter::print(vector<string> parameters)
 
 
     cout << "Output: ";
-    for (int i = 0; i < parameters.size(); i++)
+    for (auto parameter : parameters)
     {
-        const string parameter = parameters[i];
         if (parameter[0] == '"')
             this->printString(parameter);
         else if (!isNan(parameter))
@@ -103,7 +97,7 @@ void Interpreter::print(vector<string> parameters)
             else if (type == "bool")
             {
                 bool Val = var.get_bool_value();
-                if (Val == true)
+                if (Val)
                     cout << "true";
                 else
                     cout << "false";
@@ -124,7 +118,7 @@ void Interpreter::print(vector<string> parameters)
 
 string Interpreter::Typeof(vector<string> parameters, bool* Returning)
 {
-    if (parameters.size() == 0)
+    if (parameters.empty())
     {
         this->PrintError("No param given");
         *Returning = false;
@@ -134,18 +128,12 @@ string Interpreter::Typeof(vector<string> parameters, bool* Returning)
     const string parameter = parameters[0];
     string Val;
 
-    if (parameter[0] == '"')
-    {
+    if (parameter[0] == '"' || !isNan(parameter))
         Val = parameter;
-    }
-    else if (!isNan(parameter))
-    {
-        Val = parameter;
-    }
     else
     {
         Variable var = this->find_variable(parameter);
-        if (var.get_type() == "")
+        if (var.get_type().empty())
         {
             this->PrintError("Invalid variable");
             *Returning = false;
@@ -190,10 +178,10 @@ void Interpreter::SetReturnValue(vector<string> splitted)
         string type;
         type = getTypeVar(ReturningVal);
         Variable var;
-        if (type == "")
+        if (type.empty())
         {
             var = find_variable(ReturningVal);
-            if (var.get_type() == "")
+            if (var.get_type().empty())
             {
                 this->PrintError("Invalid variable returned");
                 return;
@@ -219,17 +207,17 @@ void Interpreter::SetReturnValue(vector<string> splitted)
         cout << "returning nothing" << endl;
 }
 
-Variable Interpreter::executeFunction(const string& namefunction, bool CheckWriting, vector<string> parameters, bool IsNewFunc, bool* Returning)
+Variable Interpreter::executeFunction(const string& name_function, bool CheckWriting, const vector<string>& parameters, bool IsNewFunc, bool* Returning)
 {
     Variable ReturnedVariable;
-    if (namefunction == "out" && !CheckWriting)
+    if (name_function == "out" && !CheckWriting)
     {
         this->print(parameters);
         ReturnedVariable.setup("", "");
         *Returning = true;
         return ReturnedVariable;
     }
-    else if (namefunction == "in")
+    else if (name_function == "in")
     {
         string Var;
         cin >> Var;
@@ -239,14 +227,14 @@ Variable Interpreter::executeFunction(const string& namefunction, bool CheckWrit
         ReturnedVariable.setup("", Var);
         return ReturnedVariable;
     }
-    else if (namefunction == "type")
+    else if (name_function == "type")
     {
         string type = this->Typeof(parameters, Returning);
         //cout << "debugging type = " << type << endl;
         ReturnedVariable.setup("", type);
         return ReturnedVariable;
     }
-    else if (namefunction == "if")
+    else if (name_function == "if")
     {
         if (!CheckWriting)
         {
@@ -273,28 +261,28 @@ Variable Interpreter::executeFunction(const string& namefunction, bool CheckWrit
         *Returning = true;
         return ReturnedVariable;
     }
-    else if (namefunction == "for")
+    else if (name_function == "for")
     {
         cout << "for loop" << endl;
         int num = 0;
         vector<string> assign;
         vector<string> check;
         vector<string> advancing;
-        for (int index = 0; index < parameters.size(); index++)
+        for (auto & parameter : parameters)
         {
-            if (parameters[index] != ";")
+            if (parameter != ";")
             {
                 if (num == 0)
                 {
-                    assign.push_back(parameters[index]);
+                    assign.push_back(parameter);
                 }
                 else if (num == 1)
                 {
-                    check.push_back(parameters[index]);
+                    check.push_back(parameter);
                 }
                 else if (num == 2)
                 {
-                    advancing.push_back(parameters[index]);
+                    advancing.push_back(parameter);
                 }
                 else
                     break;
@@ -310,7 +298,7 @@ Variable Interpreter::executeFunction(const string& namefunction, bool CheckWrit
         *Returning = true;
         return ReturnedVariable;
     }
-    else if (namefunction == "while")
+    else if (name_function == "while")
     {
         this->WhileLoop(parameters);
         ReturnedVariable.setup("", "");
@@ -319,16 +307,16 @@ Variable Interpreter::executeFunction(const string& namefunction, bool CheckWrit
     }
     else if (!CheckWriting)
     {
-        Function func = this->find_function(namefunction);
-        if (func.get_name() == "")
+        Function func = this->find_function(name_function);
+        if (func.get_name().empty())
         {
             try
             {
                 if (IsNewFunc)
                 {
-                    Function func;
-                    func.setup(namefunction, parameters);
-                    this->functions.push_back(func);
+                    Function local_func;
+                    local_func.setup(name_function, parameters);
+                    this->functions.push_back(local_func);
                 }
                 else
                 {
@@ -369,6 +357,7 @@ void Interpreter::executeCustomFunction(Function* func, vector<string> parameter
         this->PrintError("Params");
         return;
     }
+
     vector<vector<string>> lines = func->get_lines();
     vector<Variable> NewVariables = this->variables;
     vector<Variable> ParamsToVars;
@@ -400,7 +389,7 @@ void Interpreter::executeCustomFunction(Function* func, vector<string> parameter
             {
                 Variable find = this->find_variable(val);
                 const string type = find.get_type();
-                if (type != "")
+                if (!type.empty())
                 {
                     if (type == "string")
                         var.setup(func->get_params()[j], find.get_str_value());
@@ -426,31 +415,29 @@ void Interpreter::executeCustomFunction(Function* func, vector<string> parameter
 
     Interpreter interpreter(NewVariables, true, func);
 
-    for (int i = 0; i < lines.size(); i++)
+    for (const auto& local_line : lines)
     {
-        vector<string> line = lines[i];
-        string Strline = "";
-        for (int i2 = 0; i2 < line.size(); i2++)
+        string Str_line;
+        for (auto & i2 : local_line)
         {
-            Strline += (line[i2] + " ");
+            Str_line += (i2 + " ");
         }
-        interpreter.Line(Strline);
+        interpreter.Line(Str_line);
     }
 
-    vector<Variable> NEWVARIABLES;
+    vector<Variable> new_variables;
 
     for (int j = 0; j < interpreter.getVariables().size(); ++j) {
         Variable VAR = interpreter.getVariables()[j];
         bool found = false;
-        for (int k = 0; k < ParamsToVars.size(); ++k) {
-            Variable VARPARAM = ParamsToVars[k];
-            if (VAR.get_name() == VARPARAM.get_name()) {
+        for (auto var_param : ParamsToVars) {
+            if (VAR.get_name() == var_param.get_name()) {
                 found = true;
                 break;
             }
         }
         if (!found)
-            NEWVARIABLES.push_back(VAR);
+            new_variables.push_back(VAR);
     }
 
     //interpreter.debugVariables();
@@ -458,6 +445,5 @@ void Interpreter::executeCustomFunction(Function* func, vector<string> parameter
     {
         cout << interpreter.getVariables()[j].get_name() << " " << interpreter.getVariables()[j].get_value() << endl;
     }*/
-    this->variables = NEWVARIABLES;
-    return;
+    this->variables = new_variables;
 }

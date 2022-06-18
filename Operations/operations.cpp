@@ -1,5 +1,4 @@
 #include "../Interpreter/Interpreter.h"
-#include "../Function/Function.h"
 #include "../Other/Utilities/Utilities.h"
 #include <iostream>
 
@@ -17,7 +16,7 @@ bool interpreter::Interpreter::Addition(string* value, string* typeFinalValue, v
 
     if (splitted.size() > (*j+1) && splitted[*j + 1] == "(")
     {
-        string namefunction = splitted[i];
+        string name_function = splitted[i];
 
         *j += 2;
 
@@ -39,7 +38,7 @@ bool interpreter::Interpreter::Addition(string* value, string* typeFinalValue, v
                 {
                     string FunctionName = splitted[*j-1];
                     vector<string> params;
-                    *j++;
+                    (*j)++;
                     while (true)
                     {
                         string param = splitted[*j];
@@ -52,12 +51,12 @@ bool interpreter::Interpreter::Addition(string* value, string* typeFinalValue, v
                             params.push_back(param);
                         if (*j >= splitted.size()-1)
                             break;
-                        *j++;
+                        (*j)++;
                     }
 
                     //executing function
                     Function FUNCTION = this->find_function(FunctionName);
-                    if (FUNCTION.get_name() == "")
+                    if (FUNCTION.get_name().empty())
                     {
                         this->PrintError("Invalid function");
                         return false;
@@ -76,8 +75,8 @@ bool interpreter::Interpreter::Addition(string* value, string* typeFinalValue, v
                 }
                 else if (String == "=" && splitted[*j + 1] == "=")
                 {
-                    parameters.push_back("==");
-                    *j++;
+                    parameters.emplace_back("==");
+                    (*j)++;
                 }
                 else
                     parameters.push_back(String);
@@ -97,7 +96,7 @@ bool interpreter::Interpreter::Addition(string* value, string* typeFinalValue, v
         }*/
 
         bool Returning;
-        Variable returnedVar = this->executeFunction(namefunction, CheckWriting, parameters, false, &Returning);
+        Variable returnedVar = this->executeFunction(name_function, CheckWriting, parameters, false, &Returning);
         string type2 = returnedVar.get_type();
         if (!Returning)
         {
@@ -111,7 +110,7 @@ bool interpreter::Interpreter::Addition(string* value, string* typeFinalValue, v
             add2 = to_string(returnedVar.get_int_value());
         type = type2;
     }
-    else if (type != "")
+    else if (!type.empty())
     {
         if (type == "string")
             add2 = var.get_str_value();
@@ -123,9 +122,9 @@ bool interpreter::Interpreter::Addition(string* value, string* typeFinalValue, v
     else
         type = getTypeVar(add2);
 
-    if (type1 == "")
+    if (type1.empty())
         type1 = getTypeVar(add1);
-    if (type == "")
+    if (type.empty())
     {
         this->PrintError("Invalid variable");
         return false;
@@ -135,18 +134,18 @@ bool interpreter::Interpreter::Addition(string* value, string* typeFinalValue, v
     {
         string newVal1;
         string newVal2;
-        for (int i = 0; i < add1.length(); i++)
+        for (char index : add1)
         {
-            if (add1[i] != '"')
+            if (index != '"')
             {
-                newVal1 += add1[i];
+                newVal1 += index;
             }
         }
-        for (int i = 0; i < add2.length(); i++)
+        for (char index : add2)
         {
-            if (add2[i] != '"')
+            if (index != '"')
             {
-                newVal2 += add2[i];
+                newVal2 += index;
             }
         }
 
@@ -161,19 +160,19 @@ bool interpreter::Interpreter::Addition(string* value, string* typeFinalValue, v
         {
             string result = add1 + add2;
             string newResult;
-            for (int i = 0; i < result.size(); i++)
+            for (int index = 0; index < result.size(); index++)
             {
-                string character = string(1, result[i]);
-                if (i == 0 || i == result.size() - 1)
+                string character = string(1, result[index]);
+                if (index == 0 || index == result.size() - 1)
                 {
-                    string charact = string(1, '"');
-                    newResult += (character.c_str()[0] != '"') ? charact + character : charact;
+                    string local_character = string(1, '"');
+                    newResult += (character.c_str()[0] != '"') ? local_character + character : local_character;
                 }
                 else
                 {
-                    const char character = result[i];
-                    if (character != '"')
-                        newResult += character;
+                    const char local_character = result[index];
+                    if (local_character != '"')
+                        newResult += local_character;
                 }
             }
             *value = newResult;
@@ -200,7 +199,7 @@ bool interpreter::Interpreter::Subtraction(string* value, string* typeFinalValue
 
     if (splitted.size() > (*j+1) && splitted[*j + 1] == "(")
     {
-        string namefunction = splitted[*j];
+        string name_function = splitted[*j];
 
         *j += 2;
 
@@ -221,7 +220,7 @@ bool interpreter::Interpreter::Subtraction(string* value, string* typeFinalValue
                 {
                     string FunctionName = splitted[*j-1];
                     vector<string> params;
-                    *j++;
+                    (*j)++;
                     while (true)
                     {
                         string param = splitted[*j];
@@ -234,12 +233,12 @@ bool interpreter::Interpreter::Subtraction(string* value, string* typeFinalValue
                             params.push_back(param);
                         if (*j >= splitted.size()-1)
                             break;
-                        *j++;
+                        (*j)++;
                     }
 
                     //executing function
                     Function FUNCTION = this->find_function(FunctionName);
-                    if (FUNCTION.get_name() == "")
+                    if (FUNCTION.get_name().empty())
                     {
                         this->PrintError("Invalid function");
                         return false;
@@ -258,15 +257,15 @@ bool interpreter::Interpreter::Subtraction(string* value, string* typeFinalValue
                 }
                 else if (String == "=" && splitted[*j + 1] == "=")
                 {
-                    parameters.push_back("==");
-                    *j++;
+                    parameters.emplace_back("==");
+                    (*j)++;
                 }
                 else
                     parameters.push_back(String);
             }
 
             if (*j < splitted.size()-1)
-                *j++;
+                (*j)++;
             else
                 break;
             String = splitted[*j];
@@ -277,7 +276,7 @@ bool interpreter::Interpreter::Subtraction(string* value, string* typeFinalValue
         }*/
 
         bool Returning;
-        Variable returnedVar = this->executeFunction(namefunction, CheckWriting, parameters, false, &Returning);
+        Variable returnedVar = this->executeFunction(name_function, CheckWriting, parameters, false, &Returning);
         string type2 = returnedVar.get_type();
         if (!Returning)
         {
@@ -291,7 +290,7 @@ bool interpreter::Interpreter::Subtraction(string* value, string* typeFinalValue
             add2 = to_string(returnedVar.get_int_value());
         type = type2;
     }
-    else if (type != "")
+    else if (!type.empty())
     {
         if (type == "string")
             add2 = var.get_str_value();
@@ -302,9 +301,9 @@ bool interpreter::Interpreter::Subtraction(string* value, string* typeFinalValue
     {
         type = getTypeVar(add2);
     }
-    if (type1 == "")
+    if (type1.empty())
         type1 = getTypeVar(add1);
-    if (type == "")
+    if (type.empty())
     {
         this->PrintError("Invalid variable");
         return false;
@@ -337,28 +336,7 @@ bool interpreter::Interpreter::Subtraction(string* value, string* typeFinalValue
     {
         *typeFinalValue = type1;
         if (type1 == "string")
-        {
-            /*string result = add1 + add2;
-            string newResult;
-            for (int i = 0; i < result.size(); i++)
-            {
-                string character = string(1, result[i]);
-                if (i == 0 || i == result.size() - 1)
-                {
-                    string charact = string(1, '"');
-                    newResult += (character.c_str()[0] != '"') ? charact + character : charact;
-                }
-                else
-                {
-                    const char character = result[i];
-                    if (character != '"')
-                        newResult += character;
-                }
-            }
-            //cout << result << " " << newResult << endl;
-            *value = newResult;*/
             this->PrintError("Invalid type for - operation");
-        }
         else if (type1 == "int")
         {
             int result = stoi(add1) - stoi(add2);

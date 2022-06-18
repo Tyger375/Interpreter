@@ -6,6 +6,9 @@
 #include "../Function/Function.h"
 #include "../While/While.h"
 
+using std::vector;
+using std::string;
+
 namespace interpreter
 {
     class Interpreter;
@@ -14,84 +17,87 @@ namespace interpreter
 class interpreter::Interpreter
 {
 private:
-    int i;
-    int line;
-    std::vector<std::string> typeVariables;
-    std::vector<Function> functions;
-    std::vector<While> whiles;
-    std::vector<bool> Ifs;
-    std::vector<std::vector<Variable>> VariablesInfos;
-    std::vector<std::string> listAll;
-    bool error;
-    bool FindindStaple;
-    bool writingFunc;
-    bool writingWhile;
-    std::vector<bool> writingList;
+    //Interpreter
+    int i{};
+    int line{};
+    bool error{};
+    bool writingComment{};
 
-    std::vector<Variable> ListWriting;
-
-    bool FindingElse;
-    int FindingFromLine;
-
-    Function* FUNC;
-
-    bool isExecutingFunc;
+    //Variables
+    vector<string> typeVariables;
+    vector<vector<Variable>> VariablesInfos;
+    //Lists Variables
+    vector<string> listAll;
+    vector<bool> writingList;
+    vector<Variable> ListWriting;
+    //Functions
+    vector<Function> functions;
+    bool writingFunc{};
+    Function* FUNC{};
+    bool isExecutingFunc{};
+    //Whiles
+    vector<While> whiles;
+    bool writingWhile{};
+    //Ifs
+    vector<bool> Ifs;
+    bool FindingElse{};
+    int FindingFromLine{};
 
     void Setup();
 
-    void SetReturnValue(std::vector<std::string>);
-    void executeCustomFunction(Function*, std::vector<std::string>);
-    void loadVariable(std::vector<std::string>, const std::string&);
-    Variable loadVariableWithoutWriting(std::vector<std::string>, std::string);
-    void printString(std::string);
-    void Operation(std::vector<std::string>, std::string*, std::string*, const std::string&, int*);
+    void SetReturnValue(vector<string>);
+    void executeCustomFunction(Function*, vector<string>);
+    void loadVariable(vector<string>, const string&);
+    Variable loadVariableWithoutWriting(vector<string>, const string&);
+    static void printString(string);
+    void Operation(vector<string>, string*, string*, const string&, int*);
 
     //List
-    void printList(Variable);
-    void loadList(std::vector<std::string>, bool, int*);
+    static void printList(Variable);
+    void loadList(vector<string>, bool, int*);
 
     //Operations
-    bool Addition(std::string*, std::string*, std::vector<std::string>, std::string, int*);
-    bool Subtraction(std::string*, std::string*, std::vector<std::string>, std::string, int*);
+    bool Addition(string*, string*, vector<string>, string, int*);
+    bool Subtraction(string*, string*, vector<string>, string, int*);
 
     //Deprecated
-    void AddIntegers(std::vector<std::string>, std::string*, std::string*);
-    void AddStrings(std::vector<std::string>, std::string*, std::string*);
-    void loadIntVariable(std::vector<std::string>, std::string);
-    void loadStringVariable(std::vector<std::string>, std::string);
-    //Functions
-    void print(std::vector<std::string>);
-    std::string Typeof(std::vector<std::string>, bool*);
-    void If(std::vector<std::string>); //std::string, std::string, std::string
-    //for (i=0;i>0;i++)
-    void ForLoop(std::vector<std::string>, std::vector<std::string>, std::vector<std::string>);
-    void WhileLoop(std::vector<std::string>);
-    void FindGraffa(std::vector<std::string>);
-    void WriteParameters(std::vector<std::string>, std::vector<std::string>*, bool, bool, int*);
+    void AddIntegers(vector<string>, string*, string*);
+    void AddStrings(vector<string>, string*, string*);
 
-    void execute_internal_function(Variable*, const std::string&, std::vector<std::string>, bool*);
+    //Functions
+    void print(const vector<string>&);
+    string Typeof(vector<string>, bool*);
+    void If(const vector<string>&);
+    //for (i=0;i>0;i++)
+    void ForLoop(const vector<string>&, const vector<string>&, const vector<string>&);
+    void WhileLoop(const vector<string>&);
+    void WriteParameters(vector<string>, vector<string>*, bool, bool, int*);
+    void LoadParamVariable(vector<string>*, bool, vector<string>*);
+
+    void execute_internal_function(Variable*, const string&, vector<string>);
 
     //Internal functions
     //Lists
-    void internal_add(Variable*, std::vector<std::string>, bool*);
+    void internal_add(Variable*, vector<string>);
+    void internal_remove(Variable*, vector<string>);
 public:
 
-    Interpreter(std::vector<Variable>, bool, Function*);
+    Interpreter(const vector<Variable>&, bool, Function*);
     Interpreter();
-    void start(std::string, bool);
-    void Line(std::string line);
+    void start(const string&, bool);
+    void Line(string str_line);
     void debugVariables();
     void debugFunctions();
-    void PrintError(std::string);
+    void PrintError(const string&);
 
-    inline std::vector<Variable> getVariables() const { return this->variables; };
+    inline vector<Variable> getVariables() const { return this->variables; };
 
-    Variable find_variable(std::string);
-    Variable* find_variable_pointer(std::string);
-    Function find_function(std::string);
+    Variable find_variable(const string&);
+    Variable* find_variable_pointer(const string&);
+    Function find_function(const string&);
+    vector<Variable> variables;
 
-    std::vector<Variable> variables;
-    Variable executeFunction(const std::string& , bool, std::vector<std::string>, bool, bool*);
+    Variable executeFunction(const string& , bool, const vector<string>&, bool, bool*);
 };
 
 #endif //INTERPRETER_INTERPRETER_H

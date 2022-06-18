@@ -1,12 +1,14 @@
 var hi = 0
 
+var test_negative = -1
+
 out(type(hi))
+out(-1)
 
 var list = [hi]
-var test_str = "heheheha"
 out(list)
 
-var testbool = true
+var test_bool = true
 
 var testlist = [
     "due",
@@ -18,7 +20,7 @@ var testlist = [
         [
             3,
             [
-                "funziona!!!",
+                "it works!!!",
                 2
             ],
             5
@@ -27,7 +29,13 @@ var testlist = [
     ]
 ]
 
+out(testlist[3])
+//testlist[3].remove(-1)
 out(testlist)
+//testlist[3] = ["hi"]
+out(testlist)
+
+/*out(testlist)
 out(testlist[0])
 //out(true)
 out([2,3][0])
@@ -44,6 +52,7 @@ out(testlist)
 func function(due)
 {
     due.add("2")
+    out(due)
     return due
 }
 
@@ -66,8 +75,8 @@ else
     out("test")
 }
 
-while (hi < 5 && testbool == true)
+while (hi < 5 && test_bool == true)
 {
     out("ciao", hi)
     hi = hi + 1
-}
+}*/

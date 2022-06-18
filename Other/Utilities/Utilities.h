@@ -7,15 +7,18 @@
 #include <vector>
 #include "../../Variable/Variable.h"
 
+using std::vector;
+using std::string;
+
 namespace Utilities
 {
-	bool isNan(std::string stringa);
-	std::vector<std::string> split(std::string, char);
-	bool findInVector(std::vector<std::string>, std::string);
-    std::string getTypeVar(std::string);
-    std::string GetListValue(Variable);
-    bool to_bool(std::string);
-    std::string to_string(bool);
+	bool isNan(const string&);
+	vector<string> split(string, char);
+	bool findInVector(const vector<string>&, const string&);
+    string getTypeVar(string);
+    string GetListValue(Variable);
+    bool to_bool(const string&);
+    string to_string(bool);
 
 };
 

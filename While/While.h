@@ -6,18 +6,19 @@
 #include <vector>
 #include "../Variable/Variable.h"
 
+using std::vector;
+using std::string;
+
 class While
 {
 private:
-    std::vector<std::vector<std::string>> lines;
+    vector<vector<string>> lines;
 public:
-    void add_line(std::vector<std::string>);
-    void add_condition(std::vector<std::string>);
+    void add_line(const vector<string>&);
+    void add_condition(vector<string>);
+    void execute(const vector<Variable>&);
 
-    inline std::vector<std::vector<std::string>> get_lines() { return this->lines; };
-    void execute(std::vector<Variable>);
-
-    std::vector<std::string> WhileCondition;
+    vector<string> WhileCondition;
 };
 
 #endif //INTERPRETER_WHILE_H

@@ -4,7 +4,9 @@ var int_var = 2
 var bool_var = true
 var list_var = [string_var, int_var, bool_var]
 
+list_var.add(2)
 list_var.add(list_var)
+list_var.remove(0)
 
 out(string_var)
 out(int_var)
