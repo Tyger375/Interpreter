@@ -145,7 +145,10 @@ string Interpreter::Typeof(vector<string> parameters, bool* Returning)
             string VALUE = var.get_str_value();
             const string Type2 = getTypeVar(VALUE);
             if (Type2 == "int")
-                VALUE.erase(std::remove(VALUE.begin(), VALUE.end(), '"'), VALUE.end());
+            {
+                VALUE.erase(VALUE.begin());
+                VALUE.erase(VALUE.end() - 1);
+            }
             else
                 VALUE = '"' + VALUE + '"';
             Val = VALUE;
