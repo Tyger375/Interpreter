@@ -126,7 +126,7 @@ bool Utilities::isNan(const string& string)
 {
 	try
 	{
-        __attribute__((unused)) int integer = stoi(string);
+        int integer = stoi(string);
 		return false;
 	}
 	catch (const exception&)
@@ -201,7 +201,7 @@ Variable* Interpreter::find_variable_pointer(const string& name)
             Variable* local_var = &i2;
             if (local_var->get_name() == name)
             {
-                __attribute__((unused)) static Variable* VAR = local_var;
+                static Variable* VAR = local_var;
                 break;
             }
         }

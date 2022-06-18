@@ -15,6 +15,12 @@
 cmake-build-debug
 cmake-build-debug-visual-studio
 CMakeLists.txt
+CMakeCache.txt
+cmake_install.cmake
+ALL_BUILD.*
+Interprete.*
+Interpreter.*
+ZERO_CHECK.*
 *.userprefs
 
 # Mono auto generated files
