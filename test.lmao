@@ -35,7 +35,7 @@ out(testlist)
 //testlist[3] = ["hi"]
 out(testlist)
 
-/*out(testlist)
+out(testlist)
 out(testlist[0])
 //out(true)
 out([2,3][0])
@@ -49,6 +49,8 @@ out(testlist)
 testlist[3].add("hi")
 out(testlist)
 
+out("test")
+
 func function(due)
 {
     due.add("2")
@@ -56,6 +58,7 @@ func function(due)
     return due
 }
 
+out("test")
 var test = function(["test"])
 out(function(["test",2, 4+4]))
 out("test", test)
@@ -79,4 +82,4 @@ while (hi < 5 && test_bool == true)
 {
     out("ciao", hi)
     hi = hi + 1
-}*/
+}

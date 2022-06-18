@@ -22,7 +22,7 @@ bool interpreter::Interpreter::Addition(string* value, string* typeFinalValue, v
 
         string String = splitted[*j];
         vector<string> parameters;
-        bool CheckWriting = writingFunc || writingWhile;
+        bool CheckWriting = writingFunc || writingWhile.size() > 0;
         int num = 0;
         do
         {
@@ -205,7 +205,7 @@ bool interpreter::Interpreter::Subtraction(string* value, string* typeFinalValue
 
         string String = splitted[*j];
         vector<string> parameters;
-        bool CheckWriting = writingFunc || writingWhile;
+        bool CheckWriting = writingFunc || writingWhile.size() > 0;
         int num = 0;
         do
         {

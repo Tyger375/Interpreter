@@ -304,6 +304,7 @@ Variable Interpreter::executeFunction(const string& name_function, bool CheckWri
     else if (name_function == "while")
     {
         this->WhileLoop(parameters);
+        this->FindingFromLine = this->line;
         ReturnedVariable.setup("", "");
         *Returning = true;
         return ReturnedVariable;
@@ -342,6 +343,7 @@ Variable Interpreter::executeFunction(const string& name_function, bool CheckWri
             Variable var;
 
             func.set_return(var);
+            *Returning = true;
 
             return returnedVar;
         }
@@ -416,16 +418,30 @@ void Interpreter::executeCustomFunction(Function* func, vector<string> parameter
         ParamsToVars.push_back(var);
     }
 
+    //cout << "debugging" << endl;
+    //this->debugVariables();
+
     Interpreter interpreter(NewVariables, true, func);
+
+    /*for (auto LINE : lines)
+    {
+        for (auto word : LINE)
+        {
+            cout << word << " ";
+        }
+        cout << endl;
+    }*/
 
     for (const auto& local_line : lines)
     {
+        //cout << local_line[0] << endl;
         string Str_line;
         for (auto & i2 : local_line)
         {
             Str_line += (i2 + " ");
         }
         interpreter.Line(Str_line);
+        interpreter.line++;
     }
 
     vector<Variable> new_variables;

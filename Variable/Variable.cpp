@@ -106,7 +106,7 @@ void Interpreter::loadVariable(vector<string> splitted, const string& name)
         this->i += 2;
         string String = splitted[this->i];
         vector<string> parameters;
-        bool CheckWriting = writingFunc || writingWhile;
+        bool CheckWriting = writingFunc || (writingWhile.size() > 0);
 
         this->WriteParameters(splitted, &parameters, CheckWriting, false, &this->i);
 
@@ -120,6 +120,7 @@ void Interpreter::loadVariable(vector<string> splitted, const string& name)
         string type2 = returnedVar.get_type();
         if (!Returning)
         {
+            cout << "here" << endl;
             this->PrintError("Function returned nothing");
             return;
         }
@@ -178,11 +179,14 @@ void Interpreter::loadVariable(vector<string> splitted, const string& name)
     Variable var;
     if (type == "string")
     {
-        if (str_value[0] == '"' && str_value[1] == '"' && str_value.length() > 2)
+        /*if (str_value[0] == '"')// && str_value[1] == '"' && str_value.length() > 2)
         {
             str_value.erase(str_value.begin());
+            //str_value.erase(str_value.begin());
+            //str_value.erase(str_value.end() - 1);
             str_value.erase(str_value.end() - 1);
-        }
+        }*/
+        cout << str_value << endl;
         var.setup(name, str_value);
     }
     else if (type == "int")
@@ -251,7 +255,7 @@ Variable Interpreter::loadVariableWithoutWriting(vector<string> splitted, const 
         j += 2;
         string String = splitted[j];
         vector<string> parameters;
-        bool CheckWriting = writingFunc || writingWhile;
+        bool CheckWriting = writingFunc || (writingWhile.size() > 0);
         int num = 0;
         do
         {
@@ -392,6 +396,8 @@ Variable Interpreter::loadVariableWithoutWriting(vector<string> splitted, const 
         if (str_value[0] == '"' && str_value[1] == '"' && str_value.length() > 2)
         {
             str_value.erase(str_value.begin());
+            str_value.erase(str_value.begin());
+            str_value.erase(str_value.end() - 1);
             str_value.erase(str_value.end() - 1);
         }
         var.setup(name, str_value);

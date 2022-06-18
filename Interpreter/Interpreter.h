@@ -19,7 +19,6 @@ class interpreter::Interpreter
 private:
     //Interpreter
     int i{};
-    int line{};
     bool error{};
     bool writingComment{};
 
@@ -37,7 +36,7 @@ private:
     bool isExecutingFunc{};
     //Whiles
     vector<While> whiles;
-    bool writingWhile{};
+    vector<bool> writingWhile;
     //Ifs
     vector<bool> Ifs;
     bool FindingElse{};
@@ -81,6 +80,7 @@ private:
     void internal_add(Variable*, vector<string>);
     void internal_remove(Variable*, vector<string>);
 public:
+    int line{};
 
     Interpreter(const vector<Variable>&, bool, Function*);
     Interpreter();

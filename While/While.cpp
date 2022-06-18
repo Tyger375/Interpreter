@@ -108,6 +108,8 @@ bool Update(Interpreter* interpreter, While* aWhile)
         string Comparator = Condition[1];
         string if2 = Condition[2];
 
+        //cout << if1 << " " << if2 << endl;
+
         bool isStr1 = (if1[0] == '"');
         bool isStr2 = (if2[0] == '"');
 
@@ -207,6 +209,8 @@ bool Update(Interpreter* interpreter, While* aWhile)
         }
 
         bool FinalValue;
+
+        //cout << Val1 << " " << Val2 << endl;
 
         if (Comparator == "==") {
             if (Type1 == Type2)
@@ -369,8 +373,22 @@ bool Update(Interpreter* interpreter, While* aWhile)
 
 void While::execute(const std::vector<Variable>& Variables)
 {
+    /*for (auto line : this->lines)
+    {
+        for (auto word : line)
+        {
+            cout << word << " ";
+        }
+        cout << endl;
+    }*/
+    /*for (auto var : Variables)
+    {
+        cout << var.get_name() << " " << var.get_value() << endl;
+    }*/
+    
     Function func;
     Interpreter interpreter(Variables, true, &func);
+    //interpreter.debugVariables();
     //Check
     bool Updated = Update(&interpreter, this);
 
@@ -384,12 +402,15 @@ void While::execute(const std::vector<Variable>& Variables)
             for (auto & j : line) {
                 StrLine += (j + " ");
             }
-            //cout << StrLine << endl;
+            //cout << "StrLine = " << StrLine << endl;
             interpreter.Line(StrLine);
+            interpreter.line++;
         }
         Updated = Update(&interpreter, this);
+        interpreter.line = 0;
         //interpreter.debugVariables();
     }
+
 }
 
 void While::add_condition(vector<string> Comparison_Line)
@@ -403,7 +424,7 @@ void Interpreter::WhileLoop(const vector<string>& condition)
     {
         cout << "While" << endl;
     }*/
-    this->writingWhile = true;
+    this->writingWhile.push_back(true);
     While while_loop;
     while_loop.add_condition(condition);
     this->whiles.push_back(while_loop);
