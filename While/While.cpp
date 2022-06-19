@@ -12,8 +12,6 @@ using namespace interpreter;
 void While::add_line(const vector<string>& line)
 {
     vector<string> newline;
-    int Opened = 0;
-    int Closed = 0;
     for (const auto& Word : line) {
         if (Word == "{" || Word == "}")
         {
@@ -131,7 +129,7 @@ bool Update(Interpreter* interpreter, While* aWhile)
         }
         else if (if1 == "true" || if1 == "false")
         {
-            Val2 = if2;
+            Val1 = if1;
             Type1 = "bool";
         }
         else
@@ -140,7 +138,7 @@ bool Update(Interpreter* interpreter, While* aWhile)
 
             if (var1.get_type().empty())
             {
-                interpreter->PrintError("Variable not found");
+                interpreter->PrintError("Variable not found: " + if1);
                 return false;
             }
             else
@@ -186,7 +184,7 @@ bool Update(Interpreter* interpreter, While* aWhile)
             Variable var2 = interpreter->find_variable(if2);
             if (var2.get_type().empty())
             {
-                interpreter->PrintError("Variable not found");
+                interpreter->PrintError("Variable not found: " + if2);
                 return false;
             }
             Type2 = var2.get_type();
@@ -237,6 +235,8 @@ bool Update(Interpreter* interpreter, While* aWhile)
                 }
                 else if (Type1 == "bool")
                 {
+                    //cout << Val1 << " " << Val2 << endl;
+                    //cout << to_bool(Val1) << " " << to_bool(Val2) << endl;
                     if (to_bool(Val1) == to_bool(Val2)) {
                         //cout << "true" << endl;
                         FinalValue = true;
@@ -343,6 +343,7 @@ bool Update(Interpreter* interpreter, While* aWhile)
         }
         else if (Comparator == "<")
         {
+            //cout << Val1 << " < " << Val2 << endl;
             if (Val1 < Val2)
             {
                 //cout << "true" << endl;
@@ -354,6 +355,8 @@ bool Update(Interpreter* interpreter, While* aWhile)
                 FinalValue = false;
             }
         }
+
+        //cout << FinalValue << endl;
 
         if (Checks.empty())
             Checks.push_back(FinalValue);
@@ -373,14 +376,16 @@ bool Update(Interpreter* interpreter, While* aWhile)
 
 void While::execute(const std::vector<Variable>& Variables)
 {
-    /*for (auto line : this->lines)
+    /*cout << "start" << endl;
+    for (auto line : this->lines)
     {
         for (auto word : line)
         {
             cout << word << " ";
         }
         cout << endl;
-    }*/
+    }
+    cout << "end" << endl;*/
     /*for (auto var : Variables)
     {
         cout << var.get_name() << " " << var.get_value() << endl;
@@ -391,6 +396,8 @@ void While::execute(const std::vector<Variable>& Variables)
     //interpreter.debugVariables();
     //Check
     bool Updated = Update(&interpreter, this);
+
+    //cout << Updated << endl;
 
     while (Updated)
     {
@@ -408,9 +415,15 @@ void While::execute(const std::vector<Variable>& Variables)
         }
         Updated = Update(&interpreter, this);
         interpreter.line = 0;
+        interpreter.clear();
         //interpreter.debugVariables();
     }
+}
 
+void Interpreter::clear()
+{
+    this->whiles.clear();
+    this->writingWhile.clear();
 }
 
 void While::add_condition(vector<string> Comparison_Line)
@@ -425,7 +438,11 @@ void Interpreter::WhileLoop(const vector<string>& condition)
         cout << "While" << endl;
     }*/
     this->writingWhile.push_back(true);
-    While while_loop;
-    while_loop.add_condition(condition);
-    this->whiles.push_back(while_loop);
+    //cout << writingWhile.size() << " " << this->line << endl;
+    if (this->whiles.empty())
+    {
+        While while_loop;
+        while_loop.add_condition(condition);
+        this->whiles.push_back(while_loop);
+    }
 }

@@ -1,22 +1,26 @@
 var table = [[0, 0, 0],[0, 0, 0],[0, 0, 0]]
 
-out(table)
-
-func test()
+func printTable()
 {
-  var x = 0
-  out(x)
-  while (x < 3)
-  {
-    var y = 0
-    while (y < 3)
+    outl("-----")
+    var x = 0
+    while (x < 3)
     {
-      out(y)
-      out(table[x][y])
-      y = y + 1
+        var y = 0
+        while (y < 3)
+        {
+          out(table[x][y])
+          y = y + 1
+        }
+        outl("")
+        x = x + 1
     }
-    x = x + 1
-  }
 }
 
-test()
+var test = 0
+
+while (test < 5)
+{
+    var move = in()
+    outl(move)
+}

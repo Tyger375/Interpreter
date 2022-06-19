@@ -44,7 +44,7 @@ Function Interpreter::find_function(const string& name)
 	return local_FUNC;
 }
 
-void Interpreter::print(const vector<string>& parameters)
+void Interpreter::print(const vector<string>& parameters, bool endline=true)
 {
 	if (parameters.empty())
     {
@@ -53,7 +53,7 @@ void Interpreter::print(const vector<string>& parameters)
     }
 
 
-    cout << "Output: ";
+    //cout << "Output: ";
     for (auto parameter : parameters)
     {
         if (parameter[0] == '"')
@@ -71,7 +71,10 @@ void Interpreter::print(const vector<string>& parameters)
             int index = 0;
             //this->writingList.push_back(true);
             //cout << "parameter = " << parameter << endl;
+
             this->loadList(split(parameter, ' '), false, &index);
+
+            //cout << GetListValue(ListWriting[0]) << endl;
 
             this->printList(ListWriting[0]);
 
@@ -113,7 +116,8 @@ void Interpreter::print(const vector<string>& parameters)
         }
         cout << " ";
     }
-    cout << endl;
+    if (endline)
+        cout << endl;
 }
 
 string Interpreter::Typeof(vector<string> parameters, bool* Returning)
@@ -213,9 +217,16 @@ void Interpreter::SetReturnValue(vector<string> splitted)
 Variable Interpreter::executeFunction(const string& name_function, bool CheckWriting, const vector<string>& parameters, bool IsNewFunc, bool* Returning)
 {
     Variable ReturnedVariable;
-    if (name_function == "out" && !CheckWriting)
+    if (name_function == "outl" && !CheckWriting)
     {
         this->print(parameters);
+        ReturnedVariable.setup("", "");
+        *Returning = true;
+        return ReturnedVariable;
+    }
+    if (name_function == "out")
+    {
+        this->print(parameters, false);
         ReturnedVariable.setup("", "");
         *Returning = true;
         return ReturnedVariable;
@@ -233,7 +244,6 @@ Variable Interpreter::executeFunction(const string& name_function, bool CheckWri
     else if (name_function == "type")
     {
         string type = this->Typeof(parameters, Returning);
-        //cout << "debugging type = " << type << endl;
         ReturnedVariable.setup("", type);
         return ReturnedVariable;
     }
@@ -303,6 +313,7 @@ Variable Interpreter::executeFunction(const string& name_function, bool CheckWri
     }
     else if (name_function == "while")
     {
+        //cout << "While loop" << endl;
         this->WhileLoop(parameters);
         this->FindingFromLine = this->line;
         ReturnedVariable.setup("", "");

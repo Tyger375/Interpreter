@@ -166,7 +166,7 @@ void Interpreter::loadVariable(vector<string> splitted, const string& name)
 
     if (type.empty())
     {
-        this->PrintError("Invalid variable");
+        this->PrintError("Invalid variable: " + str_value);
         return;
     }
     if (splitted.size() > this->i+1 && (splitted[this->i + 1] == "+" || splitted[this->i + 1] == "-"))
@@ -175,6 +175,7 @@ void Interpreter::loadVariable(vector<string> splitted, const string& name)
         this->Operation(splitted, &str_value, &finalType, type, &this->i);
         type = finalType;
     }
+    //TODO: {var} = {list}[{index}]
 
     Variable var;
     if (type == "string")
@@ -186,7 +187,7 @@ void Interpreter::loadVariable(vector<string> splitted, const string& name)
             //str_value.erase(str_value.end() - 1);
             str_value.erase(str_value.end() - 1);
         }*/
-        cout << str_value << endl;
+        //cout << str_value << endl;
         var.setup(name, str_value);
     }
     else if (type == "int")
@@ -379,7 +380,7 @@ Variable Interpreter::loadVariableWithoutWriting(vector<string> splitted, const 
 
     if (type.empty())
     {
-        this->PrintError("Invalid variable");
+        this->PrintError("Invalid variable: " + str_value);
         Variable var;
         return var;
     }
@@ -417,7 +418,10 @@ Variable Interpreter::loadVariableWithoutWriting(vector<string> splitted, const 
     {
         int index = 0;
         //this->writingList.push_back(true);
-        this->loadList(split(str_value, ' '), false, &index);
+        vector<string> Splitted = split(str_value, ' ');
+        this->loadList(Splitted, false, &index);
+
+        //cout << GetListValue(ListWriting[0]) << endl;
 
         var.setup(name, ListWriting[0].get_list_value());
 
@@ -448,7 +452,17 @@ void Interpreter::loadList(vector<string> splitted, bool write, int* index)
                 (*index)++;
                 while (true)
                 {
-                    listAll.push_back(splitted[*index]);
+                    if (splitted[*index] == "[")
+                    {
+                        Variable VAR;
+                        vector<Variable> LIST = {};
+                        VAR.setup("", LIST);
+                        this->ListWriting.push_back(VAR);
+                        this->writingList.push_back(true);
+                    }
+                    else
+                        listAll.push_back(splitted[*index]);
+                    //cout << "splitted[*index] = " << splitted[*index] << endl;
                     (*index)++;
                     if (splitted.size() < *index)
                     {
@@ -466,6 +480,11 @@ void Interpreter::loadList(vector<string> splitted, bool write, int* index)
             this->ListWriting.push_back(list);
             if (!listAll.empty())
             {
+                /*cout << "printing" << endl;
+                for (auto word : listAll) {
+                    cout << word << endl;
+                }
+                cout << "ended" << endl;*/
                 Variable var2 = this->loadVariableWithoutWriting(listAll, "");
                 this->ListWriting[ListWriting.size()-1].add_item_list(var2);
             }
@@ -500,9 +519,7 @@ void Interpreter::loadList(vector<string> splitted, bool write, int* index)
                     {
                         if (!listAll.empty())
                         {
-                            cout << "hi" << endl;
                             Variable var = this->loadVariableWithoutWriting(listAll, "");
-                            cout << "hi" << endl;
                             this->ListWriting[ListWriting.size() - 1].add_item_list(var);
                             listAll = {};
                         }
@@ -516,6 +533,7 @@ void Interpreter::loadList(vector<string> splitted, bool write, int* index)
                 {
                     //Adding value to variable
                     Variable var = this->ListWriting[0];
+                    //cout << GetListValue(var) << endl;
                     string name = var.get_name();
                     bool found = false;
                     for (auto &j : this->variables)

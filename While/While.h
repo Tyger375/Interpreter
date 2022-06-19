@@ -12,6 +12,8 @@ using std::string;
 class While
 {
 private:
+    int Opened = 0;
+    int Closed = 0;
     vector<vector<string>> lines;
 public:
     void add_line(const vector<string>&);

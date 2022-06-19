@@ -64,7 +64,7 @@ private:
     void AddStrings(vector<string>, string*, string*);
 
     //Functions
-    void print(const vector<string>&);
+    void print(const vector<string>&, bool);
     string Typeof(vector<string>, bool*);
     void If(const vector<string>&);
     //for (i=0;i>0;i++)
@@ -84,6 +84,7 @@ public:
 
     Interpreter(const vector<Variable>&, bool, Function*);
     Interpreter();
+    void clear();
     void start(const string&, bool);
     void Line(string str_line);
     void debugVariables();
