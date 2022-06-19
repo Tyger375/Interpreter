@@ -224,9 +224,26 @@ void Interpreter::loadVariable(vector<string> splitted, const string& name)
         {
             *variable = var;
             found = true;
+            cout << "found here1" << endl;
+            cout << var.get_value() << endl;
             break;
         }
     }
+    for (int j = 0; j < this->VariablesInfos.size(); j++)
+    {
+        for (int k = 0; k < VariablesInfos[j].size(); k++)
+        {
+            Variable* variable = &VariablesInfos[j][k];
+            if (variable->get_name() == name)
+            {
+                *variable = var;
+                cout << "found here2" << endl;
+                found = true;
+                break;
+            }
+        }
+    }
+    cout << "found = " << found << endl;
     if (!found)
     {
         if (!this->Ifs.empty() || this->isExecutingFunc)

@@ -208,7 +208,7 @@ bool Update(Interpreter* interpreter, While* aWhile)
 
         bool FinalValue;
 
-        //cout << Val1 << " " << Val2 << endl;
+        cout << Val1 << " " << Val2 << endl;
 
         if (Comparator == "==") {
             if (Type1 == Type2)
@@ -376,7 +376,7 @@ bool Update(Interpreter* interpreter, While* aWhile)
 
 void While::execute(const std::vector<Variable>& Variables)
 {
-    /*cout << "start" << endl;
+    cout << "start" << endl;
     for (auto line : this->lines)
     {
         for (auto word : line)
@@ -385,7 +385,11 @@ void While::execute(const std::vector<Variable>& Variables)
         }
         cout << endl;
     }
-    cout << "end" << endl;*/
+    cout << "end" << endl;
+    for (auto word : WhileCondition)
+    {
+        cout << word << endl;
+    }
     /*for (auto var : Variables)
     {
         cout << var.get_name() << " " << var.get_value() << endl;

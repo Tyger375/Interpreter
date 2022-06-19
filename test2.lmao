@@ -19,8 +19,20 @@ func printTable()
 
 var test = 0
 
+var move = ""
+
 while (test < 5)
 {
-    var move = in()
-    outl(move)
+    move = in()
+    outl(type(move), move)
+    if (move == "end")
+    {
+        test = "ciao"
+        outl("ending", test)
+    }
+
+    if (move == "ciao")
+    {
+        outl("heheheha")
+    }
 }

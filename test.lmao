@@ -71,13 +71,18 @@ outl(input)
 
 outl("input", input, type(input))
 
-if (type(input) == "string" && hi == "ciao" && "string" == "string")
+if (type(input) == "string" && hi == 0 && "string" == "string")
 {
 	outl("oks")
 }
 else
 {
     outl("test")
+}
+
+if ("test" == "test")
+{
+    outl("test2")
 }
 
 while (hi < 5 && test_bool == true)

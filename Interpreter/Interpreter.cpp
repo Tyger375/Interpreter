@@ -551,13 +551,17 @@ void Interpreter::Line(string str_line)
                         this->FindingElse = false;
                         this->Ifs[Ifs.size()-1] = !Ifs[Ifs.size()-1];
                     }
+                    else if (String == "if" && (this->writingWhile.size() > 0))
+                    {
+                        Ifs.push_back(true);
+                    }
                     /*else if (String == "while" && (this->writingFunc || this->isExecutingFunc) && this->whiles.size() > 1)
                     {
                         this->writingWhile.push_back(true);
                         this->FindingFromLine = this->line;
                         cout << "size = " << writingWhile.size() << " line = " << this->line << endl;
                     }*/
-					else if (String == "(" && (!CheckWriting || ((this->isExecutingFunc || this->writingFunc) && lastString == "while")))
+					else if (String == "(" && (!CheckWriting || ((this->isExecutingFunc || this->writingFunc) && (lastString == "while"))))
 					{
 						if (lastString.empty())
                         {
@@ -572,6 +576,9 @@ void Interpreter::Line(string str_line)
                                 IsNewFunc = true;
 
                         if (name_function == "while")
+                            CheckWriting = true;
+
+                        if ((!writingWhile.empty() || writingFunc) && name_function == "if")
                             CheckWriting = true;
 
                         //cout << name_function << endl;
@@ -606,6 +613,7 @@ void Interpreter::Line(string str_line)
 					{
 						if (!this->Ifs.empty())
 						{
+                            //cout << Ifs[Ifs.size()-1] << " " << this->line << endl;
 							const unsigned int last_elem = Ifs.size() - 1;
 							if (!this->Ifs[last_elem])
 							{
@@ -629,6 +637,7 @@ void Interpreter::Line(string str_line)
 					{
 						if (!this->Ifs.empty())
 						{
+                            //cout << "ending if2 " << this->line << " " << this->i << endl;
                             this->FindingElse = true;
                             this->FindingFromLine = this->line;
 							if (!VariablesInfos.empty())
@@ -643,6 +652,7 @@ void Interpreter::Line(string str_line)
 						{
                             if (!this->writingWhile.empty())
                             {
+                                //cout << "ending while " << this->line << " " << this->i << endl;
                                 writingWhile.erase(writingWhile.end()-1);
                                 if (!writingFunc && writingWhile.empty())
                                 {
@@ -699,11 +709,11 @@ void Interpreter::Line(string str_line)
                 {
                     if((String == "{" || String == "}" || String == ")") && (!this->Ifs.empty()))
                     {
-                        cout << "adding line" << endl;
+                        /*cout << "adding line" << endl;
                         for (auto word : splitted)
                         {
                             cout << word << endl;
-                        }
+                        }*/
                         this->whiles[whiles.size() - 1].add_line(splitted);
                     }
                 }
@@ -983,6 +993,8 @@ void Interpreter::If(const vector<string>& parameters)
         }
 
         bool FinalValue;
+
+        cout << Val1 << " " << Val2 << endl;
 
         if (Comparator == "==") {
             if (Type1 == Type2)
