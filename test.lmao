@@ -56,7 +56,7 @@ outl("test")
 func function(due)
 {
     due.add("2")
-    outl(due)
+    outl("due", due)
     return due
 }
 

@@ -156,6 +156,7 @@ Variable Interpreter::find_variable(const string& name)
 {
     //bool found = false;
     Variable VAR;
+
     for (auto & variable : this->variables)
     {
         Variable* var = &variable;
@@ -165,11 +166,14 @@ Variable Interpreter::find_variable(const string& name)
             break;
         }
     }
+    //cout << this->line << " " << VariablesInfos.size() << endl;
     for (auto & VariablesInfo : this->VariablesInfos)
     {
         for (auto & i2 : VariablesInfo)
         {
             Variable* var = &i2;
+            //cout << "size2 = " << VariablesInfos.size() << endl;
+            //cout << "name2 = " << var->get_name() << endl;
             if (var->get_name() == name)
             {
                 VAR = *var;
@@ -201,7 +205,7 @@ Variable* Interpreter::find_variable_pointer(const string& name)
             Variable* local_var = &i2;
             if (local_var->get_name() == name)
             {
-                static Variable* VAR = local_var;
+                VAR = local_var;
                 break;
             }
         }

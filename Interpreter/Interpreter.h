@@ -24,7 +24,6 @@ private:
 
     //Variables
     vector<string> typeVariables;
-    vector<vector<Variable>> VariablesInfos;
     //Lists Variables
     vector<string> listAll;
     vector<bool> writingList;
@@ -82,7 +81,7 @@ private:
 public:
     int line{};
 
-    Interpreter(const vector<Variable>&, bool, Function*);
+    Interpreter(const vector<Variable>&, const vector<Variable>&, const vector<Function>&, bool, Function*);
     Interpreter();
     void clear();
     void start(const string&, bool);
@@ -99,6 +98,8 @@ public:
     vector<Variable> variables;
 
     Variable executeFunction(const string& , bool, const vector<string>&, bool, bool*);
+
+    vector<vector<Variable>> VariablesInfos;
 };
 
 #endif //INTERPRETER_INTERPRETER_H

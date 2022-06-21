@@ -1,4 +1,6 @@
-var table = [[0, 0, 0],[0, 0, 0],[0, 0, 0]]
+var table = [["-", "-", "-"],["-", "-", "-"],["-", "-", "-"]]
+//outl(table)
+var nullCell = "-"
 
 func printTable()
 {
@@ -15,24 +17,141 @@ func printTable()
         outl("")
         x = x + 1
     }
+    outl("-----")
+}
+
+func write(move, symbol)
+{
+    var Move = false
+    if (move == "1")
+    {
+        if (table[0][0] == nullCell)
+        {
+            table[0][0] = symbol
+            Move = true
+        }
+    }
+    if (move == "2")
+    {
+        if (table[0][1] == nullCell)
+        {
+            table[0][1] = symbol
+            Move = true
+        }
+    }
+    if (move == "3")
+    {
+        if (table[0][2] == nullCell)
+        {
+            table[0][2] = symbol
+            Move = true
+        }
+    }
+    if (move == "4")
+    {
+        if (table[1][0] == nullCell)
+        {
+            table[1][0] = symbol
+            Move = true
+        }
+    }
+    if (move == "5")
+    {
+        if (table[1][1] == nullCell)
+        {
+            table[1][1] = symbol
+            Move = true
+        }
+    }
+    if (move == "6")
+    {
+        if (table[1][2] == nullCell)
+        {
+            table[1][2] = symbol
+            Move = true
+        }
+    }
+    if (move == "7")
+    {
+        if (table[2][0] == nullCell)
+        {
+            table[2][0] = symbol
+            Move = true
+        }
+    }
+    if (move == "8")
+    {
+        if (table[2][1] == nullCell)
+        {
+            table[2][1] = symbol
+            Move = true
+        }
+    }
+    if (move == "9")
+    {
+        if (table[2][2] == nullCell)
+        {
+            table[2][2] = symbol
+            Move = true
+        }
+    }
+    return Move
 }
 
 var test = 0
-
+var turn = 1
 var move = ""
 
 while (test < 5)
 {
-    move = in()
-    outl(type(move), move)
-    if (move == "end")
+    var Move = false
+
+    var symbol = "0"
+
+    if (turn == 1)
     {
-        test = "ciao"
-        outl("ending", test)
+        symbol = "x"
+    }
+    else
+    {
+        symbol = "O"
     }
 
-    if (move == "ciao")
+    printTable()
+
+    move = in()
+    if (move == "end")
     {
-        outl("heheheha")
+        test = 6
+    }
+
+    if (move == "draw")
+    {
+        printTable()
+    }
+
+    Move = write(move, symbol)
+
+    if (Move == false)
+    {
+        if (move != "end")
+        {
+            outl("Invalid move")
+        }
+        else
+        {
+            out("Stopping the game")
+        }
+    }
+    else
+    {
+        if (turn == 1)
+        {
+            turn = 2
+        }
+        else
+        {
+            turn = 1
+        }
     }
 }

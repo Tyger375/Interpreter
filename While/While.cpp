@@ -208,7 +208,7 @@ bool Update(Interpreter* interpreter, While* aWhile)
 
         bool FinalValue;
 
-        cout << Val1 << " " << Val2 << endl;
+        //cout << Val1 << " " << Val2 << endl;
 
         if (Comparator == "==") {
             if (Type1 == Type2)
@@ -374,9 +374,9 @@ bool Update(Interpreter* interpreter, While* aWhile)
     return Checks[0];
 }
 
-void While::execute(const std::vector<Variable>& Variables)
+void While::execute(const vector<Variable>& Variables, const vector<Function>& Functions)
 {
-    cout << "start" << endl;
+    /*cout << "start" << endl;
     for (auto line : this->lines)
     {
         for (auto word : line)
@@ -385,18 +385,21 @@ void While::execute(const std::vector<Variable>& Variables)
         }
         cout << endl;
     }
-    cout << "end" << endl;
-    for (auto word : WhileCondition)
+    cout << "end" << endl;*/
+    /*for (auto word : WhileCondition)
     {
         cout << word << endl;
-    }
+    }*/
     /*for (auto var : Variables)
     {
         cout << var.get_name() << " " << var.get_value() << endl;
     }*/
     
     Function func;
-    Interpreter interpreter(Variables, true, &func);
+    vector<string> params;
+    vector<Variable> params2;
+    func.setup("while", params);
+    Interpreter interpreter(Variables, params2, Functions, true, &func);
     //interpreter.debugVariables();
     //Check
     bool Updated = Update(&interpreter, this);
@@ -405,6 +408,11 @@ void While::execute(const std::vector<Variable>& Variables)
 
     while (Updated)
     {
+        if (interpreter.VariablesInfos.empty())
+        {
+            vector<Variable> Vector;
+            interpreter.VariablesInfos.push_back(Vector);
+        }
         //cout << Value1 << " " << Value2 << endl;
         vector<vector<string>> local_lines = this->lines;
         for (const auto& line : local_lines)

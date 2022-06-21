@@ -5,6 +5,7 @@
 #include <iostream>
 #include <vector>
 #include "../Variable/Variable.h"
+#include "../Function/Function.h"
 
 using std::vector;
 using std::string;
@@ -18,7 +19,7 @@ private:
 public:
     void add_line(const vector<string>&);
     void add_condition(vector<string>);
-    void execute(const vector<Variable>&);
+    void execute(const vector<Variable>&, const vector<Function>&);
 
     vector<string> WhileCondition;
 };

@@ -236,8 +236,7 @@ Variable Interpreter::executeFunction(const string& name_function, bool CheckWri
         string Var;
         cin >> Var;
         *Returning = true;
-        if (isNan(Var))
-            Var = '"' + Var + '"';
+        Var = '"' + Var + '"';
         ReturnedVariable.setup("", Var);
         return ReturnedVariable;
     }
@@ -249,6 +248,7 @@ Variable Interpreter::executeFunction(const string& name_function, bool CheckWri
     }
     else if (name_function == "if")
     {
+        //cout << "if here " << this->line << endl;
         if (!CheckWriting)
         {
             //cout << "if statement" << endl;
@@ -265,6 +265,7 @@ Variable Interpreter::executeFunction(const string& name_function, bool CheckWri
             */
 
             this->If(parameters);
+            //cout << "size = " << this->VariablesInfos.size() << endl;
         }
         else
         {
@@ -347,6 +348,8 @@ Variable Interpreter::executeFunction(const string& name_function, bool CheckWri
         }
         else
         {
+            //vector<Variable> Vector;
+            //this->VariablesInfos.push_back(Vector);
             this->executeCustomFunction(&func, parameters);
 
             Variable returnedVar = func.get_return();
@@ -375,7 +378,17 @@ void Interpreter::executeCustomFunction(Function* func, vector<string> parameter
     }
 
     vector<vector<string>> lines = func->get_lines();
-    vector<Variable> NewVariables = this->variables;
+    vector<Variable> NewVariables;
+    NewVariables = this->variables;
+
+    /*for (int j = 0; j < NewVariables.size(); ++j) {
+        Variable* var = &NewVariables[j];
+        if (findInVector(func->get_params(), var->get_name()))
+        {
+            NewVariables.erase(NewVariables.begin() + j);
+        }
+    }*/
+
     vector<Variable> ParamsToVars;
 
     for (int j = 0; j < parameters.size(); j++)
@@ -425,14 +438,15 @@ void Interpreter::executeCustomFunction(Function* func, vector<string> parameter
         }
         else
             var.setup(func->get_params()[j], stoi(val));
-        NewVariables.push_back(var);
+
+        //NewVariables.push_back(var);
         ParamsToVars.push_back(var);
     }
 
-    //cout << "debugging" << endl;
-    //this->debugVariables();
+    Interpreter interpreter(NewVariables, ParamsToVars, this->functions, true, func);
 
-    Interpreter interpreter(NewVariables, true, func);
+    vector<Variable> Vector;
+    interpreter.VariablesInfos.push_back(Vector);
 
     /*for (auto LINE : lines)
     {
@@ -455,25 +469,31 @@ void Interpreter::executeCustomFunction(Function* func, vector<string> parameter
         interpreter.line++;
     }
 
-    vector<Variable> new_variables;
+    //vector<Variable> new_variables;
 
-    for (int j = 0; j < interpreter.getVariables().size(); ++j) {
+    /*for (int j = 0; j < interpreter.getVariables().size(); ++j)
+    {
         Variable VAR = interpreter.getVariables()[j];
         bool found = false;
-        for (auto var_param : ParamsToVars) {
-            if (VAR.get_name() == var_param.get_name()) {
+        for (auto var_param : ParamsToVars)
+        {
+            if (VAR.get_name() == var_param.get_name())
+            {
                 found = true;
                 break;
             }
         }
         if (!found)
             new_variables.push_back(VAR);
-    }
+    }*/
 
-    //interpreter.debugVariables();
     /*for (int j = 0; j < interpreter.getVariables().size(); ++j)
     {
         cout << interpreter.getVariables()[j].get_name() << " " << interpreter.getVariables()[j].get_value() << endl;
     }*/
-    this->variables = new_variables;
+    this->variables = interpreter.variables;
+    /*for (auto var : new_variables)
+    {
+
+    }*/
 }
