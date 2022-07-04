@@ -1321,19 +1321,56 @@ void Interpreter::WriteParameters(vector<string> splitted, vector<string>* param
             vector<string> params2;
             (*index)++;
             this->WriteParameters(splitted, &params2, CheckWriting, IsNewFunc, index);
-            //executing function
-            Function FUNCTION = this->find_function(FunctionName);
-            if (FUNCTION.get_name().empty())
+            if (splitted[(*index)-3] == ".")
             {
-                this->PrintError("Invalid function");
-                return;
+                string str_value;
+                string type;
+                (*index) -= 4;
+                this->InternalFunctionLoadVariable(&str_value, &type, splitted, "", index);
+                //cout << "printing = " << str_value << " " << type << endl;
+                params.erase(params.end()-2);
+                params.erase(params.end()-2);
+                params[params.size()-1] = str_value;
+                /*for (int j = 0; j < params.size(); ++j) {
+                    cout << j << ": " << params[j] << endl;
+                }*/
+                /*if (splitted[(*index)-4] == "]")
+                {
+
+                }
+                string var_name = splitted[(*index)-4];
+
+                if (this->find_variable(var_name).get_type().empty())
+                {
+                    this->PrintError("Invalid variable");
+                    return;
+                }
+                //params.erase()
+                Variable* var = this->find_variable_pointer(var_name);
+                Variable returned = this->execute_internal_function(var, FunctionName, params2);
+                params.erase(params.end()-2);
+                params.erase(params.end()-2);
+                params[params.size()-1] = returned.get_value();
+                /*for (int j = 0; j < params.size(); ++j) {
+                    cout << j << ": " << params[j] << endl;
+                }*/
             }
             else
             {
-                bool Returning;
-                Variable returned = this->executeFunction(FunctionName, CheckWriting, params2, IsNewFunc, &Returning);
-                //((*parameters)[parameters->size()-1]) = returned.get_value();
-                params[params.size()-1] = returned.get_value();
+                //executing function
+                Function FUNCTION = this->find_function(FunctionName);
+                if (FUNCTION.get_name().empty())
+                {
+                    this->PrintError("Invalid function");
+                    return;
+                }
+                else
+                {
+                    bool Returning;
+                    Variable returned = this->executeFunction(FunctionName, CheckWriting, params2, IsNewFunc, &Returning);
+                    //((*parameters)[parameters->size()-1]) = returned.get_value();
+                    params[params.size()-1] = returned.get_value();
+                }
             }
             //num++;
         }

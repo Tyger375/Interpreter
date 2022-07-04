@@ -71,13 +71,15 @@ private:
     void WhileLoop(const vector<string>&);
     void WriteParameters(vector<string>, vector<string>*, bool, bool, int*);
     void LoadParamVariable(vector<string>*, bool, vector<string>*);
+    void InternalFunctionLoadVariable(string*, string*, vector<string>, string, int*);
 
-    void execute_internal_function(Variable*, const string&, vector<string>);
+    Variable execute_internal_function(Variable*, const string&, vector<string>);
 
     //Internal functions
     //Lists
-    void internal_add(Variable*, vector<string>);
-    void internal_remove(Variable*, vector<string>);
+    Variable internal_add(Variable*, vector<string>);
+    Variable internal_remove(Variable*, vector<string>);
+    Variable internal_length(Variable*);
 public:
     int line{};
 

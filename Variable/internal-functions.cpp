@@ -7,13 +7,14 @@ using namespace std;
 using namespace interpreter;
 using namespace Utilities;
 
-void Interpreter::internal_add(Variable* variable, vector<string> parameters)
+Variable Interpreter::internal_add(Variable* variable, vector<string> parameters)
 {
     if (parameters.empty())
     {
         //*Error = true;
         this->PrintError("No parameters given");
-        return;
+        Variable var;
+        return var;
     }
 
     Variable var;
@@ -29,20 +30,24 @@ void Interpreter::internal_add(Variable* variable, vector<string> parameters)
         var = this->loadVariableWithoutWriting(parameters, "");
 
     variable->add_item_list(var);
+    Variable returningVar;
+    return returningVar;
 }
 
-void Interpreter::internal_remove(Variable* variable, vector<string> parameters)
+Variable Interpreter::internal_remove(Variable* variable, vector<string> parameters)
 {
     if (parameters.empty())
     {
         this->PrintError("No parameters given");
-        return;
+        Variable var;
+        return var;
     }
 
     if (isNan(parameters[0]))
     {
         this->PrintError("Invalid index");
-        return;
+        Variable var;
+        return var;
     }
 
     int index = stoi(parameters[0]);
@@ -54,7 +59,8 @@ void Interpreter::internal_remove(Variable* variable, vector<string> parameters)
         if (index > ListValue->size()-1)
         {
             this->PrintError("Index out of range");
-            return;
+            Variable var;
+            return var;
         }
         ListValue->erase((ListValue->begin() + index));
     }
@@ -63,9 +69,31 @@ void Interpreter::internal_remove(Variable* variable, vector<string> parameters)
         if (index < ListValue->size()-1)
         {
             this->PrintError("Index out of range");
-            return;
+            Variable var;
+            return var;
         }
         ListValue->erase((ListValue->end() + index));
     }
     //cout << (ListValue.begin() + index)->get_value() << endl;
+    Variable returningVar;
+    return returningVar;
+}
+
+Variable Interpreter::internal_length(Variable* variable)
+{
+    string type = variable->get_type();
+    Variable var;
+    if (type == "list")
+    {
+        var.setup("", int(variable->get_list_value().size()));
+    }
+    else if (type == "string")
+    {
+        var.setup("", int(variable->get_str_value().length()-2));
+    }
+    else
+    {
+        this->PrintError("Invalid type for function: 'length'");
+    }
+    return var;
 }

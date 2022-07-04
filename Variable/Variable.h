@@ -18,6 +18,7 @@ public:
 	void setup(string var_name, string val);
     void setup(string var_name, bool val);
     void setup(string var_name, vector<Variable> val);
+    void set_name(string param_name) { this->name = std::move(param_name); }
 	inline int get_int_value() const { return this->IntValue; }
     inline string get_str_value() { return this->StrValue; }
     inline bool get_bool_value() const { return this->BoolValue; }

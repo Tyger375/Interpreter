@@ -1,4 +1,4 @@
-# Interpreter
+# Lmao Interpreter
 
 An interpreter made in C++ just for fun.
 
@@ -8,6 +8,10 @@ An interpreter made in C++ just for fun.
     - [Lists](#Lists)
   - [Functions](#Functions)
     - [Internal functions](#Internal-functions)
+    - [Out](#Out)
+    - [Outl](#Outl)
+    - [In](#In)
+    - [Type](#Type)
   - [If statement](#If-statement)
   - [While loop](#While-loop)
 - [Links and socials](#Links-and-socials)
@@ -31,6 +35,8 @@ var list_variable = [int_variable, str_variable, bool_variable]
 Available types:<br>
 - Integer
 - String
+- Boolean
+- List
 
 #### Updating variables
 
@@ -57,7 +63,8 @@ list.add(["another list", 2])
 list.remove(0)
 list.remove(-1)
 
-out(list[0][0])
+outl(list[0][0])
+outl(list.length())
 ```
 
 ### Functions
@@ -75,23 +82,29 @@ var returned = function_name("hi") //<- "hi2"
 
 #### Internal functions
 
+##### Out
 ```
 out("hello world!")
 ```
-
 "Out" function allows you to print something in the output. <br>
 
+##### Outl
+```
+outl("hello world!")
+```
+"Outl" function allows you to print something in the output with \n at the end. <br>
+
+##### In
 ```
 var input = in()
 ```
-
 "In" function allows you to get an input from the user. <br>
 
+##### Type
 ```
 var input = in()
 var type = type(input)
 ```
-
 "Type" function allows you to get the type of a variable. <br> 
 
 ### If statement

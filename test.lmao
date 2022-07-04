@@ -25,9 +25,15 @@ var testlist = [
             ],
             5
         ],
+        4,
         4
     ]
 ]
+
+var testfunction = testlist[3].length()
+
+outl("testfunction", testfunction)
+outl("heheheha", testlist[0].length())
 
 outl(testlist[3])
 testlist[3].remove(-1)
