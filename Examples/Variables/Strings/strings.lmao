@@ -1,0 +1,5 @@
+//Declaring string variable
+var string = "this is a string"
+
+//Adding things to the string
+string = "Hi, " + string + "."

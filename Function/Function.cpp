@@ -132,7 +132,7 @@ string Interpreter::Typeof(vector<string> parameters, bool* Returning)
     const string parameter = parameters[0];
     string Val;
 
-    if (parameter[0] == '"' || !isNan(parameter))
+    if (!getTypeVar(parameter).empty())
         Val = parameter;
     else
     {
@@ -144,6 +144,7 @@ string Interpreter::Typeof(vector<string> parameters, bool* Returning)
             return "";
         }
         const string type = var.get_type();
+        //cout << "type = " << type << endl;
         if (type == "string")
         {
             string VALUE = var.get_str_value();
@@ -165,6 +166,10 @@ string Interpreter::Typeof(vector<string> parameters, bool* Returning)
         {
             Val = to_string(var.get_bool_value());
         }
+        else if (type == "list")
+        {
+            Val = GetListValue(var);
+        }
         else
         {
             this->PrintError("Invalid variable");
@@ -172,7 +177,6 @@ string Interpreter::Typeof(vector<string> parameters, bool* Returning)
     }
 
     string type = getTypeVar(Val);
-    //cout << Val << " " << type << endl;
     *Returning = true;
     return type;
 }
@@ -217,6 +221,10 @@ void Interpreter::SetReturnValue(vector<string> splitted)
 Variable Interpreter::executeFunction(const string& name_function, bool CheckWriting, const vector<string>& parameters, bool IsNewFunc, bool* Returning)
 {
     Variable ReturnedVariable;
+    //TODO: function int()
+    //TODO: function string()
+    //TODO: function list()
+    //TODO: function bool()
     if (name_function == "outl" && !CheckWriting)
     {
         this->print(parameters);
@@ -234,7 +242,8 @@ Variable Interpreter::executeFunction(const string& name_function, bool CheckWri
     else if (name_function == "in")
     {
         string Var;
-        cin >> Var;
+        //cin >> Var;
+        getline(cin, Var);
         *Returning = true;
         Var = '"' + Var + '"';
         ReturnedVariable.setup("", Var);

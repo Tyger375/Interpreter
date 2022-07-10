@@ -20,6 +20,7 @@ cmake_install.cmake
 ALL_BUILD.*
 Interprete.*
 Interpreter.*
+Logs/
 ZERO_CHECK.*
 *.userprefs
 

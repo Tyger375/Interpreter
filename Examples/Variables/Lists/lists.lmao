@@ -1,0 +1,5 @@
+//Declaring list variable
+var list = ["String member", 2, true, ["hi!", -6, false]]
+
+//Getting a list member
+outl(list[0], list[3])

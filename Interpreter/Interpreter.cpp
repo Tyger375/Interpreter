@@ -1,6 +1,7 @@
 #include "Interpreter.h"
 #include "../Other/Utilities/Utilities.h"
 #include <iostream>
+#include <utility>
 
 using namespace std;
 using namespace Utilities;
@@ -67,8 +68,9 @@ Interpreter::Interpreter(const vector<Variable>& oldVariables, const vector<Vari
     }
 }
 
-void Interpreter::start(const std::string& file_name, bool debug)
+void Interpreter::start(const std::string& file_name, bool debug, bool savelogs, string file_logs_name)
 {
+    logs_file_name = move(file_logs_name);
 	fstream new_file;
 	new_file.open(file_name, ios::in);
 	if (new_file.is_open())
@@ -83,8 +85,14 @@ void Interpreter::start(const std::string& file_name, bool debug)
 		}
         if (debug)
         {
-            this->debugVariables();
-            this->debugFunctions();
+            this->debugVariables(savelogs);
+            this->debugFunctions(savelogs);
+            this->debugInternals(savelogs);
+        }
+
+        if (savelogs)
+        {
+            this->saveLogs();
         }
 
 		/*for (int i = 0; i < this->VariablesInfos.size(); i++)
@@ -125,18 +133,27 @@ void Interpreter::Line(string str_line)
 {
 	try
 	{
-		vector<string> splitted = split(str_line, ' ');
+		vector<string> splitted = split(move(str_line), ' ');
 		/*for (int j = 0; j < splitted.size(); j++)
 		{
 			cout << splitted[j] << endl;
 		}*/
 		string lastString;
+
+        /*cout << "---------------" << endl;
+
+        cout << line << endl;
+
+        debugInternals(false);
+
+        cout << "---------------" << endl;*/
+
 		for (this->i = 0; this->i < splitted.size(); this->i++)
 		{
             if (this->error) break;
 			const string String = splitted[i];
 
-            //cout << String << endl;
+            //cout << String << " " << i << endl;
 
             //cout << Ifs.size() << " " << this->ListWriting.size() << " " << this->writingFunc << " " << this->writingWhile << endl;
 
@@ -714,14 +731,14 @@ void Interpreter::Line(string str_line)
                                     //cout << "debugging" << endl;
                                     //this->debugVariables();
                                     vector<Variable> VARS;
-                                    for (auto var : this->variables)
+                                    for (const auto& var : this->variables)
                                     {
                                         VARS.push_back(var);
                                     }
 
-                                    for (auto spaces : this->VariablesInfos)
+                                    for (const auto& spaces : this->VariablesInfos)
                                     {
-                                        for (auto var : spaces)
+                                        for (const auto& var : spaces)
                                         {
                                             VARS.push_back(var);
                                         }
@@ -919,6 +936,8 @@ void Interpreter::If(const vector<string>& parameters)
 
     vector<bool> Checks = {};
     int num = 0;
+
+    //TODO: [IF] "<" and ">" operators
 
     vector<string> ValidOperators = {
             "==",
@@ -1351,7 +1370,7 @@ void Interpreter::WriteParameters(vector<string> splitted, vector<string>* param
                 params.erase(params.end()-2);
                 params.erase(params.end()-2);
                 params[params.size()-1] = returned.get_value();
-                /*for (int j = 0; j < params.size(); ++j) {
+                for (int j = 0; j < params.size(); ++j) {
                     cout << j << ": " << params[j] << endl;
                 }*/
             }
@@ -1400,7 +1419,7 @@ void Interpreter::WriteParameters(vector<string> splitted, vector<string>* param
                     if (getTypeVar(StrIndex) != "int")
                     {
                         Variable tryVar = loadVariableWithoutWriting(split(StrIndex, ' '), "");
-                        if (tryVar.get_type() == "" || tryVar.get_type() != "int")
+                        if (tryVar.get_type().empty() || tryVar.get_type() != "int")
                         {
                             this->PrintError("Invalid index type");
                             return;
@@ -1440,7 +1459,7 @@ void Interpreter::WriteParameters(vector<string> splitted, vector<string>* param
                 if (getTypeVar(local_index) != "int")
                 {
                     Variable tryVar = loadVariableWithoutWriting(split(local_index, ' '), "");
-                    if (tryVar.get_type() == "" || tryVar.get_type() != "int")
+                    if (tryVar.get_type().empty() || tryVar.get_type() != "int")
                     {
                         this->PrintError("Invalid index type");
                         return;
@@ -1593,7 +1612,7 @@ void Interpreter::WriteParameters(vector<string> splitted, vector<string>* param
         LoadParamVariable(&params, IsNewFunc, parameters);
     else
     {
-        for (auto param : params)
+        for (const auto& param : params)
         {
             parameters->push_back(param);
         }

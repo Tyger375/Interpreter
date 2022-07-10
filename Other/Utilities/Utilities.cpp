@@ -137,7 +137,8 @@ bool Utilities::isNan(const string& string)
 
 string Utilities::getTypeVar(std::string val)
 {
-    if (isNan(val)) {
+    if (isNan(val))
+    {
         if (val[0] == '"')
             return "string";
         else if (val[0] == '[')
@@ -146,7 +147,9 @@ string Utilities::getTypeVar(std::string val)
             return "bool";
         else
             return "";
-    } else {
+    }
+    else
+    {
         //cout << "returning int" << endl;
         return "int";
     }

@@ -1,0 +1,31 @@
+var game = true
+while (game == true)
+{
+    out("you: ")
+    var input = in()
+    outl("")
+
+    var splitted = input.split(" ")
+
+    var cmd = splitted[0]
+
+    if (cmd == "!test")
+    {
+        if (splitted.length() == 1)
+        {
+            outl("And?")
+        }
+        else
+        {
+            outl("hi", splitted[1])
+        }
+    }
+    if (cmd == "!end")
+    {
+        game = false
+        if (splitted.length() != 1)
+        {
+            outl("Ending with message:", splitted[1])
+        }
+    }
+}

@@ -1,0 +1,14 @@
+//Declaring string variable
+var string = "THIS is A string"
+
+//String to upper case
+var toupper = string.up()
+
+//String to lower case
+var tolower = string.low()
+
+//String splitted
+var splitted = string.split(" ")
+
+//String's length
+var length = string.length()

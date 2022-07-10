@@ -11,6 +11,8 @@ int main(int argc, char** argv)
 {
     interpreter::Interpreter interpreter;
     bool debug = false;
+    bool savelogs = false;
+    string logs_file_name = "logs.txt";
     if (argc >= 2)
     {
         vector<string> words;
@@ -41,11 +43,18 @@ int main(int argc, char** argv)
                             else if (splitted[1] == "false")
                                 debug = false;
                         }
+                        else if (splitted[0] == "savelogs")
+                        {
+                            if (splitted[1] == "true")
+                                savelogs = true;
+                            else if (splitted[1] == "false")
+                                savelogs = false;
+                        }
                     }
                 }
             }
         }
-        interpreter.start(argv[1], debug);
+        interpreter.start(argv[1], debug, savelogs, logs_file_name);
     }
     else
     {
@@ -58,7 +67,7 @@ int main(int argc, char** argv)
             //interpreter.debugVariables();
         }
         while (line != "exit");
-        interpreter.debugVariables();
+        interpreter.debugVariables(savelogs);
         //cout << "Real-time interpreter is not available. It'll be added soon" << endl;
     }
     return 0;

@@ -18,6 +18,8 @@ class interpreter::Interpreter
 {
 private:
     //Interpreter
+    string logs_file_name;
+    string all_data_logs;
     int i{};
     bool error{};
     bool writingComment{};
@@ -79,6 +81,12 @@ private:
     //Lists
     Variable internal_add(Variable*, vector<string>);
     Variable internal_remove(Variable*, vector<string>);
+    Variable internal_contains(Variable*, vector<string>);
+    //Strings
+    Variable internal_split(Variable*, vector<string>);
+    Variable internal_lower(Variable*);
+    Variable internal_upper(Variable*);
+    //Multiple types
     Variable internal_length(Variable*);
 public:
     int line{};
@@ -86,10 +94,12 @@ public:
     Interpreter(const vector<Variable>&, const vector<Variable>&, const vector<Function>&, bool, Function*);
     Interpreter();
     void clear();
-    void start(const string&, bool);
+    void start(const string&, bool, bool, string);
     void Line(string str_line);
-    void debugVariables();
-    void debugFunctions();
+    void debugVariables(bool);
+    void debugFunctions(bool);
+    void debugInternals(bool);
+    void saveLogs();
     void PrintError(const string&);
 
     inline vector<Variable> getVariables() const { return this->variables; };

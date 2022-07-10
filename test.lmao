@@ -2,11 +2,29 @@ var hi = 0
 
 var test_negative = -1
 
+var test_string = "THIS is A string"
+
+outl(test_string)
+outl(test_string.low())
+outl(test_string.up())
+
+splitted = test_string.split(" ")
+
+outl(splitted)
+outl(splitted[0])
+var test_member = splitted[0]
+outl(test_member)
+
+if (test_member == "THIS")
+{
+    outl("heheheha")
+}
+
 outl(type(hi))
 outl(-1)
 
-var list = [hi]
-outl(list)
+var list = ["He he he ha Hi"]
+outl(list[0])
 
 var test_bool = true
 
@@ -30,9 +48,11 @@ var testlist = [
     ]
 ]
 
-var testfunction = testlist[3].length()
+var test_function = testlist[3].length()
 
-outl("testfunction", testfunction)
+outl("test_function", test_function)
+var includes = testlist.contains("due")
+outl("includes", includes)
 outl("heheheha", testlist[0].length())
 
 outl(testlist[3])

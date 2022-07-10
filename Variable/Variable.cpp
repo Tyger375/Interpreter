@@ -33,6 +33,10 @@ Variable Interpreter::execute_internal_function(Variable* variable, const string
         {
             returnedVar = this->internal_length(variable);
         }
+        else if (function_name == "contains")
+        {
+            returnedVar = this->internal_contains(variable, move(parameters));
+        }
         else
         {
             this->PrintError("Invalid function");
@@ -48,12 +52,25 @@ Variable Interpreter::execute_internal_function(Variable* variable, const string
         {
             returnedVar = this->internal_length(variable);
         }
+        else if (function_name == "split")
+        {
+            returnedVar = this->internal_split(variable, move(parameters));
+        }
+        else if (function_name == "low")
+        {
+            returnedVar = this->internal_lower(variable);
+        }
+        else if (function_name == "up")
+        {
+            returnedVar = this->internal_upper(variable);
+        }
         else
         {
             this->PrintError("Invalid function");
             Variable var;
             return var;
         }
+        //TODO: remove characters from string
         return returnedVar;
     }
     else
@@ -198,7 +215,7 @@ void Interpreter::InternalFunctionLoadVariable(string* str_value, string* type, 
 
             if (List->get_list_value().size() <= stoi(str_Index))
             {
-                this->PrintError("str_Index out of range");
+                this->PrintError("Index out of range");
                 return;
             }
             Variable member = List->get_list_value()[stoi(str_Index)];
@@ -211,8 +228,6 @@ void Interpreter::InternalFunctionLoadVariable(string* str_value, string* type, 
                 }
                 else
                 {
-
-                    cout << "here" << endl;
                     this->PrintError("Invalid syntax");
                     return;
                 }
@@ -259,7 +274,8 @@ void Interpreter::InternalFunctionLoadVariable(string* str_value, string* type, 
                     //this->PrintError("Error");
                     return;
                 }
-                //cout << "returned " << returning.get_value() << endl;
+                //cout << "returned " << returning.get_value() << " " << returning.get_type() << endl;
+                //cout << returning.get_list_value()[0].get_value() << endl;
                 /*cout << "Origin list = ";
                 this->printList(OriginList);
                 cout << endl;*/
@@ -341,19 +357,137 @@ void Interpreter::loadVariable(vector<string> splitted, const string& name)
     }
     else if (splitted.size() > (this->i+1) && splitted[i+1] == "[")
     {
-        while (true)
+        if (splitted[i] != "[")
         {
-            if (this->i == splitted.size()-1)
-                break;
-            if (splitted[i] == "]")
+            while (true)
             {
-                if (i+1 < splitted.size()-1 && splitted[i+1] != "[")
+                if (this->i == splitted.size()-1)
                     break;
+                if (splitted[i] == "]")
+                {
+                    if (i+1 < splitted.size()-1 && splitted[i+1] != "[")
+                        break;
+                }
+                i++;
             }
-            i++;
+            if (i+1 < splitted.size()-1)
+                this->InternalFunctionLoadVariable(&str_value, &type, splitted, name, &this->i);
+            else
+            {
+                Variable* VARIABLE;
+
+                Variable OriginList;
+                Variable *List = &OriginList;
+
+                string lastString = splitted[i];
+                int index = i;
+                if (lastString == " ")
+                {
+                    lastString = splitted[i - 1];
+                    index = i-1;
+                }
+
+                bool found = false;
+                vector<string> indexes;
+                do
+                {
+                    if (lastString == "]")
+                    {
+                        //index--;
+                        if (isNan(splitted[index - 1]))
+                        {
+                            this->PrintError("Invalid index");
+                        }
+                        else
+                        {
+                            //index--;
+                            while (true)
+                            {
+                                index--;
+                                if (index < 0)
+                                {
+                                    this->PrintError("Invalid syntax");
+                                    return;
+                                }
+                                if (splitted[index] == "[")
+                                {
+                                    indexes.push_back(splitted[index + 1]);
+                                    if (splitted[index - 1] != "]")
+                                        found = true;
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                    if (found)
+                    {
+                        break;
+                    }
+                } while (!found);
+                Variable VAR = find_variable(str_value);
+                string ListValue = GetListValue(VAR);
+                vector<string> Splitted = split(ListValue, ' ');
+                int index2 = 0;
+                this->loadList(Splitted, false, &index2);
+                OriginList = this->ListWriting[0];
+                Variable ListToWrite = OriginList;
+                i++;
+                for (int j = int(indexes.size()) - 1; j >= 0; --j)
+                {
+                    //member inside a list
+                    string str_Index = indexes[j];
+                    if (str_Index == "]")
+                    {
+                        this->PrintError("No index");
+                        return;
+                    }
+                    if (getTypeVar(str_Index) != "int")
+                    {
+                        this->PrintError("Invalid index local_type");
+                        return;
+                    }
+                    index++;
+                    if (List->get_list_value().size() <= stoi(str_Index))
+                    {
+                        this->PrintError("Index out of range");
+                        return;
+                    }
+                    Variable member = List->get_list_value()[stoi(str_Index)];
+                    string local_type = member.get_type();
+                    {
+                        if (local_type == "list" || local_type == "string")
+                        {
+                            Variable *Pointer = List->get_item_list_pointer(stoi(str_Index));
+                            List = Pointer;
+                        }
+                        else
+                        {
+                            this->PrintError("Invalid syntax");
+                            return;
+                        }
+                    }
+                }
+                while (!this->ListWriting.empty())
+                {
+                    this->ListWriting.erase(ListWriting.end() - 1);
+                }
+                while (!this->writingList.empty())
+                {
+                    this->writingList.erase(writingList.end() - 1);
+                }
+                VARIABLE = List;
+
+                type = VARIABLE->get_type();
+                if (type == "string")
+                    str_value = VARIABLE->get_str_value();
+                else if (type == "int")
+                    str_value = to_string(VARIABLE->get_int_value());
+                else if (type == "bool")
+                    str_value = to_string(VARIABLE->get_bool_value());
+                else if (type == "list")
+                    str_value = GetListValue(*VARIABLE);
+            }
         }
-        //i++;
-        this->InternalFunctionLoadVariable(&str_value, &type, splitted, name, &this->i);
     }
     else if (splitted[this->i] == "[")
     {
@@ -395,7 +529,6 @@ void Interpreter::loadVariable(vector<string> splitted, const string& name)
         this->Operation(splitted, &str_value, &finalType, type, &this->i);
         type = finalType;
     }
-    //TODO: {var} = {list}[{index}]
 
     Variable var;
     if (type == "string")
@@ -428,6 +561,11 @@ void Interpreter::loadVariable(vector<string> splitted, const string& name)
             writingList.erase(writingList.end()-1);
         }
         this->loadList(split(str_value, ' '), false, &index);
+
+        while (!writingList.empty())
+        {
+            writingList.erase(writingList.end()-1);
+        }
 
         var.setup(name, ListWriting[0].get_list_value());
 
@@ -591,7 +729,7 @@ Variable Interpreter::loadVariableWithoutWriting(vector<string> splitted, const 
         //cout << "in-variable function" << endl;
         this->InternalFunctionLoadVariable(&str_value, &type, splitted, name, &this->i);
     }
-    else if (splitted.size() > (this->i+1) && splitted[i+1] == "[")
+    else if (splitted.size() > (this->i+1) && splitted[i+1] == "[" && splitted[i] != "[")
     {
         while (true)
         {

@@ -1,0 +1,18 @@
+//Declaring list variable
+var list = ["String member", 2, true, ["hi!", -6, false]]
+
+//Adding a member
+list.add("hi")
+list[3].add("Hello")
+
+//Removing a member
+list.remove(4)
+list[3].remove(3)
+
+//List's length
+var length = list.length()
+var sub_length = list[3].length()
+
+//Check if a list has a member
+var includes = list.contains("String member")
+var includes2 = list.contains(-6)
