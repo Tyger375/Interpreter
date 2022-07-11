@@ -39,12 +39,28 @@ void Interpreter::Setup()
     Function typeFunc;
     typeFunc.setup("type", params);
 
+    Function castIntFunc;
+    castIntFunc.setup("int", params);
+
+    Function castStrFunc;
+    castStrFunc.setup("string", params);
+
+    Function castBoolFunc;
+    castBoolFunc.setup("bool", params);
+
+    Function castListFunc;
+    castListFunc.setup("list", params);
+
     this->functions.push_back(outFunc);
     this->functions.push_back(outlFunc);
     this->functions.push_back(whileFunc);
     this->functions.push_back(ifFunc);
     this->functions.push_back(inFunc);
     this->functions.push_back(typeFunc);
+    this->functions.push_back(castIntFunc);
+    this->functions.push_back(castStrFunc);
+    this->functions.push_back(castBoolFunc);
+    this->functions.push_back(castListFunc);
 }
 
 Interpreter::Interpreter()

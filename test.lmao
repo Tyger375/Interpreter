@@ -4,6 +4,22 @@ var test_negative = -1
 
 var test_string = "THIS is A string"
 
+var cast_int = 2
+var to_int = int(cast_int)
+outl("to_int", to_int, type(to_int))
+
+var cast_str = 5
+var to_str = string(cast_str)
+outl("to_str", to_str, type(to_str))
+
+var cast_bool = "true"
+var to_bool = bool(cast_bool)
+outl("to_bool", to_bool, type(to_bool))
+
+var cast_list = "[true, 2, 5]"
+var to_list = list(cast_list)
+outl("to_list", to_list, type(to_list))
+
 outl(test_string)
 outl(test_string.low())
 outl(test_string.up())
@@ -15,7 +31,7 @@ outl(splitted[0])
 var test_member = splitted[0]
 outl(test_member)
 
-if (test_member == "THIS")
+if (test_member.low() == "this")
 {
     outl("heheheha")
 }

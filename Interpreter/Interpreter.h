@@ -66,6 +66,10 @@ private:
 
     //Functions
     void print(const vector<string>&, bool);
+    Variable cast_int(const vector<string>& parameters);
+    Variable cast_string(const vector<string>& parameters);
+    Variable cast_bool(const vector<string>& parameters);
+    Variable cast_list(const vector<string>& parameters);
     string Typeof(vector<string>, bool*);
     void If(const vector<string>&);
     //for (i=0;i>0;i++)

@@ -5,6 +5,7 @@ An interpreter made in C++ just for fun.
 - [Syntax](#Syntax)
   - [Variables](#Variables)
     - [Updating variables](#Updating-variables)
+    - [Casting variables](#Casting-variables)
     - [Lists](#Lists)
   - [Functions](#Functions)
     - [Internal functions](#Internal-functions)
@@ -47,6 +48,30 @@ variable = variable - 1 //<- 1
 var var2 = variable + " hello" //<- "2 hello"
 
 var2 = variable - 2 //<- error
+```
+
+#### Casting variables
+
+```
+//Variable to integer
+var cast_int = 2
+var to_int = int(cast_int)
+outl("to_int", to_int, type(to_int))
+
+//Variable to string
+var cast_str = 5
+var to_str = string(cast_str)
+outl("to_str", to_str, type(to_str))
+
+//Variable to boolean
+var cast_bool = "true"
+var to_bool = bool(cast_bool)
+outl("to_bool", to_bool, type(to_bool))
+
+//Variable to list
+var cast_list = "[true, 2, 5]"
+var to_list = list(cast_list)
+outl("to_list", to_list, type(to_list))
 ```
 
 #### Lists

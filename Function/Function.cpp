@@ -120,6 +120,131 @@ void Interpreter::print(const vector<string>& parameters, bool endline=true)
         cout << endl;
 }
 
+Variable Interpreter::cast_int(const vector<string>& parameters)
+{
+    Variable var;
+    var.setup("", string(" "));
+    if (parameters.empty())
+    {
+        this->PrintError("No param given");
+        return var;
+    }
+
+    string param = parameters[0];
+    string type = getTypeVar(param);
+    if (type == "string")
+    {
+        param.erase(param.begin());
+        param.erase(param.end()-1);
+        string new_type = getTypeVar(param);
+        if (new_type == "int")
+        {
+            var.setup("", stoi(param));
+        }
+        else if (new_type == "bool")
+        {
+            var.setup("", int(to_bool(param)));
+        }
+    }
+    else if (type == "bool")
+    {
+        var.setup("", int(to_bool(param)));
+    }
+    else if (type == "int")
+    {
+        var.setup("", stoi(param));
+    }
+
+    return var;
+}
+
+Variable Interpreter::cast_string(const vector<string>& parameters)
+{
+    Variable var;
+    var.setup("", string(" "));
+    if (parameters.empty())
+    {
+        this->PrintError("No param given");
+        return var;
+    }
+
+    string param = parameters[0];
+    string type = getTypeVar(param);
+    var.setup("", string(param));
+
+    return var;
+}
+
+Variable Interpreter::cast_bool(const vector<string>& parameters)
+{
+    Variable var;
+    var.setup("", string(" "));
+    if (parameters.empty())
+    {
+        this->PrintError("No param given");
+        return var;
+    }
+
+    string param = parameters[0];
+    string type = getTypeVar(param);
+    if (type == "string")
+    {
+        param.erase(param.begin());
+        param.erase(param.end()-1);
+        string new_type = getTypeVar(param);
+        if (new_type == "bool")
+        {
+            var.setup("", to_bool(param));
+        }
+    }
+    else if (type == "bool")
+    {
+        var.setup("", to_bool(param));
+    }
+    else if (type == "int")
+    {
+        var.setup("", bool(stoi(param)));
+    }
+
+    return var;
+}
+
+Variable Interpreter::cast_list(const vector<string>& parameters)
+{
+    Variable var;
+    var.setup("", string(" "));
+    if (parameters.empty())
+    {
+        this->PrintError("No param given");
+        return var;
+    }
+
+    string param = parameters[0];
+    string type = getTypeVar(param);
+    if (type == "string")
+    {
+        param.erase(param.begin());
+        param.erase(param.end()-1);
+        string new_type = getTypeVar(param);
+        if (new_type == "list")
+        {
+            int index = 0;
+            loadList(split(param, ' '), false, &index);
+            var = this->ListWriting[0];
+            this->ListWriting.erase(ListWriting.end()-1);
+        }
+    }
+    else if (type == "list")
+    {
+        int index = 0;
+        loadList(split(param, ' '), false, &index);
+        var = this->ListWriting[0];
+        this->ListWriting.erase(ListWriting.end()-1);
+    }
+
+    return var;
+}
+
 string Interpreter::Typeof(vector<string> parameters, bool* Returning)
 {
     if (parameters.empty())
@@ -130,11 +255,9 @@ string Interpreter::Typeof(vector<string> parameters, bool* Returning)
     }
 
     const string parameter = parameters[0];
-    string Val;
+    string type = getTypeVar(parameter);
 
-    if (!getTypeVar(parameter).empty())
-        Val = parameter;
-    else
+    if (type.empty())
     {
         Variable var = this->find_variable(parameter);
         if (var.get_type().empty())
@@ -143,40 +266,9 @@ string Interpreter::Typeof(vector<string> parameters, bool* Returning)
             *Returning = false;
             return "";
         }
-        const string type = var.get_type();
-        //cout << "type = " << type << endl;
-        if (type == "string")
-        {
-            string VALUE = var.get_str_value();
-            const string Type2 = getTypeVar(VALUE);
-            if (Type2 == "int")
-            {
-                VALUE.erase(VALUE.begin());
-                VALUE.erase(VALUE.end() - 1);
-            }
-            else
-                VALUE = '"' + VALUE + '"';
-            Val = VALUE;
-        }
-        else if (type == "int")
-        {
-            Val = to_string(var.get_int_value());
-        }
-        else if (type == "bool")
-        {
-            Val = to_string(var.get_bool_value());
-        }
-        else if (type == "list")
-        {
-            Val = GetListValue(var);
-        }
-        else
-        {
-            this->PrintError("Invalid variable");
-        }
+        type = var.get_type();
     }
 
-    string type = getTypeVar(Val);
     *Returning = true;
     return type;
 }
@@ -185,46 +277,22 @@ void Interpreter::SetReturnValue(vector<string> splitted)
 {
     if ((splitted.size()-1) != i)
     {
-        string ReturningVal = splitted[++i];
-        string type;
-        type = getTypeVar(ReturningVal);
-        Variable var;
-        if (type.empty())
-        {
-            var = find_variable(ReturningVal);
-            if (var.get_type().empty())
-            {
-                this->PrintError("Invalid variable returned");
-                return;
-            }
-            else
-                this->FUNC->set_return(var);
-        }
-        else
-        {
-            if (type == "string")
-                var.setup("", ReturningVal);
-            else if (type == "int")
-                var.setup("", stoi(ReturningVal));
-            else
-            {
-                this->PrintError("Invalid type");
-            }
-
-            this->FUNC->set_return(var);
-        }
+        splitted.erase(splitted.begin());
+        Variable returned = this->loadVariableWithoutWriting(splitted, "");
+        //cout << "val = " << returned.get_value() << endl;
+        this->FUNC->set_return(returned);
     }
     else
-        cout << "returning nothing" << endl;
+    {
+        Variable var;
+        var.setup("", "");
+        this->FUNC->set_return(var);
+    }
 }
 
 Variable Interpreter::executeFunction(const string& name_function, bool CheckWriting, const vector<string>& parameters, bool IsNewFunc, bool* Returning)
 {
     Variable ReturnedVariable;
-    //TODO: function int()
-    //TODO: function string()
-    //TODO: function list()
-    //TODO: function bool()
     if (name_function == "outl" && !CheckWriting)
     {
         this->print(parameters);
@@ -232,11 +300,31 @@ Variable Interpreter::executeFunction(const string& name_function, bool CheckWri
         *Returning = true;
         return ReturnedVariable;
     }
-    if (name_function == "out")
+    else if (name_function == "out")
     {
         this->print(parameters, false);
         ReturnedVariable.setup("", "");
         *Returning = true;
+        return ReturnedVariable;
+    }
+    else if (name_function == "int")
+    {
+        ReturnedVariable = this->cast_int(parameters);
+        return ReturnedVariable;
+    }
+    else if (name_function == "string")
+    {
+        ReturnedVariable = this->cast_string(parameters);
+        return ReturnedVariable;
+    }
+    else if (name_function == "bool")
+    {
+        ReturnedVariable = this->cast_bool(parameters);
+        return ReturnedVariable;
+    }
+    else if (name_function == "list")
+    {
+        ReturnedVariable = this->cast_list(parameters);
         return ReturnedVariable;
     }
     else if (name_function == "in")
