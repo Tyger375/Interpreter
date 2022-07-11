@@ -317,15 +317,38 @@ void Interpreter::Line(string str_line)
                             while (!found);
 
                             Variable VAR = find_variable(name);
-                            string ListValue = GetListValue(VAR);
 
-                            vector<string> Splitted = split(ListValue, ' ');
+                            Variable OriginList;
+                            bool IsString = false;
+                            if (VAR.get_type() == "list")
+                            {
+                                string ListValue = GetListValue(VAR);
 
-                            int index2 = 0;
-                            //this->writingList.push_back(true);
-                            this->loadList(Splitted, false, &index2);
+                                vector<string> Splitted = split(ListValue, ' ');
 
-                            Variable OriginList = this->ListWriting[0];
+                                int index2 = 0;
+                                //this->writingList.push_back(true);
+                                this->loadList(Splitted, false, &index2);
+                                OriginList = this->ListWriting[0];
+                            }
+                            else if (VAR.get_type() == "string")
+                            {
+                                IsString = true;
+                                vector<Variable> chars;
+
+                                string StrValue = VAR.get_str_value();
+                                StrValue.erase(StrValue.begin());
+                                StrValue.erase(StrValue.end()-1);
+
+                                for (char character : StrValue)
+                                {
+                                    Variable char_var;
+                                    char_var.setup("", string(1, character));
+                                    chars.push_back(char_var);
+                                }
+                                OriginList.setup("", chars);
+                            }
+
                             Variable* List = &OriginList;
                             Variable ListToWrite = OriginList;
 
@@ -358,14 +381,27 @@ void Interpreter::Line(string str_line)
                                 }
                                 index++;
 
-                                if (List->get_list_value().size() <= stoi(Index))
-                                {
-                                    this->PrintError("Index out of range");
-                                    return;
-                                }
-                                Variable member = List->get_list_value()[stoi(Index)];
-                                string type = member.get_type();
+                                Variable member;
                                 if (List->get_type() == "list")
+                                {
+                                    if (List->get_list_value().size() <= stoi(Index))
+                                    {
+                                        this->PrintError("Index out of range");
+                                        return;
+                                    }
+                                    member = List->get_list_value()[stoi(Index)];
+                                }
+                                else if (List->get_type() == "string")
+                                {
+                                    if (List->get_str_value().size() <= stoi(Index))
+                                    {
+                                        this->PrintError("Index out of range");
+                                        return;
+                                    }
+                                    member.setup("", string(1, List->get_str_value()[stoi(Index)]));
+                                }
+                                string type = member.get_type();
+                                if (List->get_type() == "list" || List->get_type() == "string")
                                 {
                                     vector<Variable> Vector = List->get_list_value();
                                     Variable* Pointer = List->get_item_list_pointer(stoi(Index));
@@ -380,6 +416,18 @@ void Interpreter::Line(string str_line)
                                     *List = NewValue;
                             }
 
+                            string FinalString;
+                            if (IsString)
+                            {
+                                for (Variable var : OriginList.get_list_value())
+                                {
+                                    string character = var.get_str_value();
+                                    character.erase(character.begin());
+                                    character.erase(character.end()-1);
+                                    FinalString += character;
+                                }
+                            }
+
                             while (!this->ListWriting.empty())
                             {
                                 this->ListWriting.erase(ListWriting.end()-1);
@@ -388,9 +436,12 @@ void Interpreter::Line(string str_line)
                             {
                                 this->writingList.erase(writingList.end()-1);
                             }
-                            bool Found = false;
+
                             Variable newVar;
-                            newVar.setup(name, OriginList.get_list_value());
+                            if (IsString)
+                                newVar.setup(name, FinalString);
+                            else
+                                newVar.setup(name, OriginList.get_list_value());
                             Variable* OldVar = this->find_variable_pointer(name);
                             *OldVar = newVar;
                         }
@@ -953,15 +1004,15 @@ void Interpreter::If(const vector<string>& parameters)
     vector<bool> Checks = {};
     int num = 0;
 
-    //TODO: [IF] "<" and ">" operators
-
     vector<string> ValidOperators = {
             "==",
             "!=",
             ">=",
             "=>",
             "<=",
-            "=<"
+            "=<",
+            "<",
+            ">"
     };
 
     for (auto Condition : conditions) {
@@ -1175,6 +1226,60 @@ void Interpreter::If(const vector<string>& parameters)
             else
             {
                 if (Val1 >= Val2)
+                    FinalValue = true;
+                else
+                    FinalValue = false;
+            }
+        }
+        else if (Comparator == ">")
+        {
+            if (Type1 == Type2)
+            {
+                if (Type1 == "int")
+                {
+                    if (stoi(Val1) > stoi(Val2))
+                        FinalValue = true;
+                    else
+                        FinalValue = false;
+                }
+                else if (Type1 == "string")
+                {
+                    if (Val1 > Val2)
+                        FinalValue = true;
+                    else
+                        FinalValue = false;
+                }
+            }
+            else
+            {
+                if (Val1 > Val2)
+                    FinalValue = true;
+                else
+                    FinalValue = false;
+            }
+        }
+        else if (Comparator == "<")
+        {
+            if (Type1 == Type2)
+            {
+                if (Type1 == "int")
+                {
+                    if (stoi(Val1) < stoi(Val2))
+                        FinalValue = true;
+                    else
+                        FinalValue = false;
+                }
+                else if (Type1 == "string")
+                {
+                    if (Val1 < Val2)
+                        FinalValue = true;
+                    else
+                        FinalValue = false;
+                }
+            }
+            else
+            {
+                if (Val1 < Val2)
                     FinalValue = true;
                 else
                     FinalValue = false;
@@ -1451,7 +1556,21 @@ void Interpreter::WriteParameters(vector<string> splitted, vector<string>* param
                         params.erase(params.end() - 1);
                     else
                         parameters->erase(parameters->end() - 1);
-                    Variable member = var.get_list_value()[stoi(StrIndex)];
+
+                    Variable member;
+                    if (var.get_type() == "list")
+                    {
+                        member = var.get_list_value()[stoi(StrIndex)];
+                    }
+                    else if (var.get_type() == "string")
+                    {
+                        string StrValue = var.get_str_value();
+                        StrValue.erase(StrValue.begin());
+                        StrValue.erase(StrValue.end()-1);
+
+                        char character = StrValue[stoi(StrIndex)];
+                        member.setup("", string(1, character));
+                    }
                     string type = member.get_type();
                     if (type == "string")
                         params.push_back(member.get_str_value());

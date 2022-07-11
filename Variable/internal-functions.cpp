@@ -35,51 +35,6 @@ Variable Interpreter::internal_add(Variable* variable, vector<string> parameters
     return returningVar;
 }
 
-Variable Interpreter::internal_remove(Variable* variable, vector<string> parameters)
-{
-    if (parameters.empty())
-    {
-        this->PrintError("No parameters given");
-        Variable var;
-        return var;
-    }
-
-    if (isNan(parameters[0]))
-    {
-        this->PrintError("Invalid index");
-        Variable var;
-        return var;
-    }
-
-    int index = stoi(parameters[0]);
-
-    vector<Variable>* ListValue = variable->get_list_value_pointer();
-
-    if (index >= 0)
-    {
-        if (index > ListValue->size()-1)
-        {
-            this->PrintError("Index out of range");
-            Variable var;
-            return var;
-        }
-        ListValue->erase((ListValue->begin() + index));
-    }
-    else
-    {
-        if (index < ListValue->size()-1)
-        {
-            this->PrintError("Index out of range");
-            Variable var;
-            return var;
-        }
-        ListValue->erase((ListValue->end() + index));
-    }
-    //cout << (ListValue.begin() + index)->get_value() << endl;
-    Variable returningVar;
-    return returningVar;
-}
-
 Variable Interpreter::internal_contains(Variable* variable, vector<string> parameters)
 {
     if (parameters.empty())
@@ -274,4 +229,77 @@ Variable Interpreter::internal_length(Variable* variable)
         this->PrintError("Invalid type for function: 'length'");
     }
     return var;
+}
+
+Variable Interpreter::internal_remove(Variable* variable, vector<string> parameters)
+{
+    if (parameters.empty())
+    {
+        this->PrintError("No parameters given");
+        Variable var;
+        return var;
+    }
+
+    if (isNan(parameters[0]))
+    {
+        this->PrintError("Invalid index");
+        Variable var;
+        return var;
+    }
+
+    int index = stoi(parameters[0]);
+
+    if (variable->get_type() == "list")
+    {
+        vector<Variable>* ListValue = variable->get_list_value_pointer();
+
+        if (index >= 0)
+        {
+            if (index > ListValue->size()-1)
+            {
+                this->PrintError("Index out of range");
+                Variable var;
+                return var;
+            }
+            ListValue->erase((ListValue->begin() + index));
+        }
+        else
+        {
+            if (index < ListValue->size()-1)
+            {
+                this->PrintError("Index out of range");
+                Variable var;
+                return var;
+            }
+            ListValue->erase((ListValue->end() + index));
+        }
+    }
+    else if (variable->get_type() == "string")
+    {
+        string* StrValue = variable->get_str_value_pointer();
+
+        if (index >= 0)
+        {
+            if (index > StrValue->size()-1)
+            {
+                this->PrintError("Index out of range");
+                Variable var;
+                return var;
+            }
+            StrValue->erase((StrValue->begin() + index));
+        }
+        else
+        {
+            if (index < StrValue->size()-1)
+            {
+                this->PrintError("Index out of range");
+                Variable var;
+                return var;
+            }
+            StrValue->erase((StrValue->end() + index));
+        }
+    }
+    //cout << (ListValue.begin() + index)->get_value() << endl;
+    Variable returningVar;
+    return returningVar;
 }

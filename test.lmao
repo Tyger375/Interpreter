@@ -4,6 +4,16 @@ var test_negative = -1
 
 var test_string = "THIS is A string"
 
+test_string.remove(-1)
+
+var testtttt = test_string[0]
+
+outl(testtttt)
+
+test_string[0] = "t"
+
+outl(test_string)
+
 var cast_int = 2
 var to_int = int(cast_int)
 outl("to_int", to_int, type(to_int))

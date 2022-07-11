@@ -11,7 +11,7 @@ while (game == true)
 
     if (cmd == "!test")
     {
-        if (splitted.length() == 1)
+        if (splitted.length() < 2)
         {
             outl("And?")
         }
@@ -23,7 +23,7 @@ while (game == true)
     if (cmd == "!end")
     {
         game = false
-        if (splitted.length() != 1)
+        if (splitted.length() > 1)
         {
             outl("Ending with message:", splitted[1])
         }

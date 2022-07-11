@@ -21,6 +21,7 @@ public:
     void set_name(string param_name) { this->name = std::move(param_name); }
 	inline int get_int_value() const { return this->IntValue; }
     inline string get_str_value() { return this->StrValue; }
+    inline string* get_str_value_pointer() { return &this->StrValue; }
     inline bool get_bool_value() const { return this->BoolValue; }
     inline vector<Variable> get_list_value() { return this->ListValue; }
     inline vector<Variable>* get_list_value_pointer() { return &this->ListValue; }
@@ -28,6 +29,7 @@ public:
 	inline string get_name() { return this->name; }
     inline void add_item_list(const Variable& var) { this->ListValue.push_back(var); }
     inline Variable* get_item_list_pointer(int index) { return &this->ListValue[index]; }
+    //inline char* get_item_str_pointer(int index) { return &this->StrValue[index]; }
     string get_value();
 private:
 	int IntValue;

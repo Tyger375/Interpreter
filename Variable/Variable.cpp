@@ -64,13 +64,16 @@ Variable Interpreter::execute_internal_function(Variable* variable, const string
         {
             returnedVar = this->internal_upper(variable);
         }
+        else if (function_name == "remove")
+        {
+            returnedVar = this->internal_remove(variable, move(parameters));
+        }
         else
         {
             this->PrintError("Invalid function");
             Variable var;
             return var;
         }
-        //TODO: remove characters from string
         return returnedVar;
     }
     else
@@ -424,12 +427,39 @@ void Interpreter::loadVariable(vector<string> splitted, const string& name)
                         break;
                     }
                 } while (!found);
+
                 Variable VAR = find_variable(str_value);
-                string ListValue = GetListValue(VAR);
-                vector<string> Splitted = split(ListValue, ' ');
-                int index2 = 0;
-                this->loadList(Splitted, false, &index2);
-                OriginList = this->ListWriting[0];
+
+                bool IsString = false;
+                if (VAR.get_type() == "list")
+                {
+                    string ListValue = GetListValue(VAR);
+
+                    vector<string> Splitted = split(ListValue, ' ');
+
+                    int index2 = 0;
+                    //this->writingList.push_back(true);
+                    this->loadList(Splitted, false, &index2);
+                    OriginList = this->ListWriting[0];
+                }
+                else if (VAR.get_type() == "string")
+                {
+                    IsString = true;
+                    vector<Variable> chars;
+
+                    string StrValue = VAR.get_str_value();
+                    StrValue.erase(StrValue.begin());
+                    StrValue.erase(StrValue.end()-1);
+
+                    for (char character : StrValue)
+                    {
+                        Variable char_var;
+                        char_var.setup("", string(1, character));
+                        chars.push_back(char_var);
+                    }
+                    OriginList.setup("", chars);
+                }
+
                 Variable ListToWrite = OriginList;
                 i++;
                 for (int j = int(indexes.size()) - 1; j >= 0; --j)
@@ -447,24 +477,35 @@ void Interpreter::loadVariable(vector<string> splitted, const string& name)
                         return;
                     }
                     index++;
-                    if (List->get_list_value().size() <= stoi(str_Index))
+
+                    Variable member;
+                    if (List->get_type() == "list")
                     {
-                        this->PrintError("Index out of range");
-                        return;
-                    }
-                    Variable member = List->get_list_value()[stoi(str_Index)];
-                    string local_type = member.get_type();
-                    {
-                        if (local_type == "list" || local_type == "string")
+                        if (List->get_list_value().size() <= stoi(str_Index))
                         {
-                            Variable *Pointer = List->get_item_list_pointer(stoi(str_Index));
-                            List = Pointer;
-                        }
-                        else
-                        {
-                            this->PrintError("Invalid syntax");
+                            this->PrintError("Index out of range");
                             return;
                         }
+                        member = List->get_list_value()[stoi(str_Index)];
+                    }
+                    else if (List->get_type() == "string")
+                    {
+                        if (List->get_str_value().size() <= stoi(str_Index)) {
+                            this->PrintError("Index out of range");
+                            return;
+                        }
+                        member.setup("", string(1, List->get_str_value()[stoi(str_Index)]));
+                    }
+                    string local_type = member.get_type();
+                    if (local_type == "list" || local_type == "string")
+                    {
+                        Variable *Pointer = List->get_item_list_pointer(stoi(str_Index));
+                        List = Pointer;
+                    }
+                    else
+                    {
+                        this->PrintError("Invalid syntax");
+                        return;
                     }
                 }
                 while (!this->ListWriting.empty())
