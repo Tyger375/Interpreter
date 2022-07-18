@@ -332,7 +332,7 @@ void Interpreter::loadVariable(vector<string> splitted, const string& name)
             cout << parameters[j] << endl;
         }*/
 
-        bool Returning;
+        bool Returning = true;
 
         Variable returnedVar = this->executeFunction(name_function, CheckWriting, parameters, false, &Returning);
         string type2 = returnedVar.get_type();
@@ -749,7 +749,7 @@ Variable Interpreter::loadVariableWithoutWriting(vector<string> splitted, const 
             cout << parameters[j] << endl;
         }*/
 
-        bool Returning;
+        bool Returning = true;
 
         Variable returnedVar = this->executeFunction(name_function, CheckWriting, parameters, false, &Returning);
         string type2 = returnedVar.get_type();
