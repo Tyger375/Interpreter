@@ -776,7 +776,7 @@ void Interpreter::Line(string str_line)
                             //cout << "ended if " << this->line << " " << this->Ifs.size() << " " << this->Ifs[0] << " " << this->VariablesInfos.size() << endl;
                             this->FindingElse = true;
                             this->FindingFromLine = this->line;
-							if (!VariablesInfos.empty())
+							if (!VariablesInfos.empty() && this->writingWhile.empty())
 								this->VariablesInfos.erase(VariablesInfos.end() - 1);
 
 							/*if (writingFunc && i == (splitted.size()-1))
