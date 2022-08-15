@@ -2,6 +2,7 @@
 
 An interpreter made in C++ just for fun.
 
+- [Running the interpreter](#Running-the-interpreter)
 - [Syntax](#Syntax)
   - [Variables](#Variables)
     - [Updating variables](#Updating-variables)
@@ -17,11 +18,27 @@ An interpreter made in C++ just for fun.
   - [While loop](#While-loop)
 - [Links and socials](#Links-and-socials)
 
-## Compiler
+## Interpreter
 
-This compiler has two modes: <br>
+This interpreter has two modes: <br>
 - Real-time
-- File-compiler
+- File-reader<br>
+
+***
+
+## Running the interpreter
+These are the program arguments:<br>
+- {PATH}<br>
+The file parameter must be the first argument.<br>
+If there isn't any file path, the Real-time interpreter will start
+- --debug={bool}<br>
+At the end of the interpreter,<br>
+it will show all the internal variable, workspace variables and functions
+- --savelogs={bool}<br>
+All data shown with --debug, will be saved in a file called logs.txt<br>
+**--debug parameter is not required for this argument**
+
+***
 
 ## Syntax
 
@@ -130,7 +147,7 @@ var input = in()
 var input = in()
 var type = type(input)
 ```
-"Type" function allows you to get the type of a variable. <br> 
+"Type" function allows you to get the type of variable. <br> 
 
 ### If statement
 
@@ -150,7 +167,9 @@ else
 ">=",
 "=>",
 "<=",
-"=<" <br>
+"=<",
+">",
+"<"<br>
 These are the available comparators<br>
 else-if statements will be added soon.
 
@@ -164,6 +183,8 @@ while (num < 10)
     num = num + 1
 }
 ```
+
+***
 
 ## Links and socials
 

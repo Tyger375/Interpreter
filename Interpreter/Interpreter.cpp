@@ -16,6 +16,7 @@ void Interpreter::Setup()
     this->FindingElse = false;
 	this->writingFunc = false;
     this->writingComment = false;
+    this->writingKey = false;
     //this->writingList = false;
     this->isExecutingFunc = false;
     this->error = false;
@@ -253,8 +254,10 @@ void Interpreter::Line(string str_line)
                     }
                 }
             }
-            if (!this->writingList.empty() && this->writingList[writingList.size()-1])
+            if (!this->writingList.empty() && this->writingList[writingList.size()-1] && this->mainWriting == "list")
                 this->loadList(splitted, true, &i);
+            if (!this->writingDict.empty() && this->writingDict[writingDict.size()-1] && this->mainWriting == "dict")
+                this->loadDict(splitted, true, &i);
 
 			bool FoundInVector = findInVector(typeVariables, lastString);
 
@@ -264,7 +267,7 @@ void Interpreter::Line(string str_line)
 
             bool CheckWriting = writingFunc || (!writingWhile.empty()) || writingComment;
 
-			if (!findInVector(typeVariables, String) && this->writingList.empty())
+			if (!findInVector(typeVariables, String) && this->writingList.empty() && this->writingDict.empty())
 			{
 				if (!FoundInVector)
 				{
@@ -283,7 +286,9 @@ void Interpreter::Line(string str_line)
                                 if (lastString == "]")
                                 {
                                     index--;
-                                    if (isNan(splitted[index-1]))
+                                    const string Type = getTypeVar(splitted[index-1]);
+
+                                    if (Type != "int" && Type != "string")
                                     {
                                         this->PrintError("Invalid index");
                                     }
@@ -319,9 +324,10 @@ void Interpreter::Line(string str_line)
                             Variable VAR = find_variable(name);
 
                             Variable OriginList;
-                            bool IsString = false;
+                            int Case = 0;
                             if (VAR.get_type() == "list")
                             {
+                                Case = 1;
                                 string ListValue = GetListValue(VAR);
 
                                 vector<string> Splitted = split(ListValue, ' ');
@@ -333,7 +339,7 @@ void Interpreter::Line(string str_line)
                             }
                             else if (VAR.get_type() == "string")
                             {
-                                IsString = true;
+                                Case = 2;
                                 vector<Variable> chars;
 
                                 string StrValue = VAR.get_str_value();
@@ -347,6 +353,11 @@ void Interpreter::Line(string str_line)
                                     chars.push_back(char_var);
                                 }
                                 OriginList.setup("", chars);
+                            }
+                            else if (VAR.get_type() == "dict")
+                            {
+                                Case = 3;
+                                OriginList = VAR;
                             }
 
                             Variable* List = &OriginList;
@@ -365,6 +376,8 @@ void Interpreter::Line(string str_line)
 
                             Variable NewValue = this->loadVariableWithoutWriting(new_splitted, "");
 
+                            cout << "NewValue: " << NewValue.get_value() << endl;
+
                             for (int j = int(indexes.size())-1; j >= 0; --j)
                             {
                                 //member inside a list
@@ -374,7 +387,9 @@ void Interpreter::Line(string str_line)
                                     this->PrintError("No index");
                                     return;
                                 }
-                                if (getTypeVar(Index) != "int")
+                                const string Type = getTypeVar(Index);
+                                cout << Index << " " << Type << endl;
+                                if (Type != "int" && Type != "string")
                                 {
                                     this->PrintError("Invalid index type");
                                     return;
@@ -400,11 +415,21 @@ void Interpreter::Line(string str_line)
                                     }
                                     member.setup("", string(1, List->get_str_value()[stoi(Index)]));
                                 }
+                                else if (List->get_type() == "dict")
+                                {
+                                    member = List->get_dict_value()[Index];
+                                }
                                 string type = member.get_type();
+                                cout << List->get_type() << endl;
                                 if (List->get_type() == "list" || List->get_type() == "string")
                                 {
                                     vector<Variable> Vector = List->get_list_value();
                                     Variable* Pointer = List->get_item_list_pointer(stoi(Index));
+                                    List = Pointer;
+                                }
+                                else if (List->get_type() == "dict")
+                                {
+                                    Variable* Pointer = List->get_item_dict_pointer(Index);
                                     List = Pointer;
                                 }
                                 else
@@ -417,7 +442,7 @@ void Interpreter::Line(string str_line)
                             }
 
                             string FinalString;
-                            if (IsString)
+                            if (Case == 2)
                             {
                                 for (Variable var : OriginList.get_list_value())
                                 {
@@ -438,10 +463,12 @@ void Interpreter::Line(string str_line)
                             }
 
                             Variable newVar;
-                            if (IsString)
-                                newVar.setup(name, FinalString);
-                            else
+                            if (Case == 1)
                                 newVar.setup(name, OriginList.get_list_value());
+                            else if (Case == 2)
+                                newVar.setup(name, FinalString);
+                            else if (Case == 3)
+                                newVar.setup(name, OriginList.get_dict_value());
                             Variable* OldVar = this->find_variable_pointer(name);
                             *OldVar = newVar;
                         }
@@ -664,7 +691,6 @@ void Interpreter::Line(string str_line)
                     }
                     else if (String == "else" && this->FindingElse && this->writingWhile.empty())
                     {
-                        //cout << "found else " << this->line << endl;
                         bool yes = false;
                         if (Ifs.size() > 1)
                         {
@@ -673,8 +699,6 @@ void Interpreter::Line(string str_line)
                         }
                         else
                             yes = true;
-
-                        //cout << this->line << " " << yes << endl;
 
                         this->FindingElse = false;
                         vector<Variable> Vector;
@@ -1327,7 +1351,7 @@ void Interpreter::ForLoop(const vector<string>& assign, const vector<string>& ch
 			value += (String + " ");
 		}
 	}
-	cout << type << " " << variableName << " " << assignment << " " << value << endl;
+	//cout << type << " " << variableName << " " << assignment << " " << value << endl;
 
 	//Check
 	string VariableNameCheck;
@@ -1354,7 +1378,7 @@ void Interpreter::ForLoop(const vector<string>& assign, const vector<string>& ch
 		}
 	}
 
-	cout << VariableNameCheck << " " << Comparison << " " << ComparisonValue << endl;
+	//cout << VariableNameCheck << " " << Comparison << " " << ComparisonValue << endl;
 
 	string VarName;
 	string Operator;
@@ -1376,7 +1400,7 @@ void Interpreter::ForLoop(const vector<string>& assign, const vector<string>& ch
 		}
 	}
 
-	cout << VarName << " " << Operator << endl;
+	//cout << VarName << " " << Operator << endl;
 
 	Variable varDeclared = this->find_variable(variableName);
 	Variable varCondition1 = this->find_variable(VariableNameCheck);
@@ -1412,9 +1436,7 @@ void Interpreter::LoadParamVariable(vector<string>* params, bool IsNewFunc, vect
     {
         if (!findInVector(comparators, (*params)[0]))
         {
-            //cout << this->VariablesInfos.size() << endl;
             Variable VAR = this->loadVariableWithoutWriting(*params, "");
-            //cout << "value of " << VAR.get_name() << " = " << VAR.get_value() << endl;
             parameters->push_back(VAR.get_value());
         }
         else
@@ -1467,33 +1489,10 @@ void Interpreter::WriteParameters(vector<string> splitted, vector<string>* param
                 string type;
                 (*index) -= 4;
                 this->InternalFunctionLoadVariable(&str_value, &type, splitted, "", index);
-                //cout << "printing = " << str_value << " " << type << endl;
+
                 params.erase(params.end()-2);
                 params.erase(params.end()-2);
                 params[params.size()-1] = str_value;
-                /*for (int j = 0; j < params.size(); ++j) {
-                    cout << j << ": " << params[j] << endl;
-                }*/
-                /*if (splitted[(*index)-4] == "]")
-                {
-
-                }
-                string var_name = splitted[(*index)-4];
-
-                if (this->find_variable(var_name).get_type().empty())
-                {
-                    this->PrintError("Invalid variable");
-                    return;
-                }
-                //params.erase()
-                Variable* var = this->find_variable_pointer(var_name);
-                Variable returned = this->execute_internal_function(var, FunctionName, params2);
-                params.erase(params.end()-2);
-                params.erase(params.end()-2);
-                params[params.size()-1] = returned.get_value();
-                for (int j = 0; j < params.size(); ++j) {
-                    cout << j << ": " << params[j] << endl;
-                }*/
             }
             else
             {
@@ -1526,38 +1525,73 @@ void Interpreter::WriteParameters(vector<string> splitted, vector<string>* param
             //Array member
             string VariableName = splitted[(*index)-1];
             Variable var = this->find_variable(VariableName);
+
             bool isIndex = false;
             if (!var.get_type().empty())
             {
                 if ((*index)+1 < splitted.size())
                 {
+                    const string Type = var.get_type();
                     string StrIndex = splitted[(*index)+1];
                     if (StrIndex == "]")
                     {
                         this->PrintError("No index");
                         return;
                     }
-                    if (getTypeVar(StrIndex) != "int")
+
+                    int Case = 0;
+                    if (findInVector({"list", "string"}, Type))
+                        Case = 1;
+                    else if (Type == "dict")
+                        Case = 2;
+
+                    if (Case == 0)
                     {
-                        Variable tryVar = loadVariableWithoutWriting(split(StrIndex, ' '), "");
-                        if (tryVar.get_type().empty() || tryVar.get_type() != "int")
+                        return;
+                    }
+                    else if (Case == 1)
+                    {
+                        if (getTypeVar(StrIndex) != "int")
                         {
-                            this->PrintError("Invalid index type");
-                            return;
-                        }
-                        else
-                        {
-                            StrIndex = tryVar.get_value();
+                            Variable tryVar = loadVariableWithoutWriting(split(StrIndex, ' '), "");
+                            if (tryVar.get_type().empty() || tryVar.get_type() != "int")
+                            {
+                                this->PrintError("Invalid index type");
+                                return;
+                            }
+                            else
+                            {
+                                StrIndex = tryVar.get_value();
+                            }
                         }
                     }
+                    else if (Case == 2)
+                    {
+                        if (getTypeVar(StrIndex) != "string")
+                        {
+                            Variable tryVar = loadVariableWithoutWriting(split(StrIndex, ' '), "");
+                            if (tryVar.get_type().empty() || tryVar.get_type() != "string")
+                            {
+                                this->PrintError("Invalid index type");
+                                return;
+                            }
+                            else
+                            {
+                                StrIndex = tryVar.get_value();
+                            }
+                        }
+                    }
+
                     (*index)++;
                     isIndex = true;
+
                     if (!CheckWriting)
                         params.erase(params.end() - 1);
                     else
                         parameters->erase(parameters->end() - 1);
 
                     Variable member;
+
                     if (var.get_type() == "list")
                     {
                         member = var.get_list_value()[stoi(StrIndex)];
@@ -1571,6 +1605,13 @@ void Interpreter::WriteParameters(vector<string> splitted, vector<string>* param
                         char character = StrValue[stoi(StrIndex)];
                         member.setup("", string(1, character));
                     }
+                    else if (var.get_type() == "dict")
+                    {
+                        member = var.get_dict_value()[StrIndex];
+                        cout << member.get_value() << " " << member.get_type() << endl;
+                        cout << GetListValue(member) << endl;
+                    }
+
                     string type = member.get_type();
                     if (type == "string")
                         params.push_back(member.get_str_value());
@@ -1580,37 +1621,94 @@ void Interpreter::WriteParameters(vector<string> splitted, vector<string>* param
                         params.push_back(to_string(member.get_bool_value()));
                     else if (type == "list")
                         params.push_back(GetListValue(member));
+                    else if (type == "dict")
+                        params.push_back(GetDictValue(member));
                 }
             }
-            else if (!params.empty() && getTypeVar(params[params.size()-1]) == "list")
+            else if (!params.empty() && (getTypeVar(params[params.size()-1]) == "list" || getTypeVar(params[params.size()-1]) == "dict"))
             {
-                //member inside a list
+                //member inside a list/dict
+                string lastParam = params[params.size()-1];
                 string local_index = splitted[i + 1];
+
                 if (local_index == "]")
                 {
                     this->PrintError("No index");
                     return;
                 }
-                if (getTypeVar(local_index) != "int")
+
+                const string Type = getTypeVar(lastParam);
+                int Case = 0;
+                if (findInVector({"list", "string"}, Type))
+                    Case = 1;
+                else if (Type == "dict")
+                    Case = 2;
+
+                if (Case == 0)
                 {
-                    Variable tryVar = loadVariableWithoutWriting(split(local_index, ' '), "");
-                    if (tryVar.get_type().empty() || tryVar.get_type() != "int")
+                    return;
+                }
+                else if (Case == 1)
+                {
+                    if (getTypeVar(local_index) != "int")
                     {
-                        this->PrintError("Invalid index type");
-                        return;
-                    }
-                    else
-                    {
-                        local_index = tryVar.get_value();
+                        Variable tryVar = loadVariableWithoutWriting(split(local_index, ' '), "");
+                        if (tryVar.get_type().empty() || tryVar.get_type() != "int")
+                        {
+                            this->PrintError("Invalid index type");
+                            return;
+                        }
+                        else
+                        {
+                            local_index = tryVar.get_value();
+                        }
                     }
                 }
+                else if (Case == 2)
+                {
+                    if (getTypeVar(local_index) != "string")
+                    {
+                        Variable tryVar = loadVariableWithoutWriting(split(local_index, ' '), "");
+                        if (tryVar.get_type().empty() || tryVar.get_type() != "string")
+                        {
+                            this->PrintError("Invalid index type");
+                            return;
+                        }
+                        else
+                        {
+                            local_index = tryVar.get_value();
+                        }
+                    }
+                }
+
                 (*index)++;
                 isIndex = true;
+
                 int index2 = 0;
                 //this->writingList.push_back(true);
                 //this->loadList(split((*parameters)[parameters->size()-1], ' '), false, &index2);
-                this->loadList(split(params[params.size()-1], ' '), false, &index2);
-                Variable member = this->ListWriting[0].get_list_value()[stoi(local_index)];
+
+                Variable member;
+                if (Case == 1)
+                {
+                    this->loadList(split(lastParam, ' '), false, &index2);
+                    member = this->ListWriting[0].get_list_value()[stoi(local_index)];
+                }
+                else if (Case == 2)
+                {
+                    vector<string> Splitted = split(lastParam, ' ');
+                    Variable VAR;
+                    map<string, Variable> DICT = {};
+                    VAR.setup("", DICT);
+                    this->DictWriting.push_back(VAR);
+                    this->writingDict.push_back(true);
+
+                    Splitted.erase(Splitted.begin());
+                    this->loadDict(Splitted, false, &index2);
+
+                    member = this->DictWriting[0].get_dict_value()[local_index];
+                }
+
                 string type = member.get_type();
                 if (!CheckWriting)
                     params.erase(params.end() - 1);
@@ -1624,10 +1722,20 @@ void Interpreter::WriteParameters(vector<string> splitted, vector<string>* param
                     params.push_back(to_string(member.get_bool_value()));
                 else if (type == "list")
                     params.push_back(GetListValue(member));
-                this->ListWriting.erase(ListWriting.end()-1);
-                while (!this->writingList.empty())
+                else if (type == "dict")
+                    params.push_back(GetDictValue(member));
+
+                if (Case == 1)
                 {
-                    this->writingList.erase(writingList.end()-1);
+                    this->ListWriting.erase(ListWriting.end()-1);
+                    while (!this->writingList.empty())
+                    {
+                        this->writingList.erase(writingList.end()-1);
+                    }
+                }
+                else if (Case == 2)
+                {
+                    this->DictWriting.erase(DictWriting.end()-1);
                 }
             }
             if (!isIndex)

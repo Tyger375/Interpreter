@@ -52,8 +52,6 @@ void Interpreter::print(const vector<string>& parameters, bool endline=true)
         return;
     }
 
-
-    //cout << "Output: ";
     for (auto parameter : parameters)
     {
         if (parameter[0] == '"')
@@ -69,14 +67,11 @@ void Interpreter::print(const vector<string>& parameters, bool endline=true)
         else if (parameter[0] == '[')
         {
             int index = 0;
-            //this->writingList.push_back(true);
-            //cout << "parameter = " << parameter << endl;
+            //cout << "parameter here = " << parameter << endl;
 
             this->loadList(split(parameter, ' '), false, &index);
 
-            //cout << GetListValue(ListWriting[0]) << endl;
-
-            this->printList(ListWriting[0]);
+            cout << GetListValue(ListWriting[0]);
 
             this->ListWriting.erase(ListWriting.end()-1);
 
@@ -84,6 +79,23 @@ void Interpreter::print(const vector<string>& parameters, bool endline=true)
             {
                 this->writingList.erase(writingList.end()-1);
             }
+        }
+        else if (parameter[0] == '{') {
+            int index = 0;
+            vector<string> Splitted = split(parameter, ' ');
+            Variable VAR;
+            map<string, Variable> DICT = {};
+            VAR.setup("", DICT);
+            this->DictWriting.push_back(VAR);
+            this->writingDict.push_back(true);
+
+            Splitted.erase(Splitted.begin());
+
+            this->loadDict(Splitted, false, &index);
+
+            cout << GetDictValue(DictWriting[0]);
+
+            this->DictWriting.erase(DictWriting.end()-1);
         }
         else
         {
@@ -341,6 +353,12 @@ Variable Interpreter::executeFunction(const string& name_function, bool CheckWri
     {
         string type = this->Typeof(parameters, Returning);
         ReturnedVariable.setup("", type);
+        return ReturnedVariable;
+    }
+    else if (name_function == "exit")
+    {
+        this->error = true;
+        *Returning = false;
         return ReturnedVariable;
     }
     else if (name_function == "if")

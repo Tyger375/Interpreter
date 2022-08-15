@@ -26,10 +26,20 @@ private:
 
     //Variables
     vector<string> typeVariables;
+    string mainWriting;
+
     //Lists Variables
     vector<string> listAll;
     vector<bool> writingList;
     vector<Variable> ListWriting;
+
+    //Dictionaries Variables
+    vector<string> Keys;
+    bool writingKey;
+    vector<string> DictAll;
+    vector<bool> writingDict;
+    vector<Variable> DictWriting;
+
     //Functions
     vector<Function> functions;
     bool writingFunc{};
@@ -55,6 +65,11 @@ private:
     //List
     static void printList(Variable);
     void loadList(vector<string>, bool, int*);
+
+    //Dict
+    void LoadDictItem(bool);
+    void printDict(Variable);
+    void loadDict(vector<string>, bool, int*);
 
     //Operations
     bool Addition(string*, string*, vector<string>, string, int*);
@@ -88,8 +103,8 @@ private:
     Variable internal_contains(Variable*, vector<string>);
     //Strings
     Variable internal_split(Variable*, vector<string>);
-    Variable internal_lower(Variable*);
-    Variable internal_upper(Variable*);
+    static Variable internal_lower(Variable*);
+    static Variable internal_upper(Variable*);
     //Multiple types
     Variable internal_length(Variable*);
 public:
@@ -97,6 +112,7 @@ public:
 
     Interpreter(const vector<Variable>&, const vector<Variable>&, const vector<Function>&, bool, Function*);
     Interpreter();
+    inline const bool is_error() const { return this->error; }
     void clear();
     void start(const string&, bool, bool, string);
     void Line(string str_line);

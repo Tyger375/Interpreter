@@ -17,6 +17,7 @@ namespace Utilities
 	bool findInVector(const vector<string>&, const string&);
     string getTypeVar(string);
     string GetListValue(Variable);
+    string GetDictValue(Variable);
     bool to_bool(const string&);
     string to_string(bool);
 

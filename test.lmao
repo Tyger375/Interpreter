@@ -1,144 +1,37 @@
-var hi = 0
-
-var test_negative = -1
-
-var test_string = "THIS is A string"
-
-test_string.remove(-1)
-
-var testtttt = test_string[0]
-
-outl(testtttt)
-
-test_string[0] = "t"
-
-outl(test_string)
-
-var cast_int = 2
-var to_int = int(cast_int)
-outl("to_int", to_int, type(to_int))
-
-var cast_str = 5
-var to_str = string(cast_str)
-outl("to_str", to_str, type(to_str))
-
-var cast_bool = "true"
-var to_bool = bool(cast_bool)
-outl("to_bool", to_bool, type(to_bool))
-
-var cast_list = "[true, 2, 5]"
-var to_list = list(cast_list)
-outl("to_list", to_list, type(to_list))
-
-outl(test_string)
-outl(test_string.low())
-outl(test_string.up())
-
-splitted = test_string.split(" ")
-
-outl(splitted)
-outl(splitted[0])
-var test_member = splitted[0]
-outl(test_member)
-
-if (test_member.low() == "this")
-{
-    outl("heheheha")
+var dictionary = {
+    "hi": [
+        "test",
+        [
+            "hi",
+            "hi2"
+        ]
+    ],
+    "heheheha": 2,
+    "test":{
+        "test":"heheheha",
+        "wow": {
+            "funziona":[
+                "godo",
+                "tanto",
+                "ez"
+            ]
+        }
+    }
 }
 
-outl(type(hi))
-outl(-1)
-
-var list = ["He he he ha Hi"]
-outl(list[0])
-
-var test_bool = true
-
-var testlist = [
-    "due",
-    2+3,
-    true,
-    [
-        "ciao",
-        2,
-        [
-            3,
-            [
-                "it works!!!",
-                2
-            ],
-            5
-        ],
-        4,
-        4
-    ]
+var test_list = [
+    {
+        "heheheha":"omg"
+    }
 ]
 
-var test_function = testlist[3].length()
+test_list[0] = 1
+dictionary["hi"] = ["omg", "mogmoawmgoawmpgmaw"]
 
-outl("test_function", test_function)
-var includes = testlist.contains("due")
-outl("includes", includes)
-outl("heheheha", testlist[0].length())
+outl(dictionary)
 
-outl(testlist[3])
-testlist[3].remove(-1)
-outl(testlist)
-//testlist[3] = ["hi"]
-outl(testlist)
+outl("hi", dictionary["test"]["wow"]["funziona"][0])
 
-outl(testlist)
-outl(testlist[0])
-//outl(true)
-outl([2,3][0])
-outl([3,5,6,["ciao"]])
-outl([3,5,6,["ciao"]][3][0])
-outl(testlist)
+outl("test_list", test_list)
 
-testlist.add(["heheheha", 2])
-
-outl(testlist)
-testlist[4][0] = false
-outl(testlist)
-testlist[3].add("hi")
-outl(testlist)
-
-outl("test")
-
-func function(due)
-{
-    due.add("2")
-    outl("due", due)
-    return due
-}
-
-outl("test")
-var test = function(["test"])
-outl(function(["test",2, 4+4]))
-outl("test", test)
-
-var input = "ciao"
-
-outl(input)
-
-outl("input", input, type(input))
-
-if (type(input) == "string" && hi == 0 && "string" == "string")
-{
-	outl("oks")
-}
-else
-{
-    outl("test")
-}
-
-if ("test" == "test")
-{
-    outl("test2")
-}
-
-while (hi < 5 && test_bool == true)
-{
-    outl("ciao", hi)
-    hi = hi + 1
-}
+outl("test_list[0]", test_list[0])

@@ -28,7 +28,8 @@ vector<string> Utilities::split(string String, char splitter)
         "&",
         "[",
         "]",
-        "."
+        ".",
+        ":"
 	};
 	string word;
 	vector<string> words;
@@ -143,16 +144,15 @@ string Utilities::getTypeVar(std::string val)
             return "string";
         else if (val[0] == '[')
             return "list";
+        else if (val[0] == '{')
+            return "dict";
         else if (val == "true" || val == "false")
             return "bool";
         else
             return "";
     }
     else
-    {
-        //cout << "returning int" << endl;
         return "int";
-    }
 }
 
 Variable Interpreter::find_variable(const string& name)
@@ -254,10 +254,43 @@ string Utilities::GetListValue(Variable variable)
             String += to_string(item.get_bool_value());
         else if (type == "list")
             String += GetListValue(item);
+        else if (type == "dict")
+            String += GetDictValue(item);
         if (j != items.size()-1)
             String += ", ";
     }
     String += "]";
+    return String;
+}
+
+string Utilities::GetDictValue(Variable variable)
+{
+    string String = "{";
+    map<string, Variable> dict = variable.get_dict_value();
+    int length = dict.size();
+    //cout << length << endl;
+    int added = 0;
+    for (const auto& item : dict) {
+        string key = item.first;
+        Variable value = item.second;
+        string type = value.get_type();
+        //cout << "type = " << type << endl;
+        String += key + ":";
+        if (type == "string")
+            String += value.get_str_value();
+        else if (type == "int")
+            String += std::to_string(value.get_int_value());
+        else if (type == "bool")
+            String += to_string(value.get_bool_value());
+        else if (type == "list")
+            String += Utilities::GetListValue(value);
+        else if (type == "dict")
+            String += Utilities::GetDictValue(value);
+        if (added != length-1)
+            String += ", ";
+        added++;
+    }
+    String += "}";
     return String;
 }
 
@@ -277,10 +310,43 @@ void Interpreter::printList(Variable variable)
             String += to_string(item.get_bool_value());
         else if (type == "list")
             String += Utilities::GetListValue(item);
+        else if (type == "dict")
+            String += Utilities::GetDictValue(item);
         if (j != items.size()-1)
             String += ", ";
     }
     String += "]";
+    //cout << String;
+}
+
+void Interpreter::printDict(Variable variable)
+{
+    string String = "{";
+    map<string, Variable> dict = variable.get_dict_value();
+    unsigned int length = dict.size();
+    //cout << length << endl;
+    int added = 0;
+    for (const auto& item : dict) {
+        string key = item.first;
+        Variable value = item.second;
+        string type = value.get_type();
+        //cout << "type = " << type << endl;
+        String += key + ":";
+        if (type == "string")
+            String += value.get_str_value();
+        else if (type == "int")
+            String += to_string(value.get_int_value());
+        else if (type == "bool")
+            String += to_string(value.get_bool_value());
+        else if (type == "list")
+            String += Utilities::GetListValue(value);
+        else if (type == "dict")
+            String += Utilities::GetDictValue(value);
+        if (added != length-1)
+            String += ", ";
+        added++;
+    }
+    String += "}";
     cout << String;
 }
 

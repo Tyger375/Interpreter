@@ -106,6 +106,13 @@ void Variable::setup(string var_name, vector<Variable> val)
     this->ListValue = move(val);
 }
 
+void Variable::setup(string var_name, map<string, Variable> val)
+{
+    this->name = move(var_name);
+    this->valueType = "dict";
+    this->DictValue = move(val);
+}
+
 void Variable::setup(string var_name, string val)
 {
     val = '"' + val + '"';
@@ -124,6 +131,8 @@ string Variable::get_value()
         return to_string(this->BoolValue);
     else if (this->valueType == "list")
         return GetListValue(*this);
+    else if (this->valueType == "dict")
+        return GetDictValue(*this);
     else
         return "";
 }
@@ -338,7 +347,7 @@ void Interpreter::loadVariable(vector<string> splitted, const string& name)
         string type2 = returnedVar.get_type();
         if (!Returning)
         {
-            cout << "here" << endl;
+            //cout << "here" << endl;
             this->PrintError("Function returned nothing");
             return;
         }
@@ -538,6 +547,25 @@ void Interpreter::loadVariable(vector<string> splitted, const string& name)
         VAR.setup(name, LIST);
         this->ListWriting.push_back(VAR);
         this->writingList.push_back(true);
+        if (writingList.size() == 1)
+        {
+            this->mainWriting = "list";
+        }
+        return;
+    }
+    else if (splitted[this->i] == "{")
+    {
+        //Dictionary
+        Variable VAR;
+        map<string, Variable> DICT = {};
+        VAR.setup(name, DICT);
+        this->DictWriting.push_back(VAR);
+        this->writingDict.push_back(true);
+        if (writingDict.size() == 1)
+        {
+            this->mainWriting = "dict";
+        }
+        this->writingKey = true;
         return;
     }
     else if (!type.empty())
@@ -667,6 +695,10 @@ Variable Interpreter::loadVariableWithoutWriting(vector<string> splitted, const 
 
     string type;
 
+    //cout << "test heheheha" << endl;
+    /*for (auto string : splitted) {
+        cout << string << endl;
+    }*/
     if (splitted.size() > (j+1) && splitted[j + 1] == "(")
     {
         string name_function = splitted[j];
@@ -789,6 +821,7 @@ Variable Interpreter::loadVariableWithoutWriting(vector<string> splitted, const 
     else if (splitted[j] == "[")
     {
         //List
+
         Variable VAR;
         vector<Variable> LIST = {};
         VAR.setup(name, LIST);
@@ -796,10 +829,19 @@ Variable Interpreter::loadVariableWithoutWriting(vector<string> splitted, const 
         this->writingList.push_back(true);
         return VAR;
     }
+    else if (splitted[j][0] == '{') {
+        //cout << "Dictionary?" << endl;
+        str_value = splitted[j];
+        type = "dict";
+    }
     else if (!(this->find_variable(str_value)).get_type().empty())
     {
         Variable VAR = this->find_variable(str_value);
         type = VAR.get_type();
+        /*for (auto string : splitted) {
+            cout << string << endl;
+        }
+        cout << VAR.get_value() << " " << type << " " << i << " " << splitted.size() << endl;*/
         if (type == "string")
             str_value = VAR.get_str_value();
         else if (type == "int")
@@ -808,6 +850,12 @@ Variable Interpreter::loadVariableWithoutWriting(vector<string> splitted, const 
             str_value = to_string(VAR.get_bool_value());
         else if (type == "list")
             str_value = GetListValue(VAR);
+        else if (type == "dict")
+            str_value = GetDictValue(VAR);
+        /*
+        cout << "str_value = " << str_value << endl;
+        cout << type << line << endl;
+        */
     }
     else if (splitted[j] == "-")
     {
@@ -817,6 +865,9 @@ Variable Interpreter::loadVariableWithoutWriting(vector<string> splitted, const 
     else
         type = getTypeVar(str_value);
 
+    //cout << type << line << endl;
+    //cout << splitted[j] << endl;
+
     if (type.empty())
     {
         string MsgFunction;
@@ -824,6 +875,7 @@ Variable Interpreter::loadVariableWithoutWriting(vector<string> splitted, const 
         {
             MsgFunction = "in function '" + this->FUNC->get_name() + "'";
         }
+        //cout << str_value << " " << type << " " << i << " " << splitted.size() << " " << this->line << endl;
         this->PrintError("Invalid variable while reading " + MsgFunction + ": " + str_value);
         Variable var;
         return var;
@@ -860,6 +912,7 @@ Variable Interpreter::loadVariableWithoutWriting(vector<string> splitted, const 
     }
     else if (type == "list")
     {
+        //cout << "loading list" << endl;
         int index = 0;
         //this->writingList.push_back(true);
         vector<string> Splitted = split(str_value, ' ');
@@ -871,9 +924,26 @@ Variable Interpreter::loadVariableWithoutWriting(vector<string> splitted, const 
 
         this->ListWriting.erase(ListWriting.end()-1);
     }
+    else if (type == "dict")
+    {
+        int index = 0;
+        vector<string> Splitted = split(str_value, ' ');
+        Variable VAR;
+        map<string, Variable> DICT = {};
+        VAR.setup("", DICT);
+        this->DictWriting.push_back(VAR);
+        this->writingDict.push_back(true);
+
+        Splitted.erase(Splitted.begin());
+
+        this->loadDict(Splitted, false, &index);
+
+        var.setup(name, DictWriting[0].get_dict_value());
+
+        this->DictWriting.erase(DictWriting.end()-1);
+    }
 
     return var;
-    cout << "test" << endl;
 }
 
 void Interpreter::loadList(vector<string> splitted, bool write, int* index)
@@ -886,7 +956,6 @@ void Interpreter::loadList(vector<string> splitted, bool write, int* index)
         {
             //Another list
             bool Bool = listAll.size() >= 2;
-
             if (Bool)
                 this->loadVariableWithoutWriting(listAll, "");
             else
@@ -925,13 +994,37 @@ void Interpreter::loadList(vector<string> splitted, bool write, int* index)
             this->ListWriting.push_back(list);
             if (!listAll.empty())
             {
-                /*cout << "printing" << endl;
+                /*
+                cout << "printing" << endl;
                 for (auto word : listAll) {
                     cout << word << endl;
                 }
-                cout << "ended" << endl;*/
-                Variable var2 = this->loadVariableWithoutWriting(listAll, "");
-                this->ListWriting[ListWriting.size()-1].add_item_list(var2);
+                cout << "ended" << endl;
+                */
+                if (listAll[0] == "{")
+                {
+                    Variable VAR;
+                    map<string, Variable> DICT = {};
+                    VAR.setup("", DICT);
+                    this->DictWriting.push_back(VAR);
+                    this->writingDict.push_back(true);
+
+                    listAll.erase(listAll.begin());
+
+                    int in = 0;
+                    loadDict(listAll, false, &in);
+
+                    Variable returned = DictWriting[DictWriting.size()-1];
+                    //this->printDict(returned);
+                    //cout << endl;
+                    this->ListWriting[ListWriting.size()-1].add_item_list(returned);
+                    DictWriting.erase(DictWriting.end()-1);
+                }
+                else
+                {
+                    Variable var2 = this->loadVariableWithoutWriting(listAll, "");
+                    this->ListWriting[ListWriting.size()-1].add_item_list(var2);
+                }
             }
             listAll = {};
         }
@@ -939,9 +1032,21 @@ void Interpreter::loadList(vector<string> splitted, bool write, int* index)
         {
             if (!listAll.empty())
             {
-                Variable var = this->loadVariableWithoutWriting(listAll, "");
-                this->ListWriting[ListWriting.size() - 1].add_item_list(var);
-                listAll = {};
+                if (listAll[0] == "{")
+                {
+                    //cout << DictAll.size() << endl;
+                    if (!DictAll.empty())
+                        LoadDictItem(write);
+                    //cout << "Printing dict" << endl;
+                    //this->printDict(DictWriting[DictWriting.size()-1]);
+                    //cout << endl;
+                }
+                else
+                {
+                    Variable var = this->loadVariableWithoutWriting(listAll, "");
+                    this->ListWriting[ListWriting.size() - 1].add_item_list(var);
+                    listAll = {};
+                }
             }
         }
         else if (String == "]")
@@ -951,9 +1056,27 @@ void Interpreter::loadList(vector<string> splitted, bool write, int* index)
 
             if (!listAll.empty())
             {
-                Variable var = this->loadVariableWithoutWriting(listAll, "");
-                this->ListWriting[ListWriting.size() - 1].add_item_list(var);
-                listAll = {};
+                //cout << "here" << endl;
+                if (listAll[0] == "{")
+                {
+                    int Index = 0;
+                    listAll.erase(listAll.begin());
+                    this->writingDict.push_back(true);
+                    Variable test;
+                    test.setup("", map<string, Variable>());
+                    DictWriting.push_back(test);
+                    loadDict(listAll, false, &Index);
+
+                    this->ListWriting[ListWriting.size() - 1].add_item_list(DictWriting[DictWriting.size()-1]);
+                    DictWriting.erase(DictWriting.end()-1);
+                    listAll = {};
+                }
+                else
+                {
+                    Variable var = this->loadVariableWithoutWriting(listAll, "");
+                    this->ListWriting[ListWriting.size() - 1].add_item_list(var);
+                    listAll = {};
+                }
             }
 
             if (writingList.empty())
@@ -978,7 +1101,7 @@ void Interpreter::loadList(vector<string> splitted, bool write, int* index)
                 {
                     //Adding value to variable
                     Variable var = this->ListWriting[0];
-                    //cout << GetListValue(var) << endl;
+                    //cout << "GetListValue = " << GetListValue(var) << endl;
                     string name = var.get_name();
                     bool found = false;
                     for (auto &j : this->variables)
@@ -1006,6 +1129,7 @@ void Interpreter::loadList(vector<string> splitted, bool write, int* index)
                         else
                             this->variables.push_back(var);
                     }
+                    //cout << GetListValue(find_variable(var.get_name())) << endl;
                     this->ListWriting.erase(this->ListWriting.end() - 1);
                 }
                 if (this->writingList.empty())
@@ -1019,5 +1143,219 @@ void Interpreter::loadList(vector<string> splitted, bool write, int* index)
         }
         else
             listAll.push_back(String);
+    }
+}
+
+void Interpreter::LoadDictItem(bool write)
+{
+    if (DictAll[0] == "[")
+    {
+        int Index = 0;
+        this->loadList(DictAll, false, &Index);
+        //this->printList(ListWriting[0]);
+        this->DictWriting[DictWriting.size()-1].add_item_dict(Keys[Keys.size()-1], ListWriting[0]);
+        //cout << endl;
+        while (!this->ListWriting.empty())
+        {
+            this->ListWriting.erase(ListWriting.end()-1);
+        }
+        while (!this->writingList.empty())
+        {
+            this->writingList.erase(writingList.end()-1);
+        }
+    }
+    else if (DictAll[0] == "{")
+    {
+        DictAll.erase(DictAll.begin());
+        int Index = 0;
+
+        /*
+        for (auto word : DictAll)
+        {
+            cout << "\t" << word << endl;
+        }
+        cout << "Starting" << endl;
+        */
+
+        map<string, Variable> newMap;
+        Variable test;
+        test.setup("", newMap);
+        this->DictWriting.push_back(test);
+
+        //DictAll.insert(DictAll.begin(), "{");
+
+        this->loadDict(DictAll, false, &Index);
+        Variable returnedDict = DictWriting[DictWriting.size()-1];
+
+        /*
+        printDict(returnedDict);
+        cout << endl << Keys[Keys.size()-1] << endl;
+        */
+        DictWriting.erase(DictWriting.end()-1);
+        DictWriting[DictWriting.size()-1].add_item_dict(Keys[Keys.size()-1], returnedDict);
+
+        /*
+        cout << "ended" << endl;
+        cout << DictWriting.size() << endl;
+        cout << writingDict.size() << endl;
+        */
+
+        if (writingDict.size() == 1 && DictWriting.size() == 1)
+        {
+            /*
+            this->printDict(DictWriting[0]);
+            cout << endl;
+            */
+            if (write)
+            {
+                //cout << "Writing variable" << endl;
+
+                Variable var = this->DictWriting[0];
+                string name = var.get_name();
+                bool found = false;
+                for (auto &j : this->variables)
+                {
+                    Variable* variable = &j;
+                    if (variable->get_name() == name)
+                    {
+                        *variable = var;
+                        found = true;
+                        break;
+                    }
+                }
+                if (!found)
+                {
+                    if (!this->Ifs.empty() || this->isExecutingFunc)
+                    {
+                        unsigned int size = VariablesInfos.size();
+                        this->VariablesInfos[(this->VariablesInfos.size() - 1)].push_back(var);
+                    }
+                    else
+                        this->variables.push_back(var);
+                }
+                DictWriting.erase(DictWriting.end()-1);
+            }
+            writingDict.erase(writingDict.end()-1);
+            mainWriting = "";
+        }
+    }
+    else
+    {
+        Variable returned = this->loadVariableWithoutWriting(DictAll, "");
+        this->DictWriting[DictWriting.size()-1].add_item_dict(Keys[Keys.size()-1], returned);
+    }
+    DictAll.clear();
+    Keys.erase(Keys.end()-1);
+}
+
+void Interpreter::loadDict(vector<string> splitted, bool write, int* index)
+{
+    for (; *index < splitted.size(); (*index)++) {
+        string String = splitted[*index];
+
+        if (String == ":" && this->writingDict.size() == 1)
+        {
+            writingKey = false;
+            Variable returned = this->loadVariableWithoutWriting(DictAll, "");
+            string type = returned.get_type();
+            if (type == "string")
+            {
+                Keys.push_back(returned.get_str_value());
+            }
+            else
+            {
+                this->PrintError(("Invalid key " + string("'") + String + "'" + " for dictionary, it must be a string"));
+                return;
+            }
+            DictAll.clear();
+        }
+        else if (String == "{")
+        {
+            writingDict.push_back(true);
+            DictAll.push_back(String);
+        }
+        else if (String == "}" && this->writingDict.size() > 1)
+        {
+            writingDict.erase(writingDict.end()-1);
+            DictAll.push_back(String);
+            if (writingDict.size() == 1)
+                LoadDictItem(write);
+        }
+        else if (String == "[")
+        {
+            this->writingList.push_back(true);
+            DictAll.push_back(String);
+        }
+        else if (String == "]")
+        {
+            this->writingList.erase(writingList.end()-1);
+            DictAll.push_back(String);
+            if (writingList.empty() && this->writingDict.size() == 1)
+            {
+                LoadDictItem(write);
+            }
+        }
+        else if (String == "," && this->writingList.empty() && this->writingDict.size() == 1)
+        {
+            /*for (auto string : DictAll)
+            {
+                cout << string << " ";
+            }
+            cout << endl;*/
+            if (!DictAll.empty())
+            {
+                LoadDictItem(write);
+            }
+        }
+        else if (String == "}")
+        {
+            //cout << DictAll.size() << endl;
+            if (!DictAll.empty())
+                LoadDictItem(write);
+            mainWriting = "";
+            //cout << "test = " << (writingDict.size()) << DictWriting.size() << endl;
+            if (writingDict.size() <= 1 && DictWriting.size() == 1)
+            {
+                if (write)
+                {
+                    Variable var = this->DictWriting[0];
+                    string name = var.get_name();
+                    bool found = false;
+                    for (auto &j : this->variables)
+                    {
+                        Variable* variable = &j;
+                        if (variable->get_name() == name)
+                        {
+                            *variable = var;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (!found)
+                    {
+                        if (!this->Ifs.empty() || this->isExecutingFunc)
+                        {
+                            unsigned int size = VariablesInfos.size();
+                            /*if (this->Ifs.size() > size || this->isExecutingFunc)
+                            {
+                                vector<Variable> Vector;
+                                this->VariablesInfos.push_back(Vector);
+                            }*/
+                            this->VariablesInfos[(this->VariablesInfos.size() - 1)].push_back(var);
+                        }
+                        else
+                            this->variables.push_back(var);
+                    }
+                    DictWriting.erase(DictWriting.end()-1);
+                }
+                if (!writingDict.empty())
+                    writingDict.erase(writingDict.end()-1);
+                mainWriting = "";
+            }
+        }
+        else
+        {
+            DictAll.push_back(String);
+        }
     }
 }

@@ -54,6 +54,9 @@ int main(int argc, char** argv)
                 }
             }
         }
+    }
+    if (argv[1][0] != '-')
+    {
         interpreter.start(argv[1], debug, savelogs, logs_file_name);
     }
     else
@@ -65,9 +68,20 @@ int main(int argc, char** argv)
             getline(cin, line);
             interpreter.Line(line);
             //interpreter.debugVariables();
+            cout << '\b';
         }
-        while (line != "exit");
-        interpreter.debugVariables(savelogs);
+        while (!interpreter.is_error());
+        if (debug)
+        {
+            interpreter.debugVariables(savelogs);
+            interpreter.debugFunctions(savelogs);
+            interpreter.debugInternals(savelogs);
+        }
+        if (savelogs)
+        {
+            interpreter.saveLogs();
+        }
+        //interpreter(savelogs);
         //cout << "Real-time interpreter is not available. It'll be added soon" << endl;
     }
     return 0;
