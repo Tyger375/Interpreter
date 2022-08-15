@@ -292,7 +292,6 @@ void Interpreter::SetReturnValue(vector<string> splitted)
     {
         splitted.erase(splitted.begin());
         Variable returned = this->loadVariableWithoutWriting(splitted, "");
-        //cout << "val = " << returned.get_value() << endl;
         this->FUNC->set_return(returned);
     }
     else
@@ -530,6 +529,27 @@ void Interpreter::executeCustomFunction(Function* func, vector<string> parameter
 
                 j = index;
             }
+            else if (val[0] == '{')
+            {
+                val.erase(val.begin());
+                int index = 0;
+
+                map<string, Variable> newMap;
+                Variable test;
+                test.setup("", newMap);
+                this->DictWriting.push_back(test);
+                this->writingDict.push_back(true);
+
+                vector<string> splitted = split(val, ' ');
+
+                this->loadDict(splitted, false, &index);
+                Variable returnedDict = DictWriting[DictWriting.size()-1];
+
+                DictWriting.erase(DictWriting.end()-1);
+                var.setup(func->get_params()[j], returnedDict.get_dict_value());
+
+                j = index;
+            }
             else
             {
                 Variable find = this->find_variable(val);
@@ -544,6 +564,8 @@ void Interpreter::executeCustomFunction(Function* func, vector<string> parameter
                         var.setup(func->get_params()[j], find.get_bool_value());
                     else if (type == "list")
                         var.setup(func->get_params()[j], find.get_list_value());
+                    else if (type == "dict")
+                        var.setup(func->get_params()[j], find.get_dict_value());
                 }
                 else
                 {

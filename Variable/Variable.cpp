@@ -375,6 +375,8 @@ void Interpreter::loadVariable(vector<string> splitted, const string& name)
             str_value = GetListValue(returnedVar);
         else if (type2 == "bool")
             str_value = to_string(returnedVar.get_bool_value());
+        else if (type2 == "dict")
+            str_value = GetDictValue(returnedVar);
         type = type2;
     }
     else if (splitted.size() > (this->i+1) && splitted[this->i + 1] == ".")
@@ -1237,71 +1239,16 @@ void Interpreter::LoadDictItem(bool write)
         DictAll.erase(DictAll.begin());
         int Index = 0;
 
-        /*
-        for (auto word : DictAll)
-        {
-            cout << "\t" << word << endl;
-        }
-        cout << "Starting" << endl;
-        */
-
         map<string, Variable> newMap;
         Variable test;
         test.setup("", newMap);
         this->DictWriting.push_back(test);
 
-        //DictAll.insert(DictAll.begin(), "{");
-
         this->loadDict(DictAll, false, &Index);
         Variable returnedDict = DictWriting[DictWriting.size()-1];
 
-        /*
-        printDict(returnedDict);
-        cout << endl << Keys[Keys.size()-1] << endl;
-        */
         DictWriting.erase(DictWriting.end()-1);
         DictWriting[DictWriting.size()-1].add_item_dict(Keys[Keys.size()-1], returnedDict);
-
-        /*
-        cout << "ended" << endl;
-        cout << DictWriting.size() << endl;
-        cout << writingDict.size() << endl;
-        */
-
-        /*if (writingDict.size() == 1 && DictWriting.size() == 1)
-        {
-            if (write)
-            {
-                //cout << "Writing variable" << endl;
-
-                Variable var = this->DictWriting[0];
-                string name = var.get_name();
-                bool found = false;
-                for (auto &j : this->variables)
-                {
-                    Variable* variable = &j;
-                    if (variable->get_name() == name)
-                    {
-                        *variable = var;
-                        found = true;
-                        break;
-                    }
-                }
-                if (!found)
-                {
-                    if (!this->Ifs.empty() || this->isExecutingFunc)
-                    {
-                        unsigned int size = VariablesInfos.size();
-                        this->VariablesInfos[(this->VariablesInfos.size() - 1)].push_back(var);
-                    }
-                    else
-                        this->variables.push_back(var);
-                }
-                DictWriting.erase(DictWriting.end()-1);
-            }
-            writingDict.erase(writingDict.end()-1);
-            mainWriting = "";
-        }*/
     }
     else
     {

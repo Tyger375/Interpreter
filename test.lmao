@@ -32,6 +32,19 @@ dictionary["hi"] = ["omg", "things"]
 var keys = dictionary.keys()
 
 outl(dictionary, keys.length())
+outl(dictionary["hi"][0])
+
+func test_for_dicts(dict)
+{
+    dict["hi"] = 3
+    return dict
+}
+
+outl(dictionary)
+var d = {"message":"hi","channel":"hi2"}
+outl("d", d)
+var r = test_for_dicts(dictionary)
+outl("returned", r)
 
 var i = 0
 var length = keys.length()

@@ -8,8 +8,9 @@ An interpreter made in C++ just for fun.
     - [Updating variables](#Updating-variables)
     - [Casting variables](#Casting-variables)
     - [Lists](#Lists)
+    - [Dictionaries](#Dicts)
   - [Functions](#Functions)
-    - [Internal functions](#Internal-functions)
+  - [Internal functions](#Internal-functions)
     - [Out](#Out)
     - [Outl](#Outl)
     - [In](#In)
@@ -61,7 +62,7 @@ Available types:<br>
 ```
 var variable = 2
 variable = variable + 2 //<- 4
-variable = variable - 1 //<- 1
+variable = variable - 1 //<- 3
 var var2 = variable + " hello" //<- "2 hello"
 
 var2 = variable - 2 //<- error
@@ -96,7 +97,7 @@ outl("to_list", to_list, type(to_list))
 ```
 var list = ["hi"]
 
-out(list[0])
+outl(list[0])
 
 list[0] = 2
 
@@ -107,6 +108,21 @@ list.remove(-1)
 
 outl(list[0][0])
 outl(list.length())
+```
+
+### Dicts
+
+```
+var dict = {"hi":"hello"}
+
+outl(dict["hi"])
+
+dict["hi"] = 2
+
+dict["other things"] = ["a list", 2]
+
+outl(dict["other things"][0])
+outl(dict.keys())
 ```
 
 ### Functions
