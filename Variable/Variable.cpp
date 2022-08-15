@@ -23,11 +23,11 @@ Variable Interpreter::execute_internal_function(Variable* variable, const string
         Variable returnedVar;
         if (function_name == "add")
         {
-            returnedVar = this->internal_add(variable, move(parameters));
+            returnedVar = this->internal_add(variable, std::move(parameters));
         }
         else if (function_name == "remove")
         {
-            returnedVar = this->internal_remove(variable, move(parameters));
+            returnedVar = this->internal_remove(variable, std::move(parameters));
         }
         else if (function_name == "length")
         {
@@ -35,7 +35,7 @@ Variable Interpreter::execute_internal_function(Variable* variable, const string
         }
         else if (function_name == "contains")
         {
-            returnedVar = this->internal_contains(variable, move(parameters));
+            returnedVar = this->internal_contains(variable, std::move(parameters));
         }
         else
         {
@@ -54,7 +54,7 @@ Variable Interpreter::execute_internal_function(Variable* variable, const string
         }
         else if (function_name == "split")
         {
-            returnedVar = this->internal_split(variable, move(parameters));
+            returnedVar = this->internal_split(variable, std::move(parameters));
         }
         else if (function_name == "low")
         {
@@ -67,6 +67,21 @@ Variable Interpreter::execute_internal_function(Variable* variable, const string
         else if (function_name == "remove")
         {
             returnedVar = this->internal_remove(variable, move(parameters));
+        }
+        else
+        {
+            this->PrintError("Invalid function");
+            Variable var;
+            return var;
+        }
+        return returnedVar;
+    }
+    else if (variable->get_type() == "dict")
+    {
+        Variable returnedVar;
+        if (function_name == "keys")
+        {
+            returnedVar = this->internal_keys(variable);
         }
         else
         {
@@ -220,7 +235,7 @@ void Interpreter::InternalFunctionLoadVariable(string* str_value, string* type, 
             }
             if (getTypeVar(str_Index) != "int")
             {
-                this->PrintError("Invalid index type");
+                this->PrintError("Invalid index getType");
                 return;
             }
             index++;
@@ -231,9 +246,9 @@ void Interpreter::InternalFunctionLoadVariable(string* str_value, string* type, 
                 return;
             }
             Variable member = List->get_list_value()[stoi(str_Index)];
-            string type = member.get_type();
+            string getType = member.get_type();
             {
-                if (type == "list" || type == "string")
+                if (getType == "list" || getType == "string")
                 {
                     Variable *Pointer = List->get_item_list_pointer(stoi(str_Index));
                     List = Pointer;
@@ -389,7 +404,6 @@ void Interpreter::loadVariable(vector<string> splitted, const string& name)
                 Variable* VARIABLE;
 
                 Variable OriginList;
-                Variable *List = &OriginList;
 
                 string lastString = splitted[i];
                 int index = i;
@@ -406,11 +420,17 @@ void Interpreter::loadVariable(vector<string> splitted, const string& name)
                     if (lastString == "]")
                     {
                         //index--;
-                        if (isNan(splitted[index - 1]))
+                        string Type = getTypeVar(splitted[index-1]);
+
+                        if (Type != "int" && Type != "string")
                         {
-                            this->PrintError("Invalid index");
+                            const string TypeVar = find_variable(splitted[index-1]).get_type();
+                            if (TypeVar != "int" && TypeVar != "string")
+                                this->PrintError("Invalid index: " + splitted[index-1]);
+                            else
+                                Type = TypeVar;
                         }
-                        else
+                        if (Type == "int" || Type == "string")
                         {
                             //index--;
                             while (true)
@@ -423,7 +443,14 @@ void Interpreter::loadVariable(vector<string> splitted, const string& name)
                                 }
                                 if (splitted[index] == "[")
                                 {
-                                    indexes.push_back(splitted[index + 1]);
+                                    string val = splitted[index+1];
+                                    const string t = getTypeVar(val);
+                                    if (t != "int" && t != "string")
+                                    {
+                                        Variable v = find_variable(val);
+                                        val = v.get_value();
+                                    }
+                                    indexes.push_back(val);
                                     if (splitted[index - 1] != "]")
                                         found = true;
                                     break;
@@ -468,7 +495,12 @@ void Interpreter::loadVariable(vector<string> splitted, const string& name)
                     }
                     OriginList.setup("", chars);
                 }
+                else if (VAR.get_type() == "dict")
+                {
+                    OriginList = VAR;
+                }
 
+                Variable *List = &OriginList;
                 Variable ListToWrite = OriginList;
                 i++;
                 for (int j = int(indexes.size()) - 1; j >= 0; --j)
@@ -480,9 +512,11 @@ void Interpreter::loadVariable(vector<string> splitted, const string& name)
                         this->PrintError("No index");
                         return;
                     }
-                    if (getTypeVar(str_Index) != "int")
+                    const string Type = getTypeVar(str_Index);
+
+                    if (Type != "int" && Type != "string")
                     {
-                        this->PrintError("Invalid index local_type");
+                        this->PrintError("Invalid index type");
                         return;
                     }
                     index++;
@@ -505,8 +539,17 @@ void Interpreter::loadVariable(vector<string> splitted, const string& name)
                         }
                         member.setup("", string(1, List->get_str_value()[stoi(str_Index)]));
                     }
+                    else if (List->get_type() == "dict")
+                    {
+                        member = List->get_dict_value()[str_Index];
+                    }
                     string local_type = member.get_type();
-                    if (local_type == "list" || local_type == "string")
+                    if (List->get_type() == "dict")
+                    {
+                        Variable *Pointer = List->get_item_dict_pointer(str_Index);
+                        List = Pointer;
+                    }
+                    else if (local_type == "list" || local_type == "string")
                     {
                         Variable *Pointer = List->get_item_list_pointer(stoi(str_Index));
                         List = Pointer;
@@ -536,6 +579,8 @@ void Interpreter::loadVariable(vector<string> splitted, const string& name)
                     str_value = to_string(VARIABLE->get_bool_value());
                 else if (type == "list")
                     str_value = GetListValue(*VARIABLE);
+                else if (type == "dict")
+                    str_value = GetDictValue(*VARIABLE);
             }
         }
     }
@@ -640,6 +685,24 @@ void Interpreter::loadVariable(vector<string> splitted, const string& name)
 
         this->ListWriting.erase(ListWriting.end()-1);
     }
+    else if (type == "dict")
+    {
+        int index = 0;
+        vector<string> Splitted = split(str_value, ' ');
+        Variable VAR;
+        map<string, Variable> DICT = {};
+        VAR.setup("", DICT);
+        this->DictWriting.push_back(VAR);
+        this->writingDict.push_back(true);
+
+        Splitted.erase(Splitted.begin());
+
+        this->loadDict(Splitted, false, &index);
+
+        var.setup(name, DictWriting[0].get_dict_value());
+
+        this->DictWriting.erase(DictWriting.end()-1);
+    }
 
     bool found = false;
     for (auto &j : this->variables)
@@ -655,9 +718,9 @@ void Interpreter::loadVariable(vector<string> splitted, const string& name)
     }
     for (int j = 0; j < this->VariablesInfos.size(); j++)
     {
-        for (int k = 0; k < VariablesInfos[j].size(); k++)
+        for (auto & k : VariablesInfos[j])
         {
-            Variable* variable = &VariablesInfos[j][k];
+            Variable* variable = &k;
             if (variable->get_name() == name)
             {
                 *variable = var;
@@ -821,13 +884,18 @@ Variable Interpreter::loadVariableWithoutWriting(vector<string> splitted, const 
     else if (splitted[j] == "[")
     {
         //List
-
-        Variable VAR;
+        //str_value = splitted[j];
+        for (auto s : splitted)
+            str_value += s;
+        str_value.erase(str_value.begin());
+        //str_value.erase(str_value.end()-1);
+        type = "list";
+        /*Variable VAR;
         vector<Variable> LIST = {};
         VAR.setup(name, LIST);
         this->ListWriting.push_back(VAR);
         this->writingList.push_back(true);
-        return VAR;
+        return VAR;*/
     }
     else if (splitted[j][0] == '{') {
         //cout << "Dictionary?" << endl;
@@ -1200,12 +1268,8 @@ void Interpreter::LoadDictItem(bool write)
         cout << writingDict.size() << endl;
         */
 
-        if (writingDict.size() == 1 && DictWriting.size() == 1)
+        /*if (writingDict.size() == 1 && DictWriting.size() == 1)
         {
-            /*
-            this->printDict(DictWriting[0]);
-            cout << endl;
-            */
             if (write)
             {
                 //cout << "Writing variable" << endl;
@@ -1237,7 +1301,7 @@ void Interpreter::LoadDictItem(bool write)
             }
             writingDict.erase(writingDict.end()-1);
             mainWriting = "";
-        }
+        }*/
     }
     else
     {
@@ -1252,6 +1316,8 @@ void Interpreter::loadDict(vector<string> splitted, bool write, int* index)
 {
     for (; *index < splitted.size(); (*index)++) {
         string String = splitted[*index];
+
+        //cout << String << " " << this->line << endl;
 
         if (String == ":" && this->writingDict.size() == 1)
         {
@@ -1309,13 +1375,12 @@ void Interpreter::loadDict(vector<string> splitted, bool write, int* index)
         }
         else if (String == "}")
         {
-            //cout << DictAll.size() << endl;
             if (!DictAll.empty())
                 LoadDictItem(write);
-            mainWriting = "";
-            //cout << "test = " << (writingDict.size()) << DictWriting.size() << endl;
-            if (writingDict.size() <= 1 && DictWriting.size() == 1)
+            DictAll.clear();
+            if (writingDict.size() <= 1 && DictWriting.size() <= 1)
             {
+                mainWriting = "";
                 if (write)
                 {
                     Variable var = this->DictWriting[0];

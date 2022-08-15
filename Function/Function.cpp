@@ -93,7 +93,8 @@ void Interpreter::print(const vector<string>& parameters, bool endline=true)
 
             this->loadDict(Splitted, false, &index);
 
-            cout << GetDictValue(DictWriting[0]);
+            //cout << GetDictValue(DictWriting[0]);
+            this->printDict(DictWriting[0]);
 
             this->DictWriting.erase(DictWriting.end()-1);
         }

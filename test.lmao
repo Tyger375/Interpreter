@@ -10,13 +10,15 @@ var dictionary = {
     "test":{
         "test":"heheheha",
         "wow": {
-            "funziona":[
-                "godo",
-                "tanto",
+            "it works":[
+                "yes",
+                "les go",
                 "ez"
             ]
         }
-    }
+    },
+    "str":"a string",
+    "bool":true
 }
 
 var test_list = [
@@ -25,10 +27,20 @@ var test_list = [
     }
 ]
 
-test_list[0] = 1
-dictionary["hi"] = ["omg", "mogmoawmgoawmpgmaw"]
+dictionary["hi"] = ["omg", "things"]
 
-outl(dictionary)
+var keys = dictionary.keys()
+
+outl(dictionary, keys.length())
+
+var i = 0
+var length = keys.length()
+while (i < length)
+{
+    var key = keys[i]
+    outl("dict", key, dictionary[key])
+    i = i + 1
+}
 
 outl("hi", dictionary["test"]["wow"]["funziona"][0])
 

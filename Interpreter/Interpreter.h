@@ -35,7 +35,7 @@ private:
 
     //Dictionaries Variables
     vector<string> Keys;
-    bool writingKey;
+    bool writingKey{};
     vector<string> DictAll;
     vector<bool> writingDict;
     vector<Variable> DictWriting;
@@ -105,6 +105,8 @@ private:
     Variable internal_split(Variable*, vector<string>);
     static Variable internal_lower(Variable*);
     static Variable internal_upper(Variable*);
+    //Dicts
+    Variable internal_keys(Variable*);
     //Multiple types
     Variable internal_length(Variable*);
 public:

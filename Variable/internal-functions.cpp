@@ -211,6 +211,21 @@ Variable Interpreter::internal_upper(Variable* variable)
     return var;
 }
 
+//Dicts
+Variable Interpreter::internal_keys(Variable* variable)
+{
+    map<string, Variable> dict = variable->get_dict_value();
+    vector<Variable> keys;
+    Variable returning;
+    for(auto it = dict.begin(); it != dict.end(); ++it) {
+        Variable var;
+        var.setup("", it->first);
+        keys.push_back(var);
+    }
+    returning.setup("", keys);
+    return returning;
+}
+
 //Multiple
 Variable Interpreter::internal_length(Variable* variable)
 {

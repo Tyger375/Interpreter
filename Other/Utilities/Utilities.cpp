@@ -321,7 +321,7 @@ void Interpreter::printList(Variable variable)
 
 void Interpreter::printDict(Variable variable)
 {
-    string String = "{";
+    string String = "{\n";
     map<string, Variable> dict = variable.get_dict_value();
     unsigned int length = dict.size();
     //cout << length << endl;
@@ -331,7 +331,7 @@ void Interpreter::printDict(Variable variable)
         Variable value = item.second;
         string type = value.get_type();
         //cout << "type = " << type << endl;
-        String += key + ":";
+        String += "   " + key + ":";
         if (type == "string")
             String += value.get_str_value();
         else if (type == "int")
@@ -343,10 +343,10 @@ void Interpreter::printDict(Variable variable)
         else if (type == "dict")
             String += Utilities::GetDictValue(value);
         if (added != length-1)
-            String += ", ";
+            String += ",\n";
         added++;
     }
-    String += "}";
+    String += "\n}";
     cout << String;
 }
 

@@ -112,32 +112,6 @@ void Interpreter::start(const std::string& file_name, bool debug, bool savelogs,
             this->saveLogs();
         }
 
-		/*for (int i = 0; i < this->VariablesInfos.size(); i++)
-		{
-			for (int i2 = 0; i2 < VariablesInfos[i].size(); i2++)
-			{
-				cout << "Variable in if " << i << " = " << VariablesInfos[i][i2].get_type() << endl;
-			}
-		}*/
-		//cout << functions.size() << " " << functions[0].get_lines().size() << " " << functions[0].get_lines()[0][0] << endl;
-		//cout << this->functions.size() << endl;
-		/*for (int i = 0; i < this->functions.size(); i++)
-		{
-			//cout << "i = " << i << endl;
-			cout << "function name: " << functions[i].get_name() << endl;
-			for (int i2 = 0; i2 < this->functions[i].get_lines().size(); i2++)
-			{
-				//cout << "i2 = " << i2 << endl;
-				vector<string> line = functions[i].get_lines()[i2];
-				for (int i3 = 0; i3 < line.size(); i3++)
-				{
-					//cout << "i3 = " << i3 << endl;
-					cout << line[i3] << " ";
-				}
-				cout << endl;
-				//cout << "Variable in if " << i << " = " << VariablesInfos[i][i2].get_type() << endl;
-			}
-		}*/
 		new_file.close();
 	}
 	else
@@ -151,19 +125,7 @@ void Interpreter::Line(string str_line)
 	try
 	{
 		vector<string> splitted = split(move(str_line), ' ');
-		/*for (int j = 0; j < splitted.size(); j++)
-		{
-			cout << splitted[j] << endl;
-		}*/
 		string lastString;
-
-        /*cout << "---------------" << endl;
-
-        cout << line << endl;
-
-        debugInternals(false);
-
-        cout << "---------------" << endl;*/
 
 		for (this->i = 0; this->i < splitted.size(); this->i++)
 		{
@@ -286,11 +248,15 @@ void Interpreter::Line(string str_line)
                                 if (lastString == "]")
                                 {
                                     index--;
-                                    const string Type = getTypeVar(splitted[index-1]);
+                                    string Type = getTypeVar(splitted[index-1]);
 
                                     if (Type != "int" && Type != "string")
                                     {
-                                        this->PrintError("Invalid index");
+                                        const string TypeVar = find_variable(splitted[index-1]).get_type();
+                                        if (TypeVar != "int" && Type != "string")
+                                            this->PrintError("Invalid index: " + splitted[index-1]);
+                                        else
+                                            Type = TypeVar;
                                     }
                                     else
                                     {
@@ -305,7 +271,15 @@ void Interpreter::Line(string str_line)
                                             }
                                             if (splitted[index] == "[")
                                             {
-                                                indexes.push_back(splitted[index+1]);
+
+                                                string val = splitted[index+1];
+                                                const string t = getTypeVar(val);
+                                                if (t != "int" && t != "string")
+                                                {
+                                                    Variable v = find_variable(val);
+                                                    val = v.get_value();
+                                                }
+                                                indexes.push_back(val);
                                                 if (splitted[index-1] != "]")
                                                     found = true;
                                                 break;
@@ -376,8 +350,6 @@ void Interpreter::Line(string str_line)
 
                             Variable NewValue = this->loadVariableWithoutWriting(new_splitted, "");
 
-                            cout << "NewValue: " << NewValue.get_value() << endl;
-
                             for (int j = int(indexes.size())-1; j >= 0; --j)
                             {
                                 //member inside a list
@@ -388,7 +360,7 @@ void Interpreter::Line(string str_line)
                                     return;
                                 }
                                 const string Type = getTypeVar(Index);
-                                cout << Index << " " << Type << endl;
+
                                 if (Type != "int" && Type != "string")
                                 {
                                     this->PrintError("Invalid index type");
@@ -420,7 +392,7 @@ void Interpreter::Line(string str_line)
                                     member = List->get_dict_value()[Index];
                                 }
                                 string type = member.get_type();
-                                cout << List->get_type() << endl;
+
                                 if (List->get_type() == "list" || List->get_type() == "string")
                                 {
                                     vector<Variable> Vector = List->get_list_value();
@@ -1608,8 +1580,8 @@ void Interpreter::WriteParameters(vector<string> splitted, vector<string>* param
                     else if (var.get_type() == "dict")
                     {
                         member = var.get_dict_value()[StrIndex];
-                        cout << member.get_value() << " " << member.get_type() << endl;
-                        cout << GetListValue(member) << endl;
+                        //cout << member.get_value() << " " << member.get_type() << endl;
+                        //cout << GetListValue(member) << endl;
                     }
 
                     string type = member.get_type();
